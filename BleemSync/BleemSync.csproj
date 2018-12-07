@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>BleemSync</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="SharpINI" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
+    <ProjectReference Include="..\BleemSync.Services\BleemSync.Services.csproj" />
+    <ProjectReference Include="..\BleemSync.Utilities\BleemSync.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>
