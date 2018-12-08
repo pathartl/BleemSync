@@ -20,9 +20,17 @@ namespace BleemSync.Utilities
 
         public static List<int> GetGameIds()
         {
+            var directoriesToIgnore = new string[]
+            {
+                "databases",
+                "system",
+                "geninfo",
+                "preferences"
+            };
+
             var gamesDir = GetGamesDirectory();
             var dirList = Directory.GetDirectories(gamesDir).ToList();
-            var filteredDirList = dirList.Where(d => new DirectoryInfo(d).Name != "databases").ToArray();
+            var filteredDirList = dirList.Where(d => !directoriesToIgnore.Contains(new DirectoryInfo(d).Name)).ToArray();
             var gameIds = new List<int>();
 
             foreach (var dir in dirList)
