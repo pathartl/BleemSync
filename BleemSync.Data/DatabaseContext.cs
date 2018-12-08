@@ -12,6 +12,17 @@ namespace BleemSync.Data
         // Not used in US consoles
         public DbSet<Language> Languages { get; set; }
 
+        private static bool _created = false;
+
+        public DatabaseContext()
+        {
+            if (!_created)
+            {
+                Database.EnsureDeleted();
+                Database.EnsureCreated();
+            }
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
