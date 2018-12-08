@@ -9,6 +9,9 @@ namespace BleemSync.Data
         public DbSet<Disc> Discs { get; set; }
         public DbSet<Game> Games { get; set; }
 
+        // Not used in US consoles
+        public DbSet<Language> Languages { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
@@ -27,6 +30,11 @@ namespace BleemSync.Data
             modelBuilder.Entity<Disc>(entity =>
             {
                 entity.ToTable("DISC");
+            });
+
+            modelBuilder.Entity<Language>(entity =>
+            {
+                entity.ToTable("LANGUAGE_SPECIFIC");
             });
         }
     }
