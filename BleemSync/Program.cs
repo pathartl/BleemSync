@@ -37,24 +37,46 @@ namespace BleemSync
 
                     var game = new Game()
                     {
+                        Id = id,
                         Title = gameInfo.Title,
                         Publisher = gameInfo.Publisher,
                         Year = gameInfo.Year,
                         Players = gameInfo.Players
                     };
 
-                    var disc = new Disc()
+                    var i = 1;
+
+                    foreach (var discId in gameInfo.DiscIds)
                     {
-                        Id = id,
-                        DiscNumber = 1,
-                        DiscId = gameInfo.DiscId
-                    };
+                        var disc = new Disc()
+                        {
+                            GameId = id,
+                            DiscNumber = i,
+                            DiscBasename = discId
+                        };
+
+                        i++;
+
+                        db.Add(disc);
+                    }
 
                     db.Add(game);
-                    db.Add(disc);
                 }
 
                 db.SaveChanges();
+
+                // Generate mounting script
+                var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
+
+                using (TextWriter mountScript = new StreamWriter($"{executingDirectory}\\..\\System\\MountGames.sh"))
+                {
+                    mountScript.NewLine = "\n";
+
+                    foreach (var id in gameIds)
+                    {
+                        mountScript.WriteLine($"mount -o bind /media/Games/{id} /gaadata/{id}");
+                    }
+                }
             }
         }
     }

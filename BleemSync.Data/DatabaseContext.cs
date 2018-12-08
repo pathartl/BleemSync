@@ -1,6 +1,7 @@
 ﻿using BleemSync.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 
 namespace BleemSync.Data
 {
@@ -27,7 +28,9 @@ namespace BleemSync.Data
         {
             var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
 
-            optionsBuilder.UseSqlite($"Data Source={executingDirectory}\\..\\Games\\databases\\regional.db");
+            Directory.CreateDirectory($"{executingDirectory}\\..\\System\\Databases");
+            optionsBuilder.UseSqlite($"Data Source={executingDirectory}\\..\\System\\Databases\\regional.db");
+            //optionsBuilder.UseSqlite($"Data Source={executingDirectory}\\..\\Games\\databases\\regional.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

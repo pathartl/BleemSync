@@ -1,6 +1,7 @@
 ﻿using BleemSync.Data.Models;
 using System;
 using SharpConfig;
+using System.Linq;
 
 namespace BleemSync.Services
 {
@@ -20,7 +21,7 @@ namespace BleemSync.Services
                 Publisher = section["Publisher"].StringValue,
                 Year = section["Year"].IntValue,
                 Players = section["Players"].IntValue,
-                DiscId = section["DiscId"].StringValue
+                DiscIds = section["Discs"].StringValue.Split(',').ToList()
             };
 
             return game;

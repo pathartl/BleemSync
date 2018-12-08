@@ -12,6 +12,11 @@ namespace BleemSync.Data.Models
         public string Publisher { get; set; }
         public int Year { get; set; }
         public int Players { get; set; }
-        public string DiscId { get; set; }
+        public List<string> DiscIds { get; set; }
+
+        public GameInfo()
+        {
+            DiscIds = new List<string>();
+        }
     }
 }
