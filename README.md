@@ -22,7 +22,7 @@ Games/
         pcsx.cfg
         SLUS-01066.bin
         SLUS-01066.cue
-        SLUS-01066.cfg
+        SLUS-01066.png
     2/
         ...
     3/
