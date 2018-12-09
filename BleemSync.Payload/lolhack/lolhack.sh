@@ -1,5 +1,4 @@
 #!/bin/sh
-NumberOfGamesToT
 
 # Extract system files to avoid crashing
 mkdir -p /media/System
@@ -36,10 +35,9 @@ fi
 killall ui_menu
 
 # Allow access to the PCSX menu via Select + Triangle
-export PCSX_ESC_KEY=2
 
 # Safely overmount the games and user data folder
-source /media/System/MountGames.sh
+#source /media/System/MountGames.sh
 # find /media/Games -maxdepth 1 -type d -printf "%f\n" > /media/System/payload.log
 # for game in `find /media/Games/* -maxdepth 0 -type d -printf "%f\n"`
 # do
@@ -53,7 +51,9 @@ source /media/System/MountGames.sh
 # Overmount some files
 #mount -o bind /media/System/sonyapp-copy /usr/sony/bin/sonyapp-copy
 #mount -o bind /media/System/sonyapp-copylink /usr/sony/bin/sonyapp-copylink
-mount -o bind /media/System/bin /usr/sony/bin
+#mount -o bind /media/System/bin /usr/sony/bin
+
+killall ui_menu
 
 # Overmount some folders
 mount -o bind /media/System/Bios /gaadata/system/bios
@@ -63,33 +63,40 @@ mount -o bind /media/System/Region /gaadata/geninfo
 mount -o bind /media/System/UI /data/sony/ui
 #mount -o bind /media/UserData /data/AppData
 
+killall ui_menu
+
 # The pcsx.cfg file needs to be copied into the user data folder or controllers may not work.
 cd /media/Games
-find * -type d -maxdepth 1 -exec mkdir -p /media/UserData/{} \;
-find * -type d -maxdepth 1 -exec mount -o bind /media/UserData/{} /data/AppData/sony/pcsx/{} \;
-find * -type d -maxdepth 1 -exec mkdir -p /data/AppData/sony/pcsx/{}/.pcsx \;
-find * -type d -maxdepth 1 -exec cp /media/Games/{}/pcsx.cfg /data/AppData/sony/pcsx/{}/.pcsx/pcsx.cfg \;
+find * -maxdepth 0 -type d -exec mount -o bind /media/Games/{}/GameData /gaadata/{} \;
+find * -maxdepth 0 -type d -exec mkdir -p /media/Games/{}/UserData \;
+find * -maxdepth 0 -type d -exec mount -o bind /media/Games/{}/UserData /data/AppData/sony/pcsx/{} \;
+find * -maxdepth 0 -type d -exec mkdir -p /data/AppData/sony/pcsx/{}/.pcsx \;
+find * -maxdepth 0 -type d -exec cp /media/Games/{}/GameData/pcsx.cfg /data/AppData/sony/pcsx/{}/.pcsx/pcsx.cfg \;
 cd -
 
-mkdir -p /data/AppData/sony/pcsx/bios
-cp /media/System/Bios/* /data/AppData/sony/pcsx/bios
+# mkdir -p /data/AppData/sony/pcsx/bios
+# cp /media/System/Bios/* /data/AppData/sony/pcsx/bios
 
-mkdir -p /data/AppData/sony/pcsx/plugins
-cp /usr/sony/bin/plugins/* /data/AppData/sony/pcsx/plugins
+# mkdir -p /data/AppData/sony/pcsx/plugins
+# cp /usr/sony/bin/plugins/* /data/AppData/sony/pcsx/plugins
 
 /usr/sony/bin/sonyapp-copy
 
-killall ui_menu
-
 sync
 
-sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=1/" /media/data/AppData/sony/ui/user.pre
+#sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /media/data/AppData/sony/ui/user.pre
 
 sync
 
 find / > /media/filelist.log
 
-/usr/sony/bin/ui_menu
+sleep 1
+
+export PCSX_ESC_KEY=2
+/usr/sony/bin/sonyapp
+#export AUDIODEV=plughw:0,2
+#cd /data/AppData/sony/pcsx
+#/usr/sony/bin/ui_menu --power-off-enable > /media/System/ui_menu.log
 
 red_led "12" "0.3"
 
