@@ -7,7 +7,7 @@ BleemSync is a relatively safe way to add games to your PlayStation Classic.
 1. Supports multi-disc games
 
 ## Installation
-1. Download the ZIP file from the [release page](https://github.com/pathartl/BleemSync/releases/tag/0.2.0)
+1. Download the ZIP file from the [release page](https://github.com/pathartl/BleemSync/releases/latest)
 1. Extract the contents to the root of your FAT32 or ext4 formatted USB flash drive
 1. Name your flash drive `SONY`. This is a requirement.
 
