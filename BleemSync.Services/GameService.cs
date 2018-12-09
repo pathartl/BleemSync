@@ -11,7 +11,19 @@ namespace BleemSync.Services
         {
             var gamesDirectory = Utilities.Filesystem.GetGamesDirectory();
 
-            var config = Configuration.LoadFromFile($"{gamesDirectory}\\{gameId}\\Game.ini");
+            Configuration config = null;
+
+            try
+            {
+                config = Configuration.LoadFromFile($"{gamesDirectory}\\{gameId}\\Game.ini");
+            } catch { }
+
+            try
+            {
+                config = Configuration.LoadFromFile($"{gamesDirectory}\\{gameId}\\GameData\\Game.ini");
+            }
+            catch { }
+
             var section = config["Game"];
 
             var game = new GameInfo()
