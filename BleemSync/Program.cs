@@ -64,19 +64,6 @@ namespace BleemSync
                 }
 
                 db.SaveChanges();
-
-                // Generate mounting script
-                var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
-
-                using (TextWriter mountScript = new StreamWriter($"{executingDirectory}\\..\\System\\MountGames.sh"))
-                {
-                    mountScript.NewLine = "\n";
-
-                    foreach (var id in gameIds)
-                    {
-                        mountScript.WriteLine($"mount -o bind /media/Games/{id} /gaadata/{id}");
-                    }
-                }
             }
         }
     }

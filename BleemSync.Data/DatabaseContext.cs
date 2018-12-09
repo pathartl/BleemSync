@@ -30,7 +30,6 @@ namespace BleemSync.Data
 
             Directory.CreateDirectory($"{executingDirectory}\\..\\System\\Databases");
             optionsBuilder.UseSqlite($"Data Source={executingDirectory}\\..\\System\\Databases\\regional.db");
-            //optionsBuilder.UseSqlite($"Data Source={executingDirectory}\\..\\Games\\databases\\regional.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
