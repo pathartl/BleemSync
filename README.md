@@ -72,7 +72,7 @@ Yes. Remove the flash drive and the stock games should be available
 Not currently.
 
 ### What size does the cover art have to be?
-The cover art should be square (1:1 aspect ratio). If the cover art is not square, it will be squashed by the UI as square anyway so visually it's best to pre-crop it. The system uses 226x266px images for the pre-loaded games.
+The cover art should be square (1:1 aspect ratio). If the cover art is not square, it will be squashed by the UI as square anyway so visually it's best to pre-crop it. The system uses 226x226px images for the pre-loaded games.
 
 ### My controller still isn't working
 Your user data might have gotten messed up. Try going to Settings and then Initialize Console. **This will wipe out any saves and save states, proceed with caution!**
