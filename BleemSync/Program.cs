@@ -46,9 +46,13 @@ namespace BleemSync
                     game.Discs = info.DiscIds.Select((discId, index) => new Disc() { GameId = info.Id, DiscNumber = index + 1, DiscBasename = discId}).ToList();
 
                     db.Add(game);
+
+                    Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
                 }
 
                 db.SaveChanges();
+
+                Console.WriteLine($"Successfully inserted {gameIds.Count} games");
             }
         }
     }
