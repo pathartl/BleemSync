@@ -16,18 +16,9 @@ namespace BleemSync.Services
 
             try
             {
-                var path = Path.Join(gamesDirectory, gameId.ToString(), "Game.ini");
-                config = Configuration.LoadFromFile(path);
-            } catch { }
-
-            try
-            {
                 var path = Path.Combine(new [] { gamesDirectory, gameId.ToString(), "GameData", "Game.ini"});
                 config = Configuration.LoadFromFile(path);
-            }
-            catch { }
-
-            if (config == null) {
+            } catch {
                 throw new Exception($"Game.ini not found for game with id {gameId}");
             }
 
