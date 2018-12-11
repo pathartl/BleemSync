@@ -84,12 +84,15 @@ Make sure you have run BleemSync on your PC. This usually means the game databas
 On your USB drive, go to `System/Preferences` and remove `regional.pre`. If this doesn't work, start up your PlayStation Classic without your USB drive inserted, select Battle Arena Toshinden, and then unplug the machine. Plug it back in along with your USB drive and it should now boot into the menu.
 
 ## Known Issues/Limitations
-* Currently the user data partition is not overmounted so saves and savestates might look like the stock games
+* The user data partition is being overmounted, but is not super stable. **Game saves and controls may not work on some games**
 * Games have to be in sequential order. This is a limit imposed by BleemSync. Further testing has to be done to see if this is a system limitation
 * Games have to be in `bin`/`cue` format. This is a limit imposed by the system's UI
-* Other regions seem not to be working at this time
+* Other regions may not be working at this time
 
 ## Credits
 * [madmonkey](https://github.com/madmonkey1907) - created lolhack which makes all of this possible
 * [DanTheMan827](https://github.com/DanTheMan827) - overmounting lessons
 * [yifanlu](https://github.com/yifanlu) - why not
+
+## Contributors
+[CompCom](https://github.com/compcom), [Maku](https://github.com/justMaku)
