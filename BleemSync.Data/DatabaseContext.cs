@@ -28,8 +28,11 @@ namespace BleemSync.Data
         {
             var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
 
-            Directory.CreateDirectory($"{executingDirectory}\\..\\System\\Databases");
-            optionsBuilder.UseSqlite($"Data Source={executingDirectory}\\..\\System\\Databases\\regional.db");
+            var databasesDirectoryPath = Path.Combine(new[] { executingDirectory, "..", "System", "Databases"});
+            var databasePath = Path.Join(databasesDirectoryPath, "regional.db");
+
+            Directory.CreateDirectory(databasesDirectoryPath);
+            optionsBuilder.UseSqlite($"Data Source={databasePath}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

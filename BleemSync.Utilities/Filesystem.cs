@@ -78,8 +78,7 @@ namespace BleemSync.Utilities
         public static string GetGamesDirectory()
         {
             var currentPath = GetExecutingDirectory();
-
-            return $"{currentPath}\\..\\Games";
+            return Path.Join(currentPath, "..", "Games");
         }
     }
 }
