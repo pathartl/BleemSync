@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace BleemSync.Data.Models
     [Table("GAME")]
     public class Game
     {
-        [Column("GAME_ID")]
+        [Key, Column("GAME_ID")]
         public int Id { get; set; }
 
         [Column("GAME_TITLE_STRING")]
@@ -31,6 +32,8 @@ namespace BleemSync.Data.Models
 
         [Column("LINK_GAME_ID")]
         public string LinkGameId { get; set; }
+
+        public ICollection<Disc> Discs { get; set; }
 
         public Game()
         {

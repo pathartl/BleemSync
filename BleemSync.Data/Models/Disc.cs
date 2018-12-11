@@ -9,7 +9,7 @@ namespace BleemSync.Data.Models
     [Table("DISC")]
     public class Disc
     {
-        [Column("DISC_ID")]
+        [Key, Column("DISC_ID")]
         public int DiscId { get; set; }
 
         [Column("GAME_ID")]
@@ -20,5 +20,7 @@ namespace BleemSync.Data.Models
 
         [Column("BASENAME")]
         public string DiscBasename { get; set; }
+        
+        public Game Game { get; set; }
     }
 }
