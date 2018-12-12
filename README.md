@@ -18,7 +18,7 @@ A proper folder structure looks something like this:
 ```
 Games/
     1/
-        GameData
+        GameData/
             Game.ini
             pcsx.cfg
             SLUS-01066.bin
