@@ -56,7 +56,13 @@ ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /data/AppData/sony
 ln -s /media/System/Bios /data/AppData/sony/pcsx/bios
 ln -s /usr/sony/bin/plugins /data/AppData/sony/pcsx/plugins
 
+# Fix for last selected game issue. If not in place user may experience UI issue
 sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
+
+# Fix for line endings. BAD WINDOWS
+find /media -name *.cfg -exec sed -i 's/\r//g' {} \;
+find /media -name *.pre -exec sed -i 's/\r//g' {} \;
+
 
 cd /data/AppData/sony/pcsx
 /usr/sony/bin/ui_menu --power-off-enable &> /media/System/Logs/ui_menu.log
