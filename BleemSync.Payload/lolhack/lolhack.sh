@@ -3,7 +3,15 @@
 killall -s KILL sonyapp showLogo ui_menu
 
 # Extract system files to avoid crashing
-mkdir -p /media/System/Bios /media/System/Preferences /media/System/Preferences/System /media/System/Preferences/User /media/System/Preferences/AutoDimmer /media/System/Databases /media/System/Region /media/System/Logs /media/System/UI
+mkdir -p /media/System/Bios
+mkdir -p /media/System/Preferences
+mkdir -p /media/System/Preferences/System
+mkdir -p /media/System/Preferences/User
+mkdir -p /media/System/Preferences/AutoDimmer
+mkdir -p /media/System/Databases
+mkdir -p /media/System/Region
+mkdir -p /media/System/Logs
+mkdir -p /media/System/UI
 
 # Copy the BIOS files to USB
 [ ! -f /media/System/Bios/romw.bin ] && cp -r /gaadata/system/bios/* /media/System/Bios
