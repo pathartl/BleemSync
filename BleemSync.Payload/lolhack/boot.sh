@@ -32,10 +32,12 @@ mkdir -p /media/System/UI
 sync
 
 # Unmount partitons and create tmpfs - Shut system down on failure
-umount /data || reboot 
-umount /gaadata || reboot 
-mount -t tmpfs tmpfs "/gaadata" || reboot 
-mount -t tmpfs tmpfs "/data" || reboot 
+MOUNT_FAIL=0
+umount /data || MOUNT_FAIL=1 
+umount /gaadata || MOUNT_FAIL=1 
+mount -t tmpfs tmpfs "/gaadata" || MOUNT_FAIL=1 
+mount -t tmpfs tmpfs "/data" || MOUNT_FAIL=1 
+[ $MOUNT_FAIL -eq 1 ] && reboot && exit
 
 # Create gaadata tmpfs
 mkdir -p /gaadata/system/
@@ -70,3 +72,4 @@ export PCSX_ESC_KEY=2
 sync
 sync
 reboot
+
