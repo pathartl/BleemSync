@@ -13,46 +13,55 @@ namespace BleemSync
     {
         static void Main(string[] args)
         {
-            var gameService = new GameService();
-
-            var gameIds = Filesystem.GetGameIds();
-
-            using (var db = new DatabaseContext())
+            try
             {
-                foreach (var existingGame in db.Games)
+                var gameService = new GameService();
+
+                var gameIds = Filesystem.GetGameIds();
+
+                using (var db = new DatabaseContext())
                 {
-                    db.Remove(existingGame);
-                }
-
-                foreach (var existingDisc in db.Discs)
-                {
-                    db.Remove(existingDisc);
-                }
-
-                db.SaveChanges();
-
-                var infos = gameIds.Select(id => gameService.GetGameInfo(id));
-
-                foreach (var info in infos) {
-                    var game = new Game()
+                    foreach (var existingGame in db.Games)
                     {
-                        Id = info.Id,
-                        Title = info.Title,
-                        Publisher = info.Publisher,
-                        Year = info.Year,
-                        Players = info.Players
-                    };
+                        db.Remove(existingGame);
+                    }
 
-                    game.Discs = info.DiscIds.Select((discId, index) => new Disc() { GameId = info.Id, DiscNumber = index + 1, DiscBasename = discId}).ToList();
+                    foreach (var existingDisc in db.Discs)
+                    {
+                        db.Remove(existingDisc);
+                    }
 
-                    db.Add(game);
+                    db.SaveChanges();
 
-                    Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
+                    var infos = gameIds.Select(id => gameService.GetGameInfo(id));
+
+                    foreach (var info in infos)
+                    {
+                        var game = new Game()
+                        {
+                            Id = info.Id,
+                            Title = info.Title,
+                            Publisher = info.Publisher,
+                            Year = info.Year,
+                            Players = info.Players
+                        };
+
+                        game.Discs = info.DiscIds.Select((discId, index) => new Disc() { GameId = info.Id, DiscNumber = index + 1, DiscBasename = discId }).ToList();
+
+                        db.Add(game);
+
+                        Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
+                    }
+
+                    db.SaveChanges();
+
+                    Console.WriteLine($"Successfully inserted {gameIds.Count} games");
                 }
-
-                db.SaveChanges();
-
-                Console.WriteLine($"Successfully inserted {gameIds.Count} games");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.ReadLine();
             }
         }
     }
