@@ -31,11 +31,13 @@ mkdir -p /media/System/UI
 [ ! -f /media/System/Logs/ui_menu.log ] && touch /media/System/Logs/ui_menu.log
 sync
 
-umount /data
-umount /gaadata
+# Unmount partitons and create tmpfs - Shut system down on failure
+umount /data || reboot 
+umount /gaadata || reboot 
+mount -t tmpfs tmpfs "/gaadata" || reboot 
+mount -t tmpfs tmpfs "/data" || reboot 
 
 # Create gaadata tmpfs
-mount -t tmpfs tmpfs "/gaadata"
 mkdir -p /gaadata/system/
 ln -s /media/System/Databases /gaadata/databases
 ln -s /media/System/Region /gaadata/geninfo
@@ -44,7 +46,6 @@ ln -s /media/System/Preferences/System /gaadata/preferences
 ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s /media/Games/%/GameData /gaadata/% && mkdir -p /media/Games/%/.pcsx && cp /media/Games/%/GameData/pcsx.cfg /media/Games/%/.pcsx"
 
 # Create data tmpfs
-mount -t tmpfs tmpfs "/data"
 mkdir -p /data/sony/sgmo /data/AppData/sony
 ln -s /tmp/diag /data/sony/sgmo/diag
 ln -s /dev/shm/power /data/power
