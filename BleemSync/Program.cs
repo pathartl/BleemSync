@@ -31,39 +31,28 @@ namespace BleemSync
 
                 db.SaveChanges();
 
-                foreach (var id in gameIds)
-                {
-                    var gameInfo = gameService.GetGameInfo(id);
+                var infos = gameIds.Select(id => gameService.GetGameInfo(id));
 
+                foreach (var info in infos) {
                     var game = new Game()
                     {
-                        Id = id,
-                        Title = gameInfo.Title,
-                        Publisher = gameInfo.Publisher,
-                        Year = gameInfo.Year,
-                        Players = gameInfo.Players
+                        Id = info.Id,
+                        Title = info.Title,
+                        Publisher = info.Publisher,
+                        Year = info.Year,
+                        Players = info.Players
                     };
 
-                    var i = 1;
-
-                    foreach (var discId in gameInfo.DiscIds)
-                    {
-                        var disc = new Disc()
-                        {
-                            GameId = id,
-                            DiscNumber = i,
-                            DiscBasename = discId
-                        };
-
-                        i++;
-
-                        db.Add(disc);
-                    }
+                    game.Discs = info.DiscIds.Select((discId, index) => new Disc() { GameId = info.Id, DiscNumber = index + 1, DiscBasename = discId}).ToList();
 
                     db.Add(game);
+
+                    Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
                 }
 
                 db.SaveChanges();
+
+                Console.WriteLine($"Successfully inserted {gameIds.Count} games");
             }
         }
     }
