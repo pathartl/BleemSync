@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Data", "BleemSync
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Utilities", "BleemSync.Utilities\BleemSync.Utilities.csproj", "{F4B0DF4C-95F7-49A7-B5FF-2F685EB52389}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Services", "BleemSync.Services\BleemSync.Services.csproj", "{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Services", "BleemSync.Services\BleemSync.Services.csproj", "{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Scrapers.PSXDataCenterScraper", "BleemSync.PSXDataCenterScraper\BleemSync.Scrapers.PSXDataCenterScraper.csproj", "{1BCDAB21-519D-482C-B054-9DA2DB81C606}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Scrapers.PSXDataCenterScraper.Data", "BleemSync.Scrapers.PSXDataCenterScraper.Data\BleemSync.Scrapers.PSXDataCenterScraper.Data.csproj", "{4BBBBD40-706A-4C1D-9693-779EBC1CD255}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BCDAB21-519D-482C-B054-9DA2DB81C606}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BCDAB21-519D-482C-B054-9DA2DB81C606}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BCDAB21-519D-482C-B054-9DA2DB81C606}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BCDAB21-519D-482C-B054-9DA2DB81C606}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
