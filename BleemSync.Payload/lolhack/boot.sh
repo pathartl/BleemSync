@@ -35,32 +35,34 @@ sync
 MOUNT_FAIL=0
 umount /data || MOUNT_FAIL=1 
 umount /gaadata || MOUNT_FAIL=1 
-mount -t tmpfs tmpfs "/gaadata" || MOUNT_FAIL=1 
-mount -t tmpfs tmpfs "/data" || MOUNT_FAIL=1 
+# Create gaadata and data folders in tmp then mount over original folders
+mkdir -p /tmp/gaadatatmp /tmp/datatmp
+mount -o bind /tmp/gaadatatmp /gaadata || MOUNT_FAIL=1 
+mount -o bind /tmp/datatmp /data || MOUNT_FAIL=1 
 [ $MOUNT_FAIL -eq 1 ] && reboot && exit
 
-# Create gaadata tmpfs
-mkdir -p /gaadata/system/
-ln -s /media/System/Databases /gaadata/databases
-ln -s /media/System/Region /gaadata/geninfo
-ln -s /media/System/Bios /gaadata/system/bios
-ln -s /media/System/Preferences/System /gaadata/preferences
-ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s /media/Games/%/GameData /gaadata/% && mkdir -p /media/Games/%/.pcsx && cp /media/Games/%/GameData/pcsx.cfg /media/Games/%/.pcsx"
+# Create gaadata on tmpfs
+mkdir -p /tmp/gaadatatmp/system/
+ln -s /media/System/Databases /tmp/gaadatatmp/databases
+ln -s /media/System/Region /tmp/gaadatatmp/geninfo
+ln -s /media/System/Bios /tmp/gaadatatmp/system/bios
+ln -s /media/System/Preferences/System /tmp/gaadatatmp/preferences
+ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s /media/Games/%/GameData /tmp/gaadatatmp/% && mkdir -p /media/Games/%/.pcsx && cp /media/Games/%/GameData/pcsx.cfg /media/Games/%/.pcsx"
 
-# Create data tmpfs
-mkdir -p /data/sony/sgmo /data/AppData/sony
-ln -s /tmp/diag /data/sony/sgmo/diag
-ln -s /dev/shm/power /data/power
-ln -s /media/System/UI /data/sony/ui
-ln -s /media/System/Preferences/User /data/AppData/sony/ui
-ln -s /media/System/Preferences/AutoDimmer /data/AppData/sony/auto_dimmer
-cp -r /usr/sony/share/recovery/AppData/sony/pcsx /data/AppData/sony/pcsx
-ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /data/AppData/sony/pcsx/% && ln -s /media/Games/% /data/AppData/sony/pcsx/%"
-ln -s /media/System/Bios /data/AppData/sony/pcsx/bios
-ln -s /usr/sony/bin/plugins /data/AppData/sony/pcsx/plugins
+# Create data on tmpfs
+mkdir -p /tmp/datatmp/sony/sgmo /tmp/datatmp/AppData/sony
+ln -s /tmp/diag /tmp/datatmp/sony/sgmo/diag
+ln -s /dev/shm/power /tmp/datatmp/power
+ln -s /media/System/UI /tmp/datatmp/sony/ui
+ln -s /media/System/Preferences/User /tmp/datatmp/AppData/sony/ui
+ln -s /media/System/Preferences/AutoDimmer /tmp/datatmp/AppData/sony/auto_dimmer
+cp -r /usr/sony/share/recovery/AppData/sony/pcsx /tmp/datatmp/AppData/sony/pcsx
+ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /tmp/datatmp/AppData/sony/pcsx/% && ln -s /media/Games/% /tmp/datatmp/AppData/sony/pcsx/%"
+ln -s /media/System/Bios /tmp/datatmp/AppData/sony/pcsx/bios
+ln -s /usr/sony/bin/plugins /tmp/datatmp/AppData/sony/pcsx/plugins
 
 # Fix for last selected game issue. If not in place user may experience UI issue
-sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
+sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /tmp/datatmp/AppData/sony/ui/user.pre
 
 # Fix for line endings. BAD WINDOWS
 find /media -name *.cfg -exec sed -i 's/\r//g' {} \;
