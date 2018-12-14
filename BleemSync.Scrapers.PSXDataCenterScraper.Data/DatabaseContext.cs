@@ -16,7 +16,7 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper.Data
         {
             if (!_created)
             {
-                Database.EnsureDeleted();
+                //Database.EnsureDeleted();
                 Database.EnsureCreated();
             }
         }
@@ -31,7 +31,8 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper.Data
             Directory.CreateDirectory(databasesDirectoryPath);
             optionsBuilder
                 .UseLazyLoadingProxies()
-                .UseSqlite($"Data Source={databasePath}");
+                .UseMySql("Server=10.0.1.10;Port=3308;Database=psxdatacenter;User=psx;Password=psx;charset=utf8mb4");
+                //.UseSqlite($"Data Source={databasePath}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

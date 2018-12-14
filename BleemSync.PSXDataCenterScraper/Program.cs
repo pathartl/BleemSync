@@ -14,9 +14,14 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
     {
         static void Main(string[] args)
         {
+            ScrapeMainList("https://psxdatacenter.com/jlist.html");
+        }
+
+        static void ScrapeMainList(string url)
+        {
             HtmlWeb web = new HtmlWeb();
 
-            var html = web.Load("https://psxdatacenter.com/ulist.html");
+            var html = web.Load(url);
             var dom = html.DocumentNode;
 
             var links = dom.QuerySelectorAll("[href]");
@@ -34,12 +39,6 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
                     db.SaveChanges();
                 }
             }
-
-            /*using (var db = new DatabaseContext())
-            {
-                db.AddRange(games);
-                db.SaveChanges();
-            }*/
         }
 
         static Game GetGame(string url)
@@ -51,6 +50,7 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
 
             var metaTable = dom.QuerySelector("#table4");
             var featuresTable = dom.QuerySelector("#table19");
+            var discsTable = dom.QuerySelector("#table7");
 
             var game = new Game()
             {
@@ -64,7 +64,19 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
                 Discs = new List<Disc>()
             };
 
-            foreach (var serialNumber in GetContent(metaTable.QuerySelector("tr:nth-child(3) td:nth-child(2)")).Split(" / ").ToList())
+            var serialNumbers = new List<string>();
+
+            for (int i = 2; i <= 7; i++)
+            {
+                var cell = GetContent(discsTable.QuerySelector($"tr:nth-child(2) td:nth-child({i})"));
+
+                if (cell != "")
+                {
+                    serialNumbers.Add(cell);
+                }
+            }
+
+            foreach (var serialNumber in serialNumbers)
             {
                 var disc = new Disc()
                 {
