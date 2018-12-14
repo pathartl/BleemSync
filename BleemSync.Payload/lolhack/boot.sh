@@ -65,7 +65,7 @@ ln -s /usr/sony/bin/plugins /tmp/datatmp/AppData/sony/pcsx/plugins
 # Fix for last selected game issue. If not in place user may experience UI issue
 sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /tmp/datatmp/AppData/sony/ui/user.pre
 
-# Reload udev rules that were overmounted above
+# Reload and apply udev rules that were overmounted above
 # Allows both controllers to be detected through a USB hub
 udevadm control --reload-rules
 udevadm trigger
