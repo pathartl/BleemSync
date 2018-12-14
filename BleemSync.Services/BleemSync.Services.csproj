@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>BleemSync.Services</RootNamespace>
-    <Version>0.3.0</Version>
+    <Version>0.3.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
