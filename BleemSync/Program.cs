@@ -51,6 +51,7 @@ namespace BleemSync
                         db.Add(game);
 
                         Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
+                        Console.WriteLine("");
                     }
 
                     db.SaveChanges();
@@ -60,7 +61,9 @@ namespace BleemSync
             }
             catch (Exception e)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(e.Message);
+                Console.ResetColor();
                 Console.ReadLine();
             }
         }

@@ -76,31 +76,39 @@ namespace BleemSync.Services
 
             foreach (var file in files)
             {
-                if (file.EndsWith(".bin") || file.EndsWith(".iso"))
+                var fileInfo = new FileInfo(file);
+
+                if (fileInfo.Extension == ".bin" || fileInfo.Extension == ".iso")
                 {
                     try
                     {
                         var serial = DiscImage.GetSerialNumber(Path.Combine(gamesDirectory, gameId.ToString(), file));
+                        
+                        discMap.Add(serial, fileInfo.Name.Replace(fileInfo.Extension, ""));
 
-                        Console.Write($"Found serial {serial} from disc image file {file}");
-
-                        var client = new RestClient("http://209.97.151.235");
-                        var request = new RestRequest($"api/games/GetBySerial/{serial}");
-                        var result = client.Execute<GameDTO>(request);
-
-                        var game = JsonConvert.DeserializeObject<GameDTO>(result.Content);
-
-                        gameInfo.Title = game.Title;
-                        gameInfo.Year = game.DateReleased.Year;
-                        gameInfo.Publisher = game.Publisher;
-                        gameInfo.Players = game.Players;
-                        gameInfo.DiscIds = game.Discs.Select(d => d.SerialNumber).ToList();
-
-                        WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
+                        Console.WriteLine($"Found serial {serial} from disc image file {file}");
                     }
                     catch { }
                 }
             }
+
+            var client = new RestClient("http://209.97.151.235");
+            var request = new RestRequest($"api/games/GetBySerial/{discMap.Keys.First()}");
+            var result = client.Execute<GameDTO>(request);
+
+            var game = JsonConvert.DeserializeObject<GameDTO>(result.Content);
+
+            gameInfo.Title = game.Title;
+            gameInfo.Year = game.DateReleased.Year;
+            gameInfo.Publisher = game.Publisher;
+            gameInfo.Players = game.Players;
+
+            foreach (var serial in game.Discs.Select(d => d.SerialNumber))
+            {
+                gameInfo.DiscIds.Add(discMap[serial]);
+            }
+
+            WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
 
             return gameInfo;
         }
