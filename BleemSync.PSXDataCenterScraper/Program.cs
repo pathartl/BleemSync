@@ -5,8 +5,8 @@ using System.IO;
 using System.Net;
 using System.Linq;
 using System.Collections.Generic;
-using BleemSync.Scrapers.PSXDataCenterScraper.Data;
-using BleemSync.Scrapers.PSXDataCenterScraper.Data.Models;
+using BleemSync.Central.Data;
+using BleemSync.Central.Data.Models;
 
 namespace BleemSync.Scrapers.PSXDataCenterScraper
 {

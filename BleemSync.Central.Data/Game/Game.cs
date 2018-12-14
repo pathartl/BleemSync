@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace BleemSync.Scrapers.PSXDataCenterScraper.Data.Models
+namespace BleemSync.Central.Data.Models
 {
     [Table("Games")]
     public class Game

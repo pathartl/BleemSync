@@ -11,9 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Utilities", "Blee
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Services", "BleemSync.Services\BleemSync.Services.csproj", "{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Scrapers.PSXDataCenterScraper", "BleemSync.PSXDataCenterScraper\BleemSync.Scrapers.PSXDataCenterScraper.csproj", "{1BCDAB21-519D-482C-B054-9DA2DB81C606}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Scrapers.PSXDataCenterScraper", "BleemSync.PSXDataCenterScraper\BleemSync.Scrapers.PSXDataCenterScraper.csproj", "{1BCDAB21-519D-482C-B054-9DA2DB81C606}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Scrapers.PSXDataCenterScraper.Data", "BleemSync.Scrapers.PSXDataCenterScraper.Data\BleemSync.Scrapers.PSXDataCenterScraper.Data.csproj", "{4BBBBD40-706A-4C1D-9693-779EBC1CD255}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Central.Data", "BleemSync.Central.Data\BleemSync.Central.Data.csproj", "{4BBBBD40-706A-4C1D-9693-779EBC1CD255}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Central", "BleemSync.Central\BleemSync.Central.csproj", "{B6CC05A8-AF80-4298-BB22-451F920E8320}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Central.Services", "BleemSync.Central.Services\BleemSync.Central.Services.csproj", "{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BBBBD40-706A-4C1D-9693-779EBC1CD255}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6CC05A8-AF80-4298-BB22-451F920E8320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6CC05A8-AF80-4298-BB22-451F920E8320}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6CC05A8-AF80-4298-BB22-451F920E8320}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6CC05A8-AF80-4298-BB22-451F920E8320}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

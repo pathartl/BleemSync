@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BleemSync.Scrapers.PSXDataCenterScraper.Data\BleemSync.Scrapers.PSXDataCenterScraper.Data.csproj" />
+    <ProjectReference Include="..\BleemSync.Central.Data\BleemSync.Central.Data.csproj" />
   </ItemGroup>
 
 </Project>

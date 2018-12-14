@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>BleemSync.Scrapers.PSXDataCenterScraper.Data</RootNamespace>
+    <RootNamespace>BleemSync.Central.Data</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

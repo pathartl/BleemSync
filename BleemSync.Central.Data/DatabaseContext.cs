@@ -1,9 +1,9 @@
-﻿using BleemSync.Scrapers.PSXDataCenterScraper.Data.Models;
+﻿using BleemSync.Central.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 
-namespace BleemSync.Scrapers.PSXDataCenterScraper.Data
+namespace BleemSync.Central.Data
 {
     public class DatabaseContext : DbContext
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace BleemSync.Scrapers.PSXDataCenterScraper.Data.Models
+namespace BleemSync.Central.Data.Models
 {
     public class Disc
     {
