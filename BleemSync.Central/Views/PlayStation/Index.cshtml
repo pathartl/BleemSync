@@ -1,0 +1,104 @@
+﻿@model List<BleemSync.Central.ViewModels.GameDTO>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="pmd-card pmd-z-depth">
+            <div class="pmd-card-title">
+                <h2 class="pmd-card-title-text">PlayStation Games</h2>
+            </div>
+
+            <div class="pmd-card-body">
+                <div class="table-responsive">
+                    <table id="datatable" class="table pmd-table table-hover table-striped display responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Developer</th>
+                                <th>Publisher</th>
+                                <th>Region</th>
+                                <th>Genre</th>
+                                <th>Players</th>
+                                <th>Date Released</th>
+                                <th>Disc Serial Numbers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var game in Model)
+                            {
+                                <tr>
+                                    <td>@game.Title</td>
+                                    <td>@game.Developer</td>
+                                    <td>@game.Publisher</td>
+                                    <td>@game.Region</td>
+                                    <td>@game.Genre</td>
+                                    <td>@game.Players</td>
+                                    <td>@game.DateReleased.ToString("MM/dd/yyyy")</td>
+                                    <td>@String.Join(", ", game.Discs.Select(d => d.SerialNumber))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#datatable').DataTable({
+                responsive: {
+                    details: {
+                        type: 'column',
+                        target: 'tr'
+                    }
+                },
+                select: {
+                    style: 'multi',
+                    selector: 'td:first-child'
+                },
+                order: [0, 'asc'],
+                ordering: false,
+                bFilter: true,
+                bLengthChange: true,
+                "pagingType": "full_numbers",
+                "paging": true,
+                "searching": true,
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "url": "/PlayStation/DataTable",
+                    "type": "POST"
+                },
+                language: {
+                    info: " _START_ - _END_ of _TOTAL_ ",
+                    sLengthMenu: "<span class='custom-select-title'>Rows per page:</span> <span class='custom-select'> _MENU_ </span>",
+                    sSearch: "",
+                    sSearchPlaceholder: "Search",
+                },
+                dom:
+                    "<'pmd-card-title'<'data-table-title'><'search-paper pmd-textfield'f>>" +
+                    "<'custom-select-info'<'custom-select-item'><'custom-select-action'>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'pmd-card-footer' <'pmd-datatable-pagination' l i p>>",
+            }).on('draw', function () {
+                $('.pmd-checkbox input').after('<span class="pmd-checkbox-label">&nbsp;</span>');
+                customizeDatatableSelect();
+            });
+
+            customizeDatatableSelect();
+
+            $('.custom-select-info').hide();
+
+            function customizeDatatableSelect() {
+                $('.custom-select').removeClass('custom-select').addClass('datatable-select-container');
+
+                $('.datatable-select-container select').removeClass('custom-select').addClass('select-simple').addClass('form-control').addClass('pmd-select2').select2({
+                    theme: "bootstrap",
+                    minimumResultsForSearch: Infinity,
+                });
+            }
+        });
+    </script>
+}

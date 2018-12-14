@@ -11,11 +11,11 @@ using BleemSync.Central.Data;
 namespace BleemSync.Central.Controllers
 {
     [Route("api/[controller]/[action]")]
-    public class GamesController : Controller
+    public class PlayStationApiController : Controller
     {
         private GameService _service { get; set; }
 
-        public GamesController(DatabaseContext context)
+        public PlayStationApiController(DatabaseContext context)
         {
             _service = new GameService(context);
         }
