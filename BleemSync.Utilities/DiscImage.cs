@@ -48,7 +48,12 @@ namespace BleemSync.Utilities
                 }
             }
 
-            return serial;
+            if (!foundSerial)
+            {
+                throw new Exception($"PlayStation game disc serial not found for file {path}. Please verify this is a valid, uncorruped disc image.");
+            }
+
+            return serial.Replace(".", "").Replace("_", "-");
         }
     }
 }
