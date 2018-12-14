@@ -28,7 +28,7 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
 
             var games = new List<Game>();
 
-            using (var db = new DatabaseContext())
+            /*using (var db = new DatabaseContext())
             {
                 foreach (var link in links)
                 {
@@ -38,7 +38,7 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
 
                     db.SaveChanges();
                 }
-            }
+            }*/
         }
 
         static Game GetGame(string url)

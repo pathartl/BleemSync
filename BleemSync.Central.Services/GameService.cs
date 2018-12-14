@@ -10,9 +10,9 @@ namespace BleemSync.Central.Services
     {
         private DatabaseContext _context { get; set; }
 
-        public GameService()
+        public GameService(DatabaseContext context)
         {
-            _context = new DatabaseContext();
+            _context = context;
         }
         public GameDTO GetGame(int id)
         {

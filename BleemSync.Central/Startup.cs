@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
+using BleemSync.Central.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BleemSync.Central
 {
@@ -27,6 +29,9 @@ namespace BleemSync.Central
         public void ConfigureServices(IServiceCollection services)
         {
             services
+                .AddDbContext<DatabaseContext>(options => 
+                    options.UseMySql(Configuration["MySQLConnectionString"]).UseLazyLoadingProxies()
+                )
                 .AddMvc()
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
