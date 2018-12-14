@@ -36,7 +36,7 @@ MOUNT_FAIL=0
 umount /data || MOUNT_FAIL=1 
 umount /gaadata || MOUNT_FAIL=1 
 # Create gaadata and data folders in tmp then mount over original folders
-mkdir -p /tmp/gaadatatmp /tmp/datatmp /tmp/udev
+mkdir -p /tmp/gaadatatmp /tmp/datatmp
 mount -o bind /tmp/gaadatatmp /gaadata || MOUNT_FAIL=1 
 mount -o bind /tmp/datatmp /data || MOUNT_FAIL=1 
 mount -o bind /media/lolhack/20-joystick.rules /etc/udev/rules.d/20-joystick.rules || MOUNT_FAIL=1 
