@@ -32,3 +32,5 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+BleemSync-*.zip
+Publish/
