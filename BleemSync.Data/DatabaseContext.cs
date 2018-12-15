@@ -15,7 +15,7 @@ namespace BleemSync.Data
 
         private static bool _created = false;
 
-        public DatabaseContext()
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
             if (!_created)
             {
