@@ -8,11 +8,20 @@ using BleemSync.Utilities;
 using RestSharp;
 using BleemSync.Central.ViewModels;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace BleemSync.Services
 {
     public class GameService
     {
+        IConfigurationRoot _configuration { get; set; }
+
+        public GameService(IConfigurationRoot configuration)
+        {
+            _configuration = configuration;
+        }
+
         public GameInfo GetGameInfo(int gameId)
         {
             GameInfo game;
@@ -92,7 +101,7 @@ namespace BleemSync.Services
                 }
             }
 
-            var client = new RestClient("http://209.97.151.235");
+            var client = new RestClient(_configuration["BleemSyncCentralUrl"]);
             var request = new RestRequest($"api/games/GetBySerial/{discMap.Keys.First()}");
             var result = client.Execute<GameDTO>(request);
 
@@ -109,6 +118,27 @@ namespace BleemSync.Services
             }
 
             WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
+
+            var coverFileName = gameInfo.DiscIds.First() + ".jpg";
+
+            // Download the cover
+            if (!File.Exists(Path.Combine(gamesDirectory, gameId.ToString(), coverFileName)))
+            {
+                try
+                {
+                    using (WebClient wc = new WebClient())
+                    {
+                        wc.DownloadFile(
+                            new Uri(_configuration["BleemSyncCentralUrl"] + "/api/PlayStation/GetCoverBySerial/" + discMap.Keys.First()),
+                            Path.Combine(gamesDirectory, gameId.ToString(), coverFileName)
+                        );
+                    }
+                } catch
+                {
+                    Console.WriteLine("Could not download the cover from BleemSync Central");
+                }
+
+            }
 
             return gameInfo;
         }

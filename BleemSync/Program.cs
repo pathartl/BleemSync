@@ -34,14 +34,14 @@ namespace BleemSync
             var serviceProvider = services.BuildServiceProvider();
             var _context = serviceProvider.GetService<DatabaseContext>();
 
-            SyncGames(_context);
+            SyncGames(_context, configuration);
         }
 
-        static void SyncGames(DatabaseContext db)
+        static void SyncGames(DatabaseContext db, IConfigurationRoot configuration)
         {
             try
             {
-                var gameService = new GameService();
+                var gameService = new GameService(configuration);
 
                 var gameIds = Filesystem.GetGameIds();
 

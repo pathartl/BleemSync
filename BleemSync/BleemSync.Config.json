@@ -1,3 +1,4 @@
 ﻿{
-  "GamesDatabase": "../System/Databases/regional.db"
+  "GamesDatabase": "../System/Databases/regional.db",
+  "BleemSyncCentralUrl": "https://central.bleemsync.app"
 }
