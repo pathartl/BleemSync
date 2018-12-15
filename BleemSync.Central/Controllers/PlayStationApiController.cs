@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BleemSync.Central.Services;
 using BleemSync.Central.Data;
+using System.IO;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BleemSync.Central.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/PlayStation/[action]")]
     public class PlayStationApiController : Controller
     {
         private GameService _service { get; set; }
@@ -42,6 +43,15 @@ namespace BleemSync.Central.Controllers
             var game = _service.GetGameBySerialNumber(serial);
 
             return new JsonResult(game);
+        }
+
+        [HttpGet("{serial}")]
+        public ActionResult GetCoverBySerial(string serial)
+        {
+            var game = _service.GetGameBySerialNumber(serial);
+            var cover = game.Covers.First();
+
+            return PhysicalFile($"covers/{cover.File}", "image/jpg");
         }
 
         // POST api/values

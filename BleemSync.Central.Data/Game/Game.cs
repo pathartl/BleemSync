@@ -20,5 +20,6 @@ namespace BleemSync.Central.Data.Models
         public DateTime DateReleased { get; set; }
         public int Players { get; set; }
         public virtual ICollection<Disc> Discs { get; set; }
+        public virtual ICollection<Cover> Covers { get; set; }
     }
 }

@@ -18,6 +18,7 @@ namespace BleemSync.Central.ViewModels
         public DateTime DateReleased { get; set; }
         public int Players { get; set; }
         public virtual ICollection<DiscDTO> Discs { get; set; }
+        public virtual ICollection<CoverDTO> Covers { get; set; }
 
         public GameDTO(Game game)
         {
@@ -31,10 +32,16 @@ namespace BleemSync.Central.ViewModels
             DateReleased = game.DateReleased;
             Players = game.Players;
             Discs = new List<DiscDTO>();
+            Covers = new List<CoverDTO>();
 
             foreach (var disc in game.Discs)
             {
                 Discs.Add(new DiscDTO(disc));
+            }
+
+            foreach (var cover in game.Covers)
+            {
+                Covers.Add(new CoverDTO(cover));
             }
         }
     }

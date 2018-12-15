@@ -7,6 +7,10 @@ using System.Linq;
 using System.Collections.Generic;
 using BleemSync.Central.Data;
 using BleemSync.Central.Data.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using BleemSync.PSXDataCenterScraper;
 
 namespace BleemSync.Scrapers.PSXDataCenterScraper
 {
@@ -14,137 +18,26 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
     {
         static void Main(string[] args)
         {
-            ScrapeMainList("https://psxdatacenter.com/jlist.html");
-        }
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
-        static void ScrapeMainList(string url)
-        {
-            HtmlWeb web = new HtmlWeb();
+            IConfigurationRoot configuration = builder.Build();
 
-            var html = web.Load(url);
-            var dom = html.DocumentNode;
+            var services = new ServiceCollection();
 
-            var links = dom.QuerySelectorAll("[href]");
+            services.AddDbContext<DatabaseContext>(options =>
+                options.UseMySql(configuration["MySQLConnectionString"])
+            );
 
-            var games = new List<Game>();
+            var serviceProvider = services.BuildServiceProvider();
 
-            /*using (var db = new DatabaseContext())
-            {
-                foreach (var link in links)
-                {
-                    var game = GetGame("https://psxdatacenter.com/" + link.GetAttributeValue("href", ""));
+            var _context = serviceProvider.GetService<DatabaseContext>();
 
-                    db.Add(game);
-
-                    db.SaveChanges();
-                }
-            }*/
-        }
-
-        static Game GetGame(string url)
-        {
-            HtmlWeb web = new HtmlWeb();
-
-            var html = web.Load(url.Replace("https", "http"));
-            var dom = html.DocumentNode;
-
-            var metaTable = dom.QuerySelector("#table4");
-            var featuresTable = dom.QuerySelector("#table19");
-            var discsTable = dom.QuerySelector("#table7");
-
-            var game = new Game()
-            {
-                Title = GetContent(metaTable.QuerySelector("tr:nth-child(1) td:nth-child(2)")),
-                CommonTitle = GetContent(metaTable.QuerySelector("tr:nth-child(2) td:nth-child(2)")),
-                Region = GetContent(metaTable.QuerySelector("tr:nth-child(4) td:nth-child(2)")),
-                Genre = GetContent(metaTable.QuerySelector("tr:nth-child(5) td:nth-child(2)")),
-                Developer = GetContent(metaTable.QuerySelector("tr:nth-child(6) td:nth-child(2)")).TrimEnd('.'),
-                Publisher = GetContent(metaTable.QuerySelector("tr:nth-child(7) td:nth-child(2)")).TrimEnd('.'),
-                Players = GetPlayerCount(GetContent(featuresTable.QuerySelector("tr:nth-child(1) td:nth-child(2)"))),
-                Discs = new List<Disc>()
-            };
-
-            var serialNumbers = new List<string>();
-
-            for (int i = 2; i <= 7; i++)
-            {
-                var cell = GetContent(discsTable.QuerySelector($"tr:nth-child(2) td:nth-child({i})"));
-
-                if (cell != "")
-                {
-                    serialNumbers.Add(cell);
-                }
-            }
-
-            foreach (var serialNumber in serialNumbers)
-            {
-                var disc = new Disc()
-                {
-                    SerialNumber = serialNumber,
-                    Game = game,
-                };
-
-                game.Discs.Add(disc);
-            }
-
-            var dateString = GetContent(metaTable.QuerySelector("tr:nth-child(8) td:nth-child(2)"));
-
-            if (DateTime.TryParse(dateString, out var dateReleased))
-            {
-                game.DateReleased = dateReleased;
-            }
-
-            Console.WriteLine($"Grabbed info for [{game.Title}]");
-
-            return game;
-        }
-
-        static string GetContent(HtmlNode node)
-        {
-            var content = node.InnerText;
-
-            return content
-                .Replace("\t", "")
-                .Replace("\n", "")
-                .Replace("\r", "")
-                .Replace("&nbsp;", "");
-        }
-
-        static int GetPlayerCount(string input)
-        {
-            var numberString = new string(input.Where(c => char.IsDigit(c)).ToArray());
-
-            int count = 0;
-
-            if (int.TryParse(numberString, out var number))
-            {
-                switch (number)
-                {
-                    case 12:
-                    case 2:
-                        count = 2;
-                        break;
-
-                    case 13:
-                    case 23:
-                    case 3:
-                        count = 4;
-                        break;
-
-                    case 14:
-                    case 24:
-                    case 34:
-                    case 4:
-                        count = 4;
-                        break;
-
-                    default:
-                        count = 1;
-                        break;
-                }
-            }
-
-            return count;
+            var scraper = new Scraper(_context);
+            scraper.ScrapeMainList("https://psxdatacenter.com/ulist.html");
+            scraper.ScrapeMainList("https://psxdatacenter.com/plist.html");
+            scraper.ScrapeMainList("https://psxdatacenter.com/jlist.html");
         }
     }
 }
