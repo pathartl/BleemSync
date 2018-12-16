@@ -2,6 +2,14 @@
 
 killall -s KILL sonyapp showLogo ui_menu
 
+if [ -f /media/System/BleemSync/BleemSync ]
+then
+	cd /media/System/BleemSync
+	chmod +x BleemSync
+	./BleemSync
+	cd -
+fi
+
 # Extract system files to avoid crashing
 mkdir -p /media/System/Bios
 mkdir -p /media/System/Preferences

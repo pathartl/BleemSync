@@ -34,3 +34,4 @@ msbuild.wrn
 .vs/
 BleemSync-*.zip
 Publish/
+BleemSync.Payload/System/BleemSync/
