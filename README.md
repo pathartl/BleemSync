@@ -91,6 +91,9 @@ Once all the games are configured, go into the `BleemSync` directory and run `Bl
 ### It takes a few seconds more than normal for my system to boot
 BleemSync runs on boot of the system. If this is taking too long or malfunctions, simply remove the System/BleemSync folder from your flash drive.
 
+### I can't format my flash drive to FAT32 | Formatting to FAT32 doesn't let me use all of the storage available
+Use [guiformat.exe](http://www.ridgecrop.demon.co.uk/index.htm?guiformat.htm)
+
 ### My controller isn't working
 Make sure your `pcsx.cfg` is in the game directory
 
