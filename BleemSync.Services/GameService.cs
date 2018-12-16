@@ -32,6 +32,7 @@ namespace BleemSync.Services
             }
             catch (Exception e) {
                 Console.WriteLine("Game.ini doesn't exist, grabbing from BleemSync Central");
+
                 game = GetGameInfoFromCentral(gameId);
             }
 
@@ -102,7 +103,7 @@ namespace BleemSync.Services
             }
 
             var client = new RestClient(_configuration["BleemSyncCentralUrl"]);
-            var request = new RestRequest($"api/games/GetBySerial/{discMap.Keys.First()}");
+            var request = new RestRequest($"api/PlayStation/GetBySerial/{discMap.Keys.First()}");
             var result = client.Execute<GameDTO>(request);
 
             var game = JsonConvert.DeserializeObject<GameDTO>(result.Content);
@@ -119,10 +120,10 @@ namespace BleemSync.Services
 
             WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
 
-            var coverFileName = gameInfo.DiscIds.First() + ".jpg";
+            var coverFileName = gameInfo.DiscIds.First() + ".png";
 
             // Download the cover
-            if (!File.Exists(Path.Combine(gamesDirectory, gameId.ToString(), coverFileName)))
+            if (!File.Exists(Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)))
             {
                 try
                 {
@@ -130,7 +131,7 @@ namespace BleemSync.Services
                     {
                         wc.DownloadFile(
                             new Uri(_configuration["BleemSyncCentralUrl"] + "/api/PlayStation/GetCoverBySerial/" + discMap.Keys.First()),
-                            Path.Combine(gamesDirectory, gameId.ToString(), coverFileName)
+                            Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)
                         );
                     }
                 } catch
