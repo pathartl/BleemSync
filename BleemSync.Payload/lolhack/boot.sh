@@ -47,6 +47,7 @@ umount /gaadata || MOUNT_FAIL=1
 mkdir -p /tmp/gaadatatmp /tmp/datatmp
 mount -o bind /tmp/gaadatatmp /gaadata || MOUNT_FAIL=1 
 mount -o bind /tmp/datatmp /data || MOUNT_FAIL=1 
+mount -o bind /media/lolhack/20-joystick.rules /etc/udev/rules.d/20-joystick.rules || MOUNT_FAIL=1 
 [ $MOUNT_FAIL -eq 1 ] && reboot && exit
 
 # Create gaadata on tmpfs
@@ -71,6 +72,11 @@ ln -s /usr/sony/bin/plugins /tmp/datatmp/AppData/sony/pcsx/plugins
 
 # Fix for last selected game issue. If not in place user may experience UI issue
 sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /tmp/datatmp/AppData/sony/ui/user.pre
+
+# Reload and apply udev rules that were overmounted above
+# Allows both controllers to be detected through a USB hub
+udevadm control --reload-rules
+udevadm trigger
 
 # Fix for line endings. BAD WINDOWS
 find /media -name *.cfg -exec sed -i 's/\r//g' {} \;
