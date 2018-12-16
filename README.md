@@ -5,13 +5,42 @@ BleemSync is a relatively safe way to add games to your PlayStation Classic.
 1. Overmounts portions of the PSC's filesystem to safely allow modifications
 1. Modifies the stock UI to show added games
 1. Supports multi-disc games
+1. Automatically downloads game metadata and cover art
+1. Runs on boot of the PlayStation Classic
 
 ## Installation
 1. Download the ZIP file from the [release page](https://github.com/pathartl/BleemSync/releases/latest)
 1. Extract the contents to the root of your FAT32 or ext4 formatted USB flash drive
 1. Name your flash drive `SONY`. This is a requirement.
 
-## Game Configuration
+## Automatic Game Configuration
+BleemSync has the ability to download game info from BleemSync Central, an online database. To utilize automatic metadata scraping, make sure your folder structure looks something like this:
+```
+Games/
+    1/
+        GameData/
+            Cool Boarders.bin
+            Cool Boarders.cue
+    2/
+        GameData/
+            Cool Boarders 2.bin
+            Cool Boarders 2.cue
+    3/
+        ...
+```
+On the root of your flash drive, create a `Games` folder. In this folder, create a folder for each game you would like to add to the system. The folders must be numbered sequentially.
+
+Please note that it is not mandatory to have your `bin`/`cue` files named something specific. However, your `cue` file must reference your `bin` file exactly. The name of these files has no effect on the automatic metadata scraping. BleemSync will find the serial number embedded in the disc image and run it against the database.
+
+From here, you can skip the "Manual Game Configuration" step and move onto "Synchronization".
+
+**Please at this time do not submit any issues related to a specific game not existing in BleemSync Central's database or low-quality cover images.**
+
+**Also please note that automatic metadata scraping may not work with multi-track `.bin`s at this time. [Please follow this tutorial](http://www.ps2-home.com/forum/viewtopic.php?t=41) to learn how to make a single `bin` image.**
+
+**Also also please note that automatic metadata scraping will not run on boot of the system as it has no internet connectivity. Please run on a desktop/laptop to use this feature.**
+
+## Manual Game Configuration
 On the root of your flash drive, create a `Games` folder. In this folder, create a folder for each game you would like to add to the system. The folders must be numbered sequentially. Each game folder must contain a `GameData` folder which contains a `Game.ini`, cover art image, `pcsx.cfg`, and the game's `bin` and `cue` files. A template of the `Games` folder can be found in the release ZIP.
 
 A proper folder structure looks something like this:
@@ -59,6 +88,9 @@ Once all the games are configured, go into the `BleemSync` directory and run `Bl
 
 ## Frequently Asked Questions
 
+### It takes a few seconds more than normal for my system to boot
+BleemSync runs on boot of the system. If this is taking too long or malfunctions, simply remove the System/BleemSync folder from your flash drive.
+
 ### My controller isn't working
 Make sure your `pcsx.cfg` is in the game directory
 
@@ -94,4 +126,4 @@ On your USB drive, go to `System/Preferences` and remove `regional.pre`. If this
 * [yifanlu](https://github.com/yifanlu) - why not
 
 ## Contributors
-[CompCom](https://github.com/compcom), [Maku](https://github.com/justMaku)
+[CompCom](https://github.com/compcom), [Maku](https://github.com/justMaku), [mtrivs](https://github.com/mtrivs)
