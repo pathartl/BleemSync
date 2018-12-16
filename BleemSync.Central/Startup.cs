@@ -32,6 +32,7 @@ namespace BleemSync.Central
                 .AddDbContext<DatabaseContext>(options => 
                     options.UseMySql(Configuration["MySQLConnectionString"]).UseLazyLoadingProxies()
                 )
+                .AddSingleton(Configuration)
                 .AddMvc()
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

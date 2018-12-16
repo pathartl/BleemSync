@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using BleemSync.Central.Services;
 using BleemSync.Central.Data;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,11 +15,13 @@ namespace BleemSync.Central.Controllers
     [Route("api/PlayStation/[action]")]
     public class PlayStationApiController : Controller
     {
+        private IConfiguration _configuration { get; set; }
         private GameService _service { get; set; }
 
-        public PlayStationApiController(DatabaseContext context)
+        public PlayStationApiController(DatabaseContext context, IConfiguration configuration)
         {
             _service = new GameService(context);
+            _configuration = configuration;
         }
 
         // GET: api/values
@@ -51,7 +54,9 @@ namespace BleemSync.Central.Controllers
             var game = _service.GetGameBySerialNumber(serial);
             var cover = game.Covers.First();
 
-            return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "covers", cover.File), "image/jpg");
+            var coverDirectory = _configuration["CoversPath"];
+
+            return PhysicalFile(Path.Combine(coverDirectory, cover.File), "image/jpg");
         }
 
         // POST api/values
