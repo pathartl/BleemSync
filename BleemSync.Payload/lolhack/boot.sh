@@ -76,6 +76,17 @@ sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCu
 find /media -name *.cfg -exec sed -i 's/\r//g' {} \;
 find /media -name *.pre -exec sed -i 's/\r//g' {} \;
 
+# Default pcsx.cfg
+cd /media/Games
+for D in *; do
+    if [ -d "${D}" ]; then
+    	if [ ! -f "${D}/GameData/pcsx.cfg" ]; then
+			cp ../System/Defaults/pcsx.cfg "${D}/GameData/pcsx.cfg"
+    	fi
+    fi
+done
+cd -
+
 cd /data/AppData/sony/pcsx
 export PCSX_ESC_KEY=2
 /usr/sony/bin/ui_menu --power-off-enable &> /media/System/Logs/ui_menu.log

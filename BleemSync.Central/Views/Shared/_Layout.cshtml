@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BleemSync Central</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/propeller.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/propeller-roboto.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/propeller-admin-compress.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/custom.css" />
+</head>
+<body style="padding-left: 64px; padding-top: 64px;">
+    <partial name="_NavbarPartial.cshtml" />
+    <div class="container-fluid body-content">
+        @RenderBody()
+    </div>
+
+    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js" asp-append-version="true"></script>
+    <script src="//cdn.datatables.net/1.10.19/js/dataTables.responsive.min.js" asp-append-version="true"></script>
+    <script src="//cdn.datatables.net/1.10.19/js/dataTables.select.min.js" asp-append-version="true"></script>
+    <script src="~/js/propeller.js" asp-append-version="true"></script>
+    <script src="~/js/custom.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

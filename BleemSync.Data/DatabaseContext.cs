@@ -15,24 +15,13 @@ namespace BleemSync.Data
 
         private static bool _created = false;
 
-        public DatabaseContext()
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
             if (!_created)
             {
                 Database.EnsureDeleted();
                 Database.EnsureCreated();
             }
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
-
-            var databasesDirectoryPath = Path.Combine(new[] { executingDirectory, "..", "System", "Databases"});
-            var databasePath = Path.Join(databasesDirectoryPath, "regional.db");
-
-            Directory.CreateDirectory(databasesDirectoryPath);
-            optionsBuilder.UseSqlite($"Data Source={databasePath}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
