@@ -98,47 +98,58 @@ namespace BleemSync.Services
 
                         Console.WriteLine($"Found serial {serial} from disc image file {file}");
                     }
-                    catch { }
-                }
-            }
-
-            var client = new RestClient(_configuration["BleemSyncCentralUrl"]);
-            var request = new RestRequest($"api/PlayStation/GetBySerial/{discMap.Keys.First()}");
-            var result = client.Execute<GameDTO>(request);
-
-            var game = JsonConvert.DeserializeObject<GameDTO>(result.Content);
-
-            gameInfo.Title = game.Title;
-            gameInfo.Year = game.DateReleased.Year;
-            gameInfo.Publisher = game.Publisher;
-            gameInfo.Players = game.Players;
-
-            foreach (var serial in game.Discs.Select(d => d.SerialNumber))
-            {
-                gameInfo.DiscIds.Add(discMap[serial]);
-            }
-
-            WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
-
-            var coverFileName = gameInfo.DiscIds.First() + ".png";
-
-            // Download the cover
-            if (!File.Exists(Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)))
-            {
-                try
-                {
-                    using (WebClient wc = new WebClient())
-                    {
-                        wc.DownloadFile(
-                            new Uri(_configuration["BleemSyncCentralUrl"] + "/api/PlayStation/GetCoverBySerial/" + discMap.Keys.First()),
-                            Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)
-                        );
+                    catch {
+                        Console.WriteLine($"Could not find a valid serial from the disc image {file}");
                     }
-                } catch
+                }
+            }
+
+            try
+            {
+                var client = new RestClient(_configuration["BleemSyncCentralUrl"]);
+                var request = new RestRequest($"api/PlayStation/GetBySerial/{discMap.Keys.First()}");
+                var result = client.Execute<GameDTO>(request);
+
+                var game = JsonConvert.DeserializeObject<GameDTO>(result.Content);
+
+                gameInfo.Title = game.Title;
+                gameInfo.Year = game.DateReleased.Year;
+                gameInfo.Publisher = game.Publisher;
+                gameInfo.Players = game.Players;
+
+                foreach (var serial in game.Discs.Select(d => d.SerialNumber))
                 {
-                    Console.WriteLine("Could not download the cover from BleemSync Central");
+                    gameInfo.DiscIds.Add(discMap[serial]);
                 }
 
+                WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
+
+                var coverFileName = gameInfo.DiscIds.First() + ".png";
+
+                // Download the cover
+                if (!File.Exists(Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)))
+                {
+                    try
+                    {
+                        using (WebClient wc = new WebClient())
+                        {
+                            wc.DownloadFile(
+                                new Uri(_configuration["BleemSyncCentralUrl"] + "/api/PlayStation/GetCoverBySerial/" + discMap.Keys.First()),
+                                Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)
+                            );
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Could not download the cover from BleemSync Central");
+                    }
+
+                }
+            }
+            catch
+            {
+                Console.WriteLine($"Could not grab game info for serial {discMap.Keys.First()}");
+                throw;
             }
 
             return gameInfo;

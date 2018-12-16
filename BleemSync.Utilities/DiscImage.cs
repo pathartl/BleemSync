@@ -67,7 +67,7 @@ namespace BleemSync.Utilities
 
                             foreach (var prefix in serialNumberPrefixes)
                             {
-                                if (possibleString.StartsWith($"{prefix}_"))
+                                if (possibleString.StartsWith($"{prefix}"))
                                 {
                                     foundSerial = true;
                                     serial = possibleString;

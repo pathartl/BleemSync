@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -26,8 +27,10 @@ namespace BleemSync
 
             var databaseLocation = configuration["GamesDatabase"];
 
+            Directory.CreateDirectory(new FileInfo(databaseLocation).Directory.FullName);
+
             services.AddDbContext<DatabaseContext>(options =>
-                options.UseSqlite(databaseLocation)
+                options.UseSqlite($"Data Source={databaseLocation}")
             );
 
             var serviceProvider = services.BuildServiceProvider();
@@ -57,7 +60,20 @@ namespace BleemSync
 
                 db.SaveChanges();
 
-                var infos = gameIds.Select(id => gameService.GetGameInfo(id));
+                var infos = new List<GameInfo>();
+
+                foreach (var id in gameIds)
+                {
+                    try
+                    {
+                        infos.Add(gameService.GetGameInfo(id));
+                        Console.WriteLine("");
+                    }
+                    catch
+                    {
+
+                    }
+                }
 
                 foreach (var info in infos)
                 {
@@ -75,10 +91,16 @@ namespace BleemSync
                     db.Add(game);
 
                     Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
-                    Console.WriteLine("");
                 }
 
-                db.SaveChanges();
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.InnerException);
+                }
 
                 Console.WriteLine($"Successfully inserted {gameIds.Count} games");
             }
