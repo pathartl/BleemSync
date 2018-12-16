@@ -24,8 +24,7 @@ namespace BleemSync
 
             var services = new ServiceCollection();
 
-            var relativeDatabaseLocation = Path.Combine(configuration["GamesDatabase"].Split('/'));
-            var databaseLocation = Path.Combine(Filesystem.GetExecutingDirectory(), relativeDatabaseLocation);
+            var databaseLocation = configuration["GamesDatabase"];
 
             services.AddDbContext<DatabaseContext>(options =>
                 options.UseSqlite(databaseLocation)
@@ -43,7 +42,7 @@ namespace BleemSync
             {
                 var gameService = new GameService(configuration);
 
-                var gameIds = Filesystem.GetGameIds();
+                var gameIds = Filesystem.GetGameIds(configuration["GamesPath"]);
 
 
                 foreach (var existingGame in db.Games)

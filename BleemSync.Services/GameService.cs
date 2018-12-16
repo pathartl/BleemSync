@@ -40,7 +40,7 @@ namespace BleemSync.Services
 
         public GameInfo GetGameInfoFromFile(int gameId)
         {
-            var gamesDirectory = Filesystem.GetGamesDirectory();
+            var gamesDirectory = Filesystem.GetGamesDirectory(_configuration["GamesPath"]);
 
             Configuration config = null;
 
@@ -77,7 +77,7 @@ namespace BleemSync.Services
 
         public GameInfo GetGameInfoFromCentral(int gameId)
         {
-            var gamesDirectory = Filesystem.GetGamesDirectory();
+            var gamesDirectory = Filesystem.GetGamesDirectory(_configuration["GamesPath"]);
 
             var files = Directory.GetFiles(Path.Combine(gamesDirectory, gameId.ToString(), "GameData"));
             var discMap = new Dictionary<string, string>();

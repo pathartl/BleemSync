@@ -24,17 +24,6 @@ namespace BleemSync.Data
             }
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var executingDirectory = Utilities.Filesystem.GetExecutingDirectory();
-
-            var databasesDirectoryPath = Path.Combine(new[] { executingDirectory, "..", "System", "Databases"});
-            var databasePath = Path.Join(databasesDirectoryPath, "regional.db");
-
-            Directory.CreateDirectory(databasesDirectoryPath);
-            optionsBuilder.UseSqlite($"Data Source={databasePath}");
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Game>(entity =>

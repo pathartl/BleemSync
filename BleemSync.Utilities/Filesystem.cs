@@ -18,9 +18,10 @@ namespace BleemSync.Utilities
             return Path.GetDirectoryName(path);
         }
 
-        public static List<int> GetGameIds()
+        public static List<int> GetGameIds(string gamesDir = "")
         {
-            var gamesDir = GetGamesDirectory();
+            gamesDir = GetGamesDirectory(gamesDir);
+
             var dirList = Directory.GetDirectories(gamesDir).Select(path => new DirectoryInfo(path).Name);
 
             var gameIds = dirList.Select(directoryName =>
@@ -41,10 +42,23 @@ namespace BleemSync.Utilities
 
             return gameIds;
         }
-        public static string GetGamesDirectory()
+
+        public static string GetGamesDirectory(string gamesDir = "")
         {
             var currentPath = GetExecutingDirectory();
-            return Path.Join(currentPath, "..", "Games");
+
+            if (gamesDir != "" && !gamesDir.StartsWith("/"))
+            {
+                return Path.Join(currentPath, Path.Combine(gamesDir.Split('/')));
+            }
+            else if (gamesDir.StartsWith("/"))
+            {
+                return gamesDir;
+            }
+            else
+            {
+                return Path.Join(currentPath, "..", "Games");
+            }
         }
     }
 }

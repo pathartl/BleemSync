@@ -51,7 +51,7 @@ namespace BleemSync.Central.Controllers
             var game = _service.GetGameBySerialNumber(serial);
             var cover = game.Covers.First();
 
-            return PhysicalFile(Directory.GetCurrentDirectory() + $"/covers/{cover.File}", "image/jpg");
+            return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "covers", cover.File), "image/jpg");
         }
 
         // POST api/values
