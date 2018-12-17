@@ -34,7 +34,7 @@ Please note that it is not mandatory to have your `bin`/`cue` files named someth
 
 From here, you can skip the "Manual Game Configuration" step and move onto "Synchronization".
 
-**Please at this time do not submit any issues related to a specific game not existing in BleemSync Central's database or low-quality cover images.**
+**Please at this time do not submit any issues related to a specific game not existing in BleemSync Central's database or low-quality cover images. Please use [this spreadsheet](https://docs.google.com/spreadsheets/d/1Z_BT65fIFUPp1LXCFqEnCzyVpgf2cvHIgicJqsalrl8/edit?usp=sharing) for tracking missing games.**
 
 **Also please note that automatic metadata scraping may not work with multi-track `.bin`s at this time. [Please follow this tutorial](http://www.ps2-home.com/forum/viewtopic.php?t=41) to learn how to make a single `bin` image.**
 
