@@ -22,37 +22,37 @@ namespace BleemSync.Services
             _configuration = configuration;
         }
 
-        public GameInfo GetGameInfo(int gameId)
+        public GameInfo GetGameInfo(String gamePath)
         {
             GameInfo game;
 
             try
             {
-                game = GetGameInfoFromFile(gameId);
+                game = GetGameInfoFromFile(gamePath);
             }
             catch (Exception e) {
                 Console.WriteLine("Game.ini doesn't exist, grabbing from BleemSync Central");
 
-                game = GetGameInfoFromCentral(gameId);
+                game = GetGameInfoFromCentral(gamePath);
             }
 
             return game;
         }
 
-        public GameInfo GetGameInfoFromFile(int gameId)
+        public GameInfo GetGameInfoFromFile(String gamePath)
         {
             var gamesDirectory = Filesystem.GetGamesDirectory(_configuration["GamesPath"]);
 
             Configuration config = null;
 
-            var path = Path.Combine(new [] { gamesDirectory, gameId.ToString(), "GameData", "Game.ini"});
+            var path = Path.Combine(new [] { gamesDirectory, gamePath, "Game.ini"});
             config = Configuration.LoadFromFile(path);
 
             var section = config["Game"];
 
             var game = new GameInfo()
             {
-                Id = gameId,
+                RelativePath = gamePath,
                 Title = section["Title"].StringValue,
                 Publisher = section["Publisher"].StringValue,
                 Year = section["Year"].IntValue,
@@ -73,14 +73,14 @@ namespace BleemSync.Services
             config["Game"]["Players"].StringValue = gameInfo.Players.ToString();
             config["Game"]["Discs"].StringValue = String.Join(',', gameInfo.DiscIds);
 
-            config.SaveToFile(Path.Combine(path, "GameData", "Game.ini"));
+            config.SaveToFile(Path.Combine(path, "Game.ini"));
         }
 
-        public GameInfo GetGameInfoFromCentral(int gameId)
+        public GameInfo GetGameInfoFromCentral(String gamePath)
         {
             var gamesDirectory = Filesystem.GetGamesDirectory(_configuration["GamesPath"]);
 
-            var files = Directory.GetFiles(Path.Combine(gamesDirectory, gameId.ToString(), "GameData"));
+            var files = Directory.GetFiles(Path.Combine(gamesDirectory, gamePath));
             var discMap = new Dictionary<string, string>();
             var gameInfo = new GameInfo();
 
@@ -92,7 +92,7 @@ namespace BleemSync.Services
                 {
                     try
                     {
-                        var serial = DiscImage.GetSerialNumber(Path.Combine(gamesDirectory, gameId.ToString(), file));
+                        var serial = DiscImage.GetSerialNumber(Path.Combine(gamesDirectory, gamePath, file));
                         
                         discMap.Add(serial, fileInfo.Name.Replace(fileInfo.Extension, ""));
 
@@ -112,6 +112,7 @@ namespace BleemSync.Services
 
                 var game = JsonConvert.DeserializeObject<GameDTO>(result.Content);
 
+                gameInfo.RelativePath = gamePath;
                 gameInfo.Title = game.Title;
                 gameInfo.Year = game.DateReleased.Year;
                 gameInfo.Publisher = game.Publisher;
@@ -122,12 +123,12 @@ namespace BleemSync.Services
                     gameInfo.DiscIds.Add(discMap[serial]);
                 }
 
-                WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gameId.ToString()));
+                WriteGameInfoToFile(gameInfo, Path.Combine(gamesDirectory, gamePath));
 
                 var coverFileName = gameInfo.DiscIds.First() + ".png";
 
                 // Download the cover
-                if (!File.Exists(Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)))
+                if (!File.Exists(Path.Combine(gamesDirectory, gamePath, coverFileName)))
                 {
                     try
                     {
@@ -135,7 +136,7 @@ namespace BleemSync.Services
                         {
                             wc.DownloadFile(
                                 new Uri(_configuration["BleemSyncCentralUrl"] + "/api/PlayStation/GetCoverBySerial/" + discMap.Keys.First()),
-                                Path.Combine(gamesDirectory, gameId.ToString(), "GameData", coverFileName)
+                                Path.Combine(gamesDirectory, gamePath, coverFileName)
                             );
                         }
                     }
@@ -146,7 +147,7 @@ namespace BleemSync.Services
 
                 }
             }
-            catch
+            catch (Exception e)
             {
                 Console.WriteLine($"Could not grab game info for serial {discMap.Keys.First()}");
                 throw;

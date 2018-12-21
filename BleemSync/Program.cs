@@ -45,9 +45,9 @@ namespace BleemSync
             {
                 var gameService = new GameService(configuration);
 
-                var gameIds = Filesystem.GetGameIds(configuration["GamesPath"]);
+                var gamePaths = Filesystem.GetGamePaths(configuration["GamesPath"]);
 
-
+                // Clean up old database
                 foreach (var existingGame in db.Games)
                 {
                     db.Remove(existingGame);
@@ -61,13 +61,16 @@ namespace BleemSync
                 db.SaveChanges();
 
                 var infos = new List<GameInfo>();
-
-                foreach (var id in gameIds)
+                var idx_count = 1;
+                foreach (var path in gamePaths)
                 {
                     try
                     {
-                        infos.Add(gameService.GetGameInfo(id));
+                        GameInfo info = gameService.GetGameInfo(path);
+                        info.Id = idx_count;
+                        infos.Add(info);
                         Console.WriteLine("");
+                        idx_count++;
                     }
                     catch
                     {
@@ -86,10 +89,11 @@ namespace BleemSync
                         Players = info.Players
                     };
 
+
                     game.Discs = info.DiscIds.Select((discId, index) => new Disc() { GameId = info.Id, DiscNumber = index + 1, DiscBasename = discId }).ToList();
 
                     db.Add(game);
-
+                    
                     Console.WriteLine($"Added game [{game.Id}] {game.Title} to the database");
                 }
 
@@ -102,7 +106,7 @@ namespace BleemSync
                     Console.WriteLine(e.InnerException);
                 }
 
-                Console.WriteLine($"Successfully inserted {gameIds.Count} games");
+                Console.WriteLine($"Successfully inserted {gamePaths.Count} games");
             }
             catch (Exception e)
             {

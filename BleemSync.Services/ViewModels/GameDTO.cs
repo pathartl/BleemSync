@@ -8,6 +8,7 @@ namespace BleemSync.Central.ViewModels
     public class GameDTO
     {
         public int Id { get; set; }
+        public String RelativePath { get; set; }
         public string Title { get; set; }
         public string CommonTitle { get; set; }
         public string Region { get; set; }

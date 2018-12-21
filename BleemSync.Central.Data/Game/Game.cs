@@ -11,6 +11,7 @@ namespace BleemSync.Central.Data.Models
     {
         [Key]
         public int Id { get; set; }
+        public String RelativePath { get; set; }
         public string Title { get; set; }
         public string CommonTitle { get; set; }
         public string Region { get; set; }

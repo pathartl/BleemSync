@@ -56,19 +56,22 @@ ln -s /media/System/Databases /tmp/gaadatatmp/databases
 ln -s /media/System/Region /tmp/gaadatatmp/geninfo
 ln -s /media/System/Bios /tmp/gaadatatmp/system/bios
 ln -s /media/System/Preferences/System /tmp/gaadatatmp/preferences
-ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s /media/Games/%/GameData /tmp/gaadatatmp/% && mkdir -p /media/Games/%/.pcsx && cp /media/Games/%/GameData/pcsx.cfg /media/Games/%/.pcsx"
-
-# Create data on tmpfs
-mkdir -p /tmp/datatmp/sony/sgmo /tmp/datatmp/AppData/sony
-ln -s /tmp/diag /tmp/datatmp/sony/sgmo/diag
-ln -s /dev/shm/power /tmp/datatmp/power
-ln -s /media/System/UI /tmp/datatmp/sony/ui
-ln -s /media/System/Preferences/User /tmp/datatmp/AppData/sony/ui
-ln -s /media/System/Preferences/AutoDimmer /tmp/datatmp/AppData/sony/auto_dimmer
-cp -r /usr/sony/share/recovery/AppData/sony/pcsx /tmp/datatmp/AppData/sony/pcsx
-ls /media/Games | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /tmp/datatmp/AppData/sony/pcsx/% && ln -s /media/Games/% /tmp/datatmp/AppData/sony/pcsx/%"
-ln -s /media/System/Bios /tmp/datatmp/AppData/sony/pcsx/bios
-ln -s /usr/sony/bin/plugins /tmp/datatmp/AppData/sony/pcsx/plugins
+COUNTER=1
+for game in /media/Games/*
+do
+	if [ -d "${game}" ]; then
+		dir_name=$(basename $game)
+		re='^[0-9]+$'
+		game_dir=$game
+		if [[ $dir_name =~ $re ]]; then
+			game_dir="${game}/GameData"
+		fi
+		ln -s "${game_dir}" /tmp/gaadatatmp/$COUNTER
+		mkdir -p "${game}/.pcsx"
+		cp "${game_dir}/pcsx.cfg" "${game}/.pcsx"
+		COUNTER=$((COUNTER + 1))
+	fi
+done
 
 # Fix for last selected game issue. If not in place user may experience UI issue
 sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" /tmp/datatmp/AppData/sony/ui/user.pre
@@ -83,11 +86,17 @@ find /media -name *.cfg -exec sed -i 's/\r//g' {} \;
 find /media -name *.pre -exec sed -i 's/\r//g' {} \;
 
 # Default pcsx.cfg
-cd /media/Games
-for D in *; do
-    if [ -d "${D}" ]; then
-    	if [ ! -f "${D}/GameData/pcsx.cfg" ]; then
-			cp ../System/Defaults/pcsx.cfg "${D}/GameData/pcsx.cfg"
+for game in /media/Games/*
+do
+	if [ -d "${game}" ]; then
+		dir_name=$(basename $game)
+		re='^[0-9]+$'
+		game_dir=$game
+		if [[ $dir_name =~ $re ]]; then
+			game_dir="${game}/GameData"
+		fi
+    	if [ ! -f "${game_dir}/pcsx.cfg" ]; then
+			cp ../System/Defaults/pcsx.cfg "${game_dir}/pcsx.cfg"
     	fi
     fi
 done
