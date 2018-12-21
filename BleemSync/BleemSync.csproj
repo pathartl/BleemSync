@@ -6,9 +6,13 @@
 
   <ItemGroup>
     <PackageReference Include="ExtCore.Data" Version="3.3.0" />
-    <PackageReference Include="ExtCore.Data.EntityFramework.MySql" Version="3.3.0" />
+    <PackageReference Include="ExtCore.Data.EntityFramework.Sqlite" Version="3.3.0" />
     <PackageReference Include="ExtCore.Mvc" Version="3.3.0" />
     <PackageReference Include="ExtCore.WebApplication" Version="3.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

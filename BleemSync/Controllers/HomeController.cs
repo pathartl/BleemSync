@@ -5,13 +5,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BleemSync.Models;
+using BleemSync.Services;
 
 namespace BleemSync.Controllers
 {
     public class HomeController : Controller
     {
+        MenuService _menuService { get; set; }
+
+        public HomeController(MenuService menuService)
+        {
+            _menuService = menuService;
+        }
+
         public IActionResult Index()
         {
+            var items = _menuService.GetMenuItems();
             return View();
         }
 
