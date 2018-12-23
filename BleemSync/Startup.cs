@@ -13,6 +13,7 @@ using ExtCore.WebApplication.Extensions;
 using BleemSync.Services;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using ExtCore.Data.EntityFramework;
 
 namespace BleemSync
 {
@@ -31,6 +32,10 @@ namespace BleemSync
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddExtCore(ExtensionsPath, Configuration["Extensions:IncludingSubpaths"].ToLower() == true.ToString());
+            services.Configure<StorageContextOptions>(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("Default");
+            });
 
             services.Configure<CookiePolicyOptions>(options =>
             {

@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
+    <ProjectReference Include="..\BleemSync.Extensions.PlayStationClassic\BleemSync.Extensions.PlayStationClassic.Data\BleemSync.Extensions.PlayStationClassic.Data.csproj" />
     <ProjectReference Include="..\BleemSync.Services\BleemSync.Services.csproj" />
     <ProjectReference Include="..\BleemSync.Utilities\BleemSync.Utilities.csproj" />
   </ItemGroup>

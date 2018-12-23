@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.CLI", "BleemSync.CLI\BleemSync.CLI.csproj", "{1CEA60BF-ABB6-4E58-90D7-01B2FC999DA0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Data", "BleemSync.Data\BleemSync.Data.csproj", "{F51BBEA3-5570-425E-AAB3-F85BB7563F97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.PlayStationClassic.Data", "BleemSync.Extensions.PlayStationClassic\BleemSync.Extensions.PlayStationClassic.Data\BleemSync.Extensions.PlayStationClassic.Data.csproj", "{F51BBEA3-5570-425E-AAB3-F85BB7563F97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Utilities", "BleemSync.Utilities\BleemSync.Utilities.csproj", "{F4B0DF4C-95F7-49A7-B5FF-2F685EB52389}"
 EndProject
@@ -29,11 +29,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BleemSync.Extensions", "Ble
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BleemSync.Extensions.PlayStationClassic", "BleemSync.Extensions.PlayStationClassic", "{82E2221F-0697-4553-9E78-C73F4DF6B1F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.PlayStationClassic.Core", "BleemSync.Extensions.PlayStationClassic.Core\BleemSync.Extensions.PlayStationClassic.Core.csproj", "{6880A4DB-DC03-47EE-A06A-B6B5AEF32394}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.PlayStationClassic.Core", "BleemSync.Extensions.PlayStationClassic\BleemSync.Extensions.PlayStationClassic.Core\BleemSync.Extensions.PlayStationClassic.Core.csproj", "{6880A4DB-DC03-47EE-A06A-B6B5AEF32394}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.Infrastructure", "BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj", "{AF89C8BF-5A8F-42D6-A044-B5F5DB142913}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Extensions.PlayStationClassic.Utilities", "BleemSync.Extensions.PlayStationClassic.Utilities\BleemSync.Extensions.PlayStationClassic.Utilities.csproj", "{E1C6068A-E560-446D-A62C-CD8D90C10DBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.PlayStationClassic.Utilities", "BleemSync.Extensions.PlayStationClassic\BleemSync.Extensions.PlayStationClassic.Utilities\BleemSync.Extensions.PlayStationClassic.Utilities.csproj", "{E1C6068A-E560-446D-A62C-CD8D90C10DBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Data", "BleemSync.Data\BleemSync.Data.csproj", "{11185624-8F5D-4935-A03C-EF582C1A2A05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,13 +91,17 @@ Global
 		{E1C6068A-E560-446D-A62C-CD8D90C10DBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1C6068A-E560-446D-A62C-CD8D90C10DBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1C6068A-E560-446D-A62C-CD8D90C10DBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1CEA60BF-ABB6-4E58-90D7-01B2FC999DA0} = {F9D152FE-7EC3-4D51-B4C8-61AE27996FE2}
-		{F51BBEA3-5570-425E-AAB3-F85BB7563F97} = {F9D152FE-7EC3-4D51-B4C8-61AE27996FE2}
+		{F51BBEA3-5570-425E-AAB3-F85BB7563F97} = {82E2221F-0697-4553-9E78-C73F4DF6B1F5}
 		{F4B0DF4C-95F7-49A7-B5FF-2F685EB52389} = {F9D152FE-7EC3-4D51-B4C8-61AE27996FE2}
 		{ED0A42C7-B7DF-4ABF-BCEF-2C3DC6692E17} = {F9D152FE-7EC3-4D51-B4C8-61AE27996FE2}
 		{1BCDAB21-519D-482C-B054-9DA2DB81C606} = {F9D152FE-7EC3-4D51-B4C8-61AE27996FE2}

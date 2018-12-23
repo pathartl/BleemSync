@@ -6,21 +6,43 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BleemSync.Models;
 using BleemSync.Services;
+using BleemSync.Data.Abstractions;
+using ExtCore.Data.Abstractions;
+using BleemSync.Data.Entities;
 
 namespace BleemSync.Controllers
 {
     public class HomeController : Controller
     {
         MenuService _menuService { get; set; }
+        private IGameRepository _gameRepository { get; set; }
+        private IStorage _storage { get; set; }
 
-        public HomeController(MenuService menuService)
+        public HomeController(MenuService menuService, IStorage storage)
         {
             _menuService = menuService;
+            _gameRepository = storage.GetRepository<IGameRepository>();
+            _storage = storage;
         }
 
         public IActionResult Index()
         {
             var items = _menuService.GetMenuItems();
+            var games = _gameRepository.All();
+
+            var game = new Game()
+            {
+                Title = "Tony Hawk's Pro Skater 2",
+                SortTitle = "Tony Hawk 2",
+                Developer = "Neversoft",
+                Publisher = "Activision",
+                Players = 2,
+                ReleaseDate = DateTime.Now
+            };
+
+            _gameRepository.Add(game);
+            _storage.Save();
+
             return View();
         }
 

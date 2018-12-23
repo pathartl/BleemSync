@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
     <ProjectReference Include="..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
   </ItemGroup>
 
