@@ -11,11 +11,12 @@ namespace BleemSync.Data
     {
         public void RegisterEntities(ModelBuilder modelbuilder)
         {
-            modelbuilder.Entity<Game>(etb =>
+            modelbuilder.Entity<GameManagerNode>(etb =>
             {
                 etb.HasKey(e => e.Id);
                 etb.Property(e => e.Id);
-                etb.ToTable("Games");
+                etb.HasOne(e => e.Parent).WithMany(e => e.Children);
+                etb.ToTable("GameManagerNodes");
             });
         }
     }

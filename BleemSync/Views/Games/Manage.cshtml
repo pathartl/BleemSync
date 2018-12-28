@@ -1,0 +1,46 @@
+﻿<link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
+
+<div class="pmd-card pmd-z-depth">
+    <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jstree/jstree.min.js"></script>
+    <script>
+        var tree;
+
+        $.getJSON('@Url.Action("GetTree")', function (data) {
+            tree = $('.game-manager-node-tree')
+            .jstree({
+                'core': {
+                    'data': data,
+                    'check_callback': true
+                },
+                'types': {
+                    '#': {
+                        'valid_children': ['Folder', 'Game']
+                    },
+                    'Folder': {
+                        'valid_children': ['Folder', 'Game']
+                    },
+                    'Game': {
+                        'valid_children': []
+                    }
+                },
+                'plugins': [
+                    'dnd',
+                    'types'
+                ]
+                }).bind('move_node.jstree', function (e, data) {
+                    var treeData = tree.jstree(true).get_json(null, { 'flat': true });
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("SaveTree")',
+                        data: { Nodes: treeData },
+                        success: function () { },
+                        dataType: 'json'
+                    });
+                });
+        });
+    </script>
+}

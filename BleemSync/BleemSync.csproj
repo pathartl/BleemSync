@@ -16,8 +16,4 @@
     <ProjectReference Include="..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\lib\" />
-  </ItemGroup>
-
 </Project>

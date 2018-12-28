@@ -1,15 +1,13 @@
 ﻿using ExtCore.Data.Entities.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace BleemSync.Data.Entities
 {
-    public class GameGenre : IEntity
+    public class GameSystem : IEntity
     {
-        [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
+        public int Name { get; set; }
     }
 }

@@ -4,11 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>BleemSync.Data</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Abstractions\GameRepository.cs" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="ExtCore.Data.Abstractions" Version="3.3.0" />
     <PackageReference Include="ExtCore.Data.Entities.Abstractions" Version="3.3.0" />

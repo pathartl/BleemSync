@@ -9,43 +9,30 @@ using BleemSync.Services;
 using BleemSync.Data.Abstractions;
 using ExtCore.Data.Abstractions;
 using BleemSync.Data.Entities;
+using BleemSync.Extensions.Infrastructure.Attributes;
 
 namespace BleemSync.Controllers
 {
+    [MenuSection(Name = "Home", Icon = "home", Position = 999999)]
     public class HomeController : Controller
     {
         MenuService _menuService { get; set; }
-        private IGameRepository _gameRepository { get; set; }
+        private IGameManagerNodeRepository _gameRepository { get; set; }
         private IStorage _storage { get; set; }
 
         public HomeController(MenuService menuService, IStorage storage)
         {
             _menuService = menuService;
-            _gameRepository = storage.GetRepository<IGameRepository>();
+            _gameRepository = storage.GetRepository<IGameManagerNodeRepository>();
             _storage = storage;
         }
 
         public IActionResult Index()
         {
-            var items = _menuService.GetMenuItems();
-            var games = _gameRepository.All();
-
-            var game = new Game()
-            {
-                Title = "Tony Hawk's Pro Skater 2",
-                SortTitle = "Tony Hawk 2",
-                Developer = "Neversoft",
-                Publisher = "Activision",
-                Players = 2,
-                ReleaseDate = DateTime.Now
-            };
-
-            _gameRepository.Add(game);
-            _storage.Save();
-
             return View();
         }
 
+        [MenuItem(Name = "About")]
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
