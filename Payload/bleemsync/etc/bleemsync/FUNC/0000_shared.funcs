@@ -1,0 +1,21 @@
+#!/bin/sh
+###############################################################################
+# BleemSync Function Library - Shared
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+pretty_logo_func(){ #ASCII PORN
+	bin=$bleemsync_path/etc/bleemsync/SUP/scripts/show_logo
+	chmod +x $bin && $bin
+}
+
+red_led_flash () {
+  SLEEP=1
+  echo 0 > /sys/class/leds/green/brightness
+  while true; do
+    echo 1 > /sys/class/leds/red/brightness
+    sleep $SLEEP
+    echo 0 > /sys/class/leds/red/brightness
+    sleep $SLEEP
+  done
+}

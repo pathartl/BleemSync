@@ -1,0 +1,118 @@
+#!/bin/sh
+###############################################################################
+# BleemSync Function Library - BleemSync
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+execute_bleemsync_func(){
+	echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
+	echo 1 > /sys/class/leds/red/brightness
+	
+	if [ -f "$mountpoint/System/BleemSync/BleemSync" ]
+	then
+		cd "$mountpoint/System/BleemSync"
+		chmod +x "BleemSync"
+		./BleemSync
+		cd -
+	fi
+
+	# Extract system files to avoid crashing
+	mkdir -p "$mountpoint/System/Bios"
+	mkdir -p "$mountpoint/System/Preferences"
+	mkdir -p "$mountpoint/System/Preferences/System"
+	mkdir -p "$mountpoint/System/Preferences/User"
+	mkdir -p "$mountpoint/System/Preferences/AutoDimmer"
+	mkdir -p "$mountpoint/System/Databases"
+	mkdir -p "$mountpoint/System/Region"
+	mkdir -p "$mountpoint/System/Logs"
+	mkdir -p "$mountpoint/System/UI"
+
+	# Copy the BIOS files to USB
+	[ ! -f "$mountpoint/System/Bios/romw.bin" ] && cp -fr "/gaadata/system/bios/"* "$mountpoint/System/Bios"
+	# Copy the regional.pre to USB
+	# This contains settings for the UI region
+	[ ! -f "$mountpoint/System/Preferences/System/regional.pre" ] && cp -f "/gaadata/preferences/"* "$mountpoint/System/Preferences/System"
+	# Copy out the user.pre to USB
+	# This contains things like language setting
+	[ ! -f "$mountpoint/System/Preferences/User/user.pre" ] && cp -f "/data/AppData/sony/ui/"* "$mountpoint/System/Preferences/User"
+	# Copy out the auto dimming config to USB
+	[ ! -f "$mountpoint/System/Preferences/AutoDimmer/config.cnf" ] && cp -f "/data/AppData/sony/auto_dimmer/"* "$mountpoint/System/Preferences/AutoDimmer"
+	# Copy out the region info
+	[ ! -f "$mountpoint/System/Region/REGION" ] && cp -f "/gaadata/geninfo/"* "$mountpoint/System/Region"
+	# Copy ui error log
+	[ ! -f "$mountpoint/System/UI/error.log" ] && cp -f "/data/sony/ui/"* "$mountpoint/System/UI"
+	# Init the ui_menu.log
+	[ ! -f "$mountpoint/System/Logs/ui_menu.log" ] && touch "$mountpoint/System/Logs/ui_menu.log"
+	sync
+
+	# Unmount partitons and create tmpfs - Shut system down on failure
+	MOUNT_FAIL=0
+	umount /data || MOUNT_FAIL=1 
+	umount /gaadata || MOUNT_FAIL=1 
+	# Create gaadata and data folders in tmp then mount over original folders
+	mkdir -p "/tmp/gaadatatmp" "/tmp/datatmp"
+	mount -o bind "/tmp/gaadatatmp" "/gaadata" || MOUNT_FAIL=1 
+	mount -o bind "/tmp/datatmp" "/data" || MOUNT_FAIL=1 
+	mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1 
+	if [ $MOUNT_FAIL -eq 1 ]; then
+		#display error message
+		echo 0 > /sys/class/leds/green/brightness
+		echo 1 > /sys/class/leds/red/brightness
+		reboot
+		exit 1
+	fi
+
+	# Create gaadata on tmpfs
+	mkdir -p "/tmp/gaadatatmp/system/"
+	ln -s "$mountpoint/System/Databases" "/tmp/gaadatatmp/databases"
+	ln -s "$mountpoint/System/Region" "/tmp/gaadatatmp/geninfo"
+	ln -s "$mountpoint/System/Bios" "/tmp/gaadatatmp/system/bios"
+	ln -s "$mountpoint/System/Preferences/System" "/tmp/gaadatatmp/preferences"
+	ls "$mountpoint/Games" | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s $mountpoint/Games/%/GameData /tmp/gaadatatmp/% && mkdir -p $mountpoint/Games/%/.pcsx && cp $mountpoint/Games/%/GameData/pcsx.cfg $mountpoint/Games/%/.pcsx"
+
+	# Create data on tmpfs
+	mkdir -p "/tmp/datatmp/sony/sgmo" "/tmp/datatmp/AppData/sony"
+	ln -s "/tmp/diag" "/tmp/datatmp/sony/sgmo/diag"
+	ln -s "/dev/shm/power" "/tmp/datatmp/power"
+	ln -s "$mountpoint/System/UI" "/tmp/datatmp/sony/ui"
+	ln -s "$mountpoint/System/Preferences/User" "/tmp/datatmp/AppData/sony/ui"
+	ln -s "$mountpoint/System/Preferences/AutoDimmer" "/tmp/datatmp/AppData/sony/auto_dimmer"
+	cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/tmp/datatmp/AppData/sony/pcsx"
+	ls "$mountpoint/Games" | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /tmp/datatmp/AppData/sony/pcsx/% && ln -s $mountpoint/Games/% /tmp/datatmp/AppData/sony/pcsx/%"
+	ln -s "$mountpoint/System/Bios" "/tmp/datatmp/AppData/sony/pcsx/bios"
+	ln -s "/usr/sony/bin/plugins" "/tmp/datatmp/AppData/sony/pcsx/plugins"
+
+	# Fix for last selected game issue. If not in place user may experience UI issue
+	sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" "/tmp/datatmp/AppData/sony/ui/user.pre"
+
+	# Reload and apply udev rules that were overmounted above
+	# Allows both controllers to be detected through a USB hub
+	udevadm control --reload-rules
+	udevadm trigger
+
+	# Default pcsx.cfg
+	cd "$mountpoint/Games"
+	for D in *; do
+			if [ -d "${D}" ]; then
+				if [ ! -f "${D}/GameData/pcsx.cfg" ]; then
+				cp -f "../System/Defaults/pcsx.cfg" "${D}/GameData/pcsx.cfg"
+				fi
+			fi
+	done
+	cd -
+	
+	echo 0 > /sys/class/leds/red/brightness
+	echo "[BLEEMSYNC](INFO) completed bleemsync boot, starting PSX UI"
+	
+	cd "/data/AppData/sony/pcsx"
+	export PCSX_ESC_KEY=2
+	/usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
+	
+	#Cleanup and shutdown
+	sync
+	sync
+	echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
+	reboot
+	exit 0
+
+}
