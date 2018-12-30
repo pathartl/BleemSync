@@ -93,26 +93,34 @@ execute_bleemsync_func(){
 	# Default pcsx.cfg
 	cd "$mountpoint/Games"
 	for D in *; do
-			if [ -d "${D}" ]; then
-				if [ ! -f "${D}/GameData/pcsx.cfg" ]; then
+		if [ -d "${D}" ]; then
+			if [ ! -f "${D}/GameData/pcsx.cfg" ]; then
 				cp -f "../System/Defaults/pcsx.cfg" "${D}/GameData/pcsx.cfg"
-				fi
 			fi
+		fi
 	done
 	cd -
 	
 	echo 0 > /sys/class/leds/red/brightness
 	echo "[BLEEMSYNC](INFO) completed bleemsync boot, starting PSX UI"
 	
+	killall -s KILL sdl_display
+
 	cd "/data/AppData/sony/pcsx"
 	export PCSX_ESC_KEY=2
 	/usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
 	
-	#Cleanup and shutdown
-	sync
-	sync
-	echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
-	reboot
+	#Cleanup and shutdown (If active telnet session don't shutdown console.)
+	if [ "$(who | wc -l)" = "1" ]; then
+		while true; do
+			sleep 999
+		done		
+	else
+		sync
+		sync
+		echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
+		reboot
+	fi
 	exit 0
 
 }

@@ -135,6 +135,7 @@ debug_run_func(){
 	#Misc debugging commands get dumped here.
 	echo "[BLEEMSYNC](Executing) debug_run_func()"
 	echo 1 > /sys/class/leds/red/brightness
+	[ ! -d "$dump_path" ] && mkdir -p "$dump_path"
 	touch "$dump_path/mount.log" && mount &> "$dump_path/mount.log"
 	[ -d "$dump_path/DEBUG" ] && rm -rf "$dump_path/DEBUG"
 	[ ! -d "$dump_path/DEBUG" ] && mkdir -p "$dump_path/DEBUG"
