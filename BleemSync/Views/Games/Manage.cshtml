@@ -1,11 +1,15 @@
 ﻿<link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
 
 <div class="pmd-card pmd-z-depth">
+    <div class="game-upload">
+        <input type="file" name="game-upload" accept=".cue,.bin" />
+    </div>
     <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
 </div>
 
 @section Scripts {
     <script src="~/lib/jstree/jstree.min.js"></script>
+    <script src="~/lib/bleemsync/playstation-utilities.js"></script>
     <script>
         var tree;
 

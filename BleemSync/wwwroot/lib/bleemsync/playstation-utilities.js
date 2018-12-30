@@ -34,7 +34,7 @@ function ExtractSerialFromBinFile(file) {
     ];
 
     //var bufferLength = 4194304;
-    var bufferLength = 128;
+    var bufferLength = 32768;
     var reader = new FileReader();
     var position = 0;
     var blob = file.slice(position, position + bufferLength);
@@ -66,145 +66,28 @@ function ExtractSerialFromBinFile(file) {
         return charArray;
     }
 
-    function ParseForPossibleIndicesOfSerial(buffer) {
-        var possibleIndices = [];
-
-        for (let triggerCharacter in triggerCharacters) {
-            // Search through the buffer for any possible trigger characters
-            for (let i = 0; i < buffer.length; i++) {
-                if (buffer[i] == triggerCharacter) {
-                    foundPossibleString = true;
-                    // Keep track of indexes of possible starts of serial
-                    possibleIndices.push(i);
-                }
-            }
-        }
-
-        return possibleIndices
-    }
-
-    function ParseForSerialFromPossible(buffer, possibleIndices) {
-        var serial = '';
-
-        // Loop through each possible start of serial
-        for (let i = 0; i < possibleIndices.length; i++) {
-            // Truncate to save memory
-            let truncatedBuffer = buffer.slice(possibleIndices[i]);
-            let str = String.fromCharCode.apply(null, buffer);
-
-            for (let prefix of serialNumberPrefixes) {
-                // Check if starts with any prefix
-                if (str.startsWith(prefix)) {
-                    serial = CleanSerial(str.toUpperCase());
-
-                    // Break out of the loop, cause we have the serial
-                    i = possibleIndices.length;
-                }
-            }
-        }
-
-        return serial;
-    }
-
-    function ParseSerialFromBeginningOfBuffer(buffer) {
-        let serial = '';
-        let truncatedBuffer = buffer.slice(0, 11); // Truncate at 11 bytes, because that's what the PS max serial length is
+    function ParseForSerial(result = new ArrayBuffer()) {
+        let buffer = new Uint8Array(result);
         let bufferStr = String.fromCharCode.apply(null, buffer);
 
-
         for (let prefix of serialNumberPrefixes) {
-            // Check if starts with any prefix
-            if (bufferStr.startsWith(prefix)) {
-                serial = CleanSerial(bufferStr.toUpperCase());
+            var prefixIndex = bufferStr.indexOf(prefix);
+            if (prefixIndex !== -1) {
+                var dirtySerial = bufferStr.slice(prefixIndex, prefixIndex + 11);
+                try {
+                    serial = CleanSerial(dirtySerial);
+                } catch (e) {}
                 break;
             }
         }
 
-        return serial;
-    }
-
-    function BufferStartsWithTriggerCharacter(buffer) {
-        var begins = false;
-
-        for (let i = 0; i < triggerCharacters.length; i++) {
-            if (buffer[0] == triggerCharacters[i]) {
-                begins = true;
-                i = triggerCharacters.length;
-            }
-        }
-
-        return begins;
-    }
-
-    function ParseForSerial(result = new ArrayBuffer()) {
-        let buffer = new Uint8Array(result);
-
-        if (BufferStartsWithTriggerCharacter(buffer)) {
-            serial = ParseForPossibleIndicesOfSerial(buffer);
-        }
-
-        if (serial !== '') {
-            var possibleIndices = ParseForPossibleIndicesOfSerial(buffer);
-
-            if (possibleIndices.length > 0) {
-                position += possibleIndices[0];
-                blob = file.slice(position, position + );
-            }
-        }
-
-        if (possibleIndices.length > 0) {
-            serial = ParseForSerialFromPossible(buffer, possibleIndices);
-        }
-
         if (serial == '') {
-            reader.abort();
-            reader.readAsArrayBuffer(blob);
-        }
-
-
-
-
-
-
-
-        if (!foundPossibleString && !foundSomething) {
-            var doneSearchingForPossible = false;
-
-            ParseForPossibles(buffer);
-
-            for (let i = 0; i < buffer.length; i++) {
-                if (triggerCharacters.includes(buffer[i]) && !doneSearchingForPossible) {
-                    doneSearchingForPossible = true;
-                    foundPossibleString = true;
-                    foundSomething = true;
-
-                    ParseForSerialFromPossible(buffer)
-
-                    position += i;
-                    blob = file.slice(position, position + bufferLength);
-
-                    // Easy jump out of the loop
-                    i = buffer.length;
-                }
-            }
-
-            reader.abort();
-            reader.readAsArrayBuffer(blob);
-        }
-
-        if (foundPossibleString && !foundSerial && !foundSomething) {
-
-        }
-
-        if (!foundPossibleString && !foundSerial && !foundSomething) {
             position += bufferLength;
             blob = file.slice(position, position + bufferLength);
             reader.abort();
             reader.readAsArrayBuffer(blob);
-        }
-
-        if (foundSerial) {
-            alert("Found serial " + serial);
+        } else {
+            alert('Found serial ' + serial);
         }
     }
 
