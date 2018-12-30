@@ -14,6 +14,7 @@ using BleemSync.Services;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ExtCore.Data.EntityFramework;
+using Newtonsoft.Json.Serialization;
 
 namespace BleemSync
 {
@@ -44,7 +45,9 @@ namespace BleemSync
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IUrlHelper>(x =>
@@ -54,7 +57,7 @@ namespace BleemSync
                 return factory.GetUrlHelper(actionContext);
             });
 
-            services.AddSingleton<MenuService>();
+            services.AddSingleton<BleemSyncCentralService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

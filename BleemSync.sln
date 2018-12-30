@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.Infras
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Extensions.PlayStationClassic.Utilities", "BleemSync.Extensions.PlayStationClassic\BleemSync.Extensions.PlayStationClassic.Utilities\BleemSync.Extensions.PlayStationClassic.Utilities.csproj", "{E1C6068A-E560-446D-A62C-CD8D90C10DBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Data", "BleemSync.Data\BleemSync.Data.csproj", "{11185624-8F5D-4935-A03C-EF582C1A2A05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Data", "BleemSync.Data\BleemSync.Data.csproj", "{11185624-8F5D-4935-A03C-EF582C1A2A05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.UI", "BleemSync.UI\BleemSync.UI.csproj", "{631544D5-372D-41BC-B439-A1CC5068205A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +97,10 @@ Global
 		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11185624-8F5D-4935-A03C-EF582C1A2A05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{631544D5-372D-41BC-B439-A1CC5068205A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{631544D5-372D-41BC-B439-A1CC5068205A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{631544D5-372D-41BC-B439-A1CC5068205A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{631544D5-372D-41BC-B439-A1CC5068205A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,15 @@
+﻿@model BleemSync.ViewModels.Game
+@addTagHelper *, BleemSync.UI
+
+<form data-ajax="true" data-ajax-method="POST">
+    <card title="Add New Game">
+        <textbox asp-for="Name" />
+        <textbox asp-for="SortName" />
+        <textarea asp-for="Description"></textarea>
+        <textbox asp-for="ReleaseDate" />
+        <textbox asp-for="Players" />
+        <textbox asp-for="Developer" />
+        <textbox asp-for="Publisher" />
+        <button type="submit" text="Add Game" />
+    </card>
+</form>

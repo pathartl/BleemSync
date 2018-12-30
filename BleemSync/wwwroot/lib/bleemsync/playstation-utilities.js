@@ -1,15 +1,4 @@
-﻿$('input[type="file"]').change(function () {
-    var file = this.files[0];
-    ExtractSerialFromBinFile(file);
-});
-
-function TestExtractSerialFromInput() {
-    var input = $('input[type="file"]').get(0);
-    var file = input.files[0];
-    ExtractSerialFromBinFile(file);
-}
-
-function ExtractSerialFromBinFile(file) {
+﻿function ExtractSerialFromBinFile(file) {
     var serial = "";
     var foundPossibleString = false;
     var foundSerial = false;
@@ -87,7 +76,7 @@ function ExtractSerialFromBinFile(file) {
             reader.abort();
             reader.readAsArrayBuffer(blob);
         } else {
-            alert('Found serial ' + serial);
+            $(document).trigger('SerialParsed', [serial]);
         }
     }
 

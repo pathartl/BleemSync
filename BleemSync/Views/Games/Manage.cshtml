@@ -1,50 +1,104 @@
-﻿<link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
+﻿@model BleemSync.ViewModels.Game
+@addTagHelper *, BleemSync.UI
 
-<div class="pmd-card pmd-z-depth">
-    <div class="game-upload">
-        <input type="file" name="game-upload" accept=".cue,.bin" />
-    </div>
-    <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
-</div>
+<link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
+
+<column lg="4" md="5" xs="12">
+    <card title="Game Manager">
+        <div class="game-upload form-group">
+            <input type="file" name="game-upload" accept=".cue,.bin" />
+        </div>
+        <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
+    </card>
+</column>
+
+<column lg="8" md="7" xs="12">
+    <form id="add-game-form"
+          asp-action="AddGame"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-success="OnGameAdded">
+        <card title="Add New Game">
+            <textbox asp-for="Name" />
+            <textbox asp-for="SortName" />
+            <textarea asp-for="Description"></textarea>
+            <textbox asp-for="ReleaseDate" />
+            <textbox asp-for="Players" />
+            <textbox asp-for="Developer" />
+            <textbox asp-for="Publisher" />
+            <button type="submit" text="Add Game" />
+        </card>
+    </form>
+</column>
+
 
 @section Scripts {
     <script src="~/lib/jstree/jstree.min.js"></script>
     <script src="~/lib/bleemsync/playstation-utilities.js"></script>
     <script>
-        var tree;
+        var tree = $('.game-manager-node-tree');
 
-        $.getJSON('@Url.Action("GetTree")', function (data) {
-            tree = $('.game-manager-node-tree')
-            .jstree({
-                'core': {
-                    'data': data,
-                    'check_callback': true
-                },
-                'types': {
-                    '#': {
-                        'valid_children': ['Folder', 'Game']
+        function LoadGameTree() {
+            $.getJSON('@Url.Action("GetTree")', function (data) {
+                tree.jstree({
+                    'core': {
+                        'data': data,
+                        'check_callback': true
                     },
-                    'Folder': {
-                        'valid_children': ['Folder', 'Game']
+                    'types': {
+                        '#': {
+                            'valid_children': ['Folder', 'Game']
+                        },
+                        'Folder': {
+                            'valid_children': ['Folder', 'Game']
+                        },
+                        'Game': {
+                            'valid_children': []
+                        }
                     },
-                    'Game': {
-                        'valid_children': []
-                    }
-                },
-                'plugins': [
-                    'dnd',
-                    'types'
-                ]
-                }).bind('move_node.jstree', function (e, data) {
-                    var treeData = tree.jstree(true).get_json(null, { 'flat': true });
-                    $.ajax({
-                        type: 'POST',
-                        url: '@Url.Action("SaveTree")',
-                        data: { Nodes: treeData },
-                        success: function () { },
-                        dataType: 'json'
+                    'plugins': [
+                        'dnd',
+                        'types'
+                    ]
+                    }).bind('move_node.jstree', function (e, data) {
+                        var treeData = tree.jstree(true).get_json(null, { 'flat': true });
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("SaveTree")',
+                            data: { Nodes: treeData },
+                            success: function () { },
+                            dataType: 'json'
+                        });
                     });
-                });
+            });
+        }
+
+        function ReloadGameTree() {
+            $.getJSON('@Url.Action("GetTree")', function (data) {
+                tree.jstree(true).settings.core.data = data;
+                tree.jstree(true).refresh();
+            });
+        }
+
+        LoadGameTree();
+    </script>
+
+    <script>
+        $('input[type="file"]').change(function () {
+            var file = this.files[0];
+            ExtractSerialFromBinFile(file);
         });
+
+        $(document).on('SerialParsed', function (e, serial) {
+            $.getJSON('@Url.Action("GetBySerial")?serial=' + serial, function (data) {
+                $('#add-game-form').setViewModel(data);
+            });
+        });
+
+        var OnGameAdded = function (context) {
+            $('input[type="file"]').val(null);
+            ReloadGameTree();
+            $('#add-game-form').clearForm();
+        }
     </script>
 }

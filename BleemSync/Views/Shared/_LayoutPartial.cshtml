@@ -11,23 +11,10 @@
     <link rel="stylesheet" href="~/lib/material-icons/material-icons.css" />
     <link rel="stylesheet" href="~/lib/bleemsync/custom.css" />
 </head>
-<body>
-    <nav class="navbar navbar-inverse navbar-fixed-top pmd-navbar pmd-z-depth">
-        <a href="javascript:void(0);" data-target="sidebar" data-placement="left" data-position="slidepush" class="btn btn-sm pmd-btn-fab pmd-btn-flat pmd-ripple-effect pull-left pmd-sidebar-toggle">
-            <i class="material-icons md-light">menu</i>
-        </a>
-        <a href="/" class="navbar-brand">BleemSync</a>
-    </nav>
-
-    @await Component.InvokeAsync("Sidebar")
-
-    <div class="container-fluid body-content">
-        @RenderBody()
-    </div>
+<body class="container-fluid">
+    @RenderBody()
 
     <script src="~/lib/jquery/jquery-3.3.1.min.js"></script>
-    <script src="~/lib/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.min.js"></script>
-    <script src="~/lib/bleemsync/form-helpers.js"></script>
     <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="~/lib/propeller/js/propeller.min.js"></script>
     <script src="~/lib/datatables/jquery.dataTables.min.js"></script>

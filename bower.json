@@ -1,0 +1,18 @@
+{
+  "name": "BleemSync",
+  "homepage": "https://github.com/pathartl/BleemSync",
+  "authors": [
+    "Pat Hartl <pat@pathar.tl>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
