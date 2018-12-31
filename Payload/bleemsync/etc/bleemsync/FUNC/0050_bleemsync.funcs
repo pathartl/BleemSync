@@ -24,7 +24,6 @@ execute_bleemsync_func(){
 	mkdir -p "$mountpoint/System/Preferences/AutoDimmer"
 	mkdir -p "$mountpoint/System/Databases"
 	mkdir -p "$mountpoint/System/Region"
-	mkdir -p "$mountpoint/System/Logs"
 	mkdir -p "$mountpoint/System/UI"
 
 	# Copy the BIOS files to USB
@@ -41,8 +40,6 @@ execute_bleemsync_func(){
 	[ ! -f "$mountpoint/System/Region/REGION" ] && cp -f "/gaadata/geninfo/"* "$mountpoint/System/Region"
 	# Copy ui error log
 	[ ! -f "$mountpoint/System/UI/error.log" ] && cp -f "/data/sony/ui/"* "$mountpoint/System/UI"
-	# Init the ui_menu.log
-	[ ! -f "$mountpoint/System/Logs/ui_menu.log" ] && touch "$mountpoint/System/Logs/ui_menu.log"
 	sync
 
 	# Unmount partitons and create tmpfs - Shut system down on failure
