@@ -15,9 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Scrapers.PSXDataC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Central.Data", "BleemSync.Central.Data\BleemSync.Central.Data.csproj", "{4BBBBD40-706A-4C1D-9693-779EBC1CD255}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Central", "BleemSync.Central\BleemSync.Central.csproj", "{B6CC05A8-AF80-4298-BB22-451F920E8320}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Central", "BleemSync.Central\BleemSync.Central.csproj", "{B6CC05A8-AF80-4298-BB22-451F920E8320}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Central.Services", "BleemSync.Central.Services\BleemSync.Central.Services.csproj", "{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Central.Services", "BleemSync.Central.Services\BleemSync.Central.Services.csproj", "{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Validator", "BleemSync.Validator\BleemSync.Validator.csproj", "{B92AF938-B383-4982-8922-4D38E62FC7E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6712A24F-CB48-4C3D-91E7-C3C261E98C2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B92AF938-B383-4982-8922-4D38E62FC7E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B92AF938-B383-4982-8922-4D38E62FC7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B92AF938-B383-4982-8922-4D38E62FC7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B92AF938-B383-4982-8922-4D38E62FC7E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
