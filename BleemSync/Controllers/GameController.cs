@@ -12,6 +12,10 @@ using BleemSync.Services;
 using BleemSync.Data.Entities;
 using System.Net;
 using System.Net.Mime;
+using System.IO;
+using BleemSync.Services.Abstractions;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
 
 namespace BleemSync.Controllers
 {
@@ -22,12 +26,14 @@ namespace BleemSync.Controllers
         private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
         private IStorage _storage { get; set; }
         private BleemSyncCentralService _bleemSyncCentral { get; set; }
+        private IGameManagerService _gameManagerService { get; set; }
 
-        public GamesController(IStorage storage, BleemSyncCentralService bleemSyncCentral)
+        public GamesController(IStorage storage, BleemSyncCentralService bleemSyncCentral, IGameManagerService gameManagerService)
         {
             _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
             _storage = storage;
             _bleemSyncCentral = bleemSyncCentral;
+            _gameManagerService = gameManagerService;
         }
 
         [MenuItem(Name = "Manage")]
@@ -88,42 +94,97 @@ namespace BleemSync.Controllers
         }
 
         [HttpGet]
-        public ActionResult AddGame(string serial)
+        public ActionResult GetById(int id)
         {
-            Game game;
-            try
-            {
-                var bscGame = _bleemSyncCentral.GetPlayStationGameBySerial(serial);
-                game = new Game(bscGame);
-            }
-            catch
-            {
-                game = new Game();
-            }
+            var game = _gameManagerNodeRepository.Get(id);
 
-            return View(game);
+            return new JsonResult(game);
         }
 
         [HttpPost]
-        public ActionResult AddGame(string serial, Game game)
+        public async Task<ActionResult> AddGame(string serial, GameUpload gameUpload)
         {
+            var temporaryFileLocations = new Dictionary<string, string>();
+
+            foreach (var file in gameUpload.Files)
+            {
+                long size = file.Length;
+                var filePath = Path.GetTempFileName();
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                    temporaryFileLocations[file.FileName] = filePath;
+                }
+            }
+
+            // Add game to the database
             var node = new GameManagerNode()
             {
-                Name = game.Name,
-                SortName = game.SortName,
-                Description = game.Description,
-                ReleaseDate = game.ReleaseDate,
-                Players = game.Players,
-                Developer = game.Developer,
-                Publisher = game.Publisher,
+                Name = gameUpload.Name,
+                SortName = gameUpload.SortName,
+                Description = gameUpload.Description,
+                ReleaseDate = gameUpload.ReleaseDate,
+                Players = gameUpload.Players,
+                Developer = gameUpload.Developer,
+                Publisher = gameUpload.Publisher,
                 Type = GameManagerNodeType.Game
             };
 
             _gameManagerNodeRepository.Create(node);
             _storage.Save();
 
+            _gameManagerService.UploadGame(node, temporaryFileLocations.Values);
+
             Response.StatusCode = (int)HttpStatusCode.OK;
             return Json("Game added!");
+        }
+
+        [HttpPost]
+        public ActionResult UpdateGame(GameManagerNode game)
+        {
+            game.Type = GameManagerNodeType.Game;
+            _gameManagerNodeRepository.Update(game);
+
+            _storage.Save();
+
+            return Json("Game updated!");
+        }
+
+        [HttpPost]
+        public ActionResult ValidateCueSheet(IFormFile file)
+        {
+            var response = new CueSheetValidationResponse()
+            {
+                Valid = true
+            };
+
+            string cueSheet;
+
+            using (var reader = new StreamReader(file.OpenReadStream()))
+            {
+                cueSheet = reader.ReadToEnd();
+            }
+
+            var binaryFiles = new List<string>();
+
+            Regex regex = new Regex("FILE \"(.+)\" BINARY", RegexOptions.Multiline);
+            
+            foreach (Match match in regex.Matches(cueSheet))
+            {
+                if (match.Groups.Count == 2)
+                {
+                    response.BinFiles.Add(match.Groups[1].Value);
+                }
+            }
+
+            if (response.BinFiles.Count == 0)
+            {
+                response.Valid = false;
+                response.Message = "No reference to .bin files found.";
+            }
+
+            return new JsonResult(response);
         }
     }
 }

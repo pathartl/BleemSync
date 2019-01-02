@@ -5,7 +5,7 @@ using System.IO;
 
 namespace BleemSync.Data
 {
-    public class DatabaseContext : DbContext
+    public class MenuDatabaseContext : DbContext
     {
         public DbSet<Disc> Discs { get; set; }
         public DbSet<Game> Games { get; set; }
@@ -15,7 +15,7 @@ namespace BleemSync.Data
 
         private static bool _created = false;
 
-        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+        public MenuDatabaseContext(DbContextOptions<MenuDatabaseContext> options) : base(options)
         {
             if (!_created)
             {

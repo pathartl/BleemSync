@@ -37,3 +37,5 @@ Publish/
 BleemSync.Payload/System/BleemSync/
 BleemSync/BleemSync.db
 System/Databases/regional.db
+BleemSync/Games/
+BleemSync/ui_menu.db

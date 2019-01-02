@@ -1,8 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>BleemSync.Extensions.PlayStationClassic.Core</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExtCore.Mvc.Infrastructure" Version="3.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\BleemSync.Services\BleemSync.Services.csproj" />
+  </ItemGroup>
 
 </Project>

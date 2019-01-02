@@ -125,6 +125,30 @@
             options.data.push({ name: "X-HTTP-Method-Override", value: method });
         }
 
+        // change here:
+        // Check for a Form POST with enctype=multipart/form-data
+        // add the input file that were not previously included in the serializeArray()
+        // set processData and contentType to false
+        var $element = $(element);
+        if ($element.is("form") && $element.attr("enctype") == "multipart/form-data") {
+            var formdata = new FormData();
+            $.each(options.data, function (i, v) {
+                formdata.append(v.name, v.value);
+            });
+            $("input[type=file]", $element).each(function () {
+                var file = this;
+                $.each(file.files, function (n, v) {
+                    formdata.append(file.name, v);
+                });
+            });
+            $.extend(options, {
+                processData: false,
+                contentType: false,
+                data: formdata
+            });
+        }
+        // end change
+
         $.ajax(options);
     }
 

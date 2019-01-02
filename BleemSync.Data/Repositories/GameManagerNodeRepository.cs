@@ -16,6 +16,11 @@ namespace BleemSync.Data.Repositories
             return dbSet.OrderBy(n => n.SortName != "" ? n.SortName : n.Name);
         }
 
+        public GameManagerNode Get(int id)
+        {
+            return dbSet.SingleOrDefault(n => n.Id == id);
+        }
+
         public void Create(GameManagerNode node)
         {
             dbSet.Add(node);

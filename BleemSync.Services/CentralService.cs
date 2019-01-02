@@ -1,4 +1,4 @@
-﻿using BleemSync.ViewModels;
+﻿using BleemSync.Services.ViewModels;
 using Newtonsoft.Json;
 using RestSharp;
 using System;

@@ -29,17 +29,17 @@ namespace BleemSync.CLI
 
             Directory.CreateDirectory(new FileInfo(databaseLocation).Directory.FullName);
 
-            services.AddDbContext<DatabaseContext>(options =>
+            services.AddDbContext<MenuDatabaseContext>(options =>
                 options.UseSqlite($"Data Source={databaseLocation}")
             );
 
             var serviceProvider = services.BuildServiceProvider();
-            var _context = serviceProvider.GetService<DatabaseContext>();
+            var _context = serviceProvider.GetService<MenuDatabaseContext>();
 
             SyncGames(_context, configuration);
         }
 
-        static void SyncGames(DatabaseContext db, IConfigurationRoot configuration)
+        static void SyncGames(MenuDatabaseContext db, IConfigurationRoot configuration)
         {
             try
             {

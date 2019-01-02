@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ExtCore.Data.EntityFramework;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace BleemSync
 {
@@ -43,6 +44,11 @@ namespace BleemSync
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 1474560000;
             });
 
             services.AddMvc()

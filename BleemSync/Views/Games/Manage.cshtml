@@ -1,32 +1,71 @@
-﻿@model BleemSync.ViewModels.Game
+﻿@model BleemSync.ViewModels.GameUpload
+@using System.ComponentModel.DataAnnotations;
 @addTagHelper *, BleemSync.UI
 
 <link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
 
+<style>
+    .game-manager-form {
+        display: none;
+    }
+</style>
+
 <column lg="4" md="5" xs="12">
     <card title="Game Manager">
-        <div class="game-upload form-group">
-            <input type="file" name="game-upload" accept=".cue,.bin" />
-        </div>
+        <button text="Add New Game" class="add-game-button" />
         <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
     </card>
 </column>
 
+@{ 
+    var imageTypeEnumType = typeof(GameImageType);
+    var values = Enum.GetValues(imageTypeEnumType);
+
+    List<string> fileExtensions = new List<string>();
+
+    foreach (var value in values)
+    {
+        var member = imageTypeEnumType.GetMembers().Where(m => m.Name == value.ToString()).First();
+        var attribute = (FileExtensionsAttribute)member.GetCustomAttributes(typeof(FileExtensionsAttribute), false).First();
+        fileExtensions.AddRange(attribute.Extensions.Split(",").Select(e => "." + e));
+    }
+}
+
 <column lg="8" md="7" xs="12">
-    <form id="add-game-form"
+    <form id="add-game-form" class="game-manager-form"
           asp-action="AddGame"
+          enctype="multipart/form-data"
           data-ajax="true"
           data-ajax-method="POST"
           data-ajax-success="OnGameAdded">
         <card title="Add New Game">
+            <input type="file" name="Files" class="game-upload" accept="@String.Join(",", fileExtensions)" multiple />
             <textbox asp-for="Name" />
             <textbox asp-for="SortName" />
-            <textarea asp-for="Description"></textarea>
+            <textarea asp-for="Description" />
             <textbox asp-for="ReleaseDate" />
             <textbox asp-for="Players" />
             <textbox asp-for="Developer" />
             <textbox asp-for="Publisher" />
             <button type="submit" text="Add Game" />
+        </card>
+    </form>
+    <form id="edit-game-form" class="game-manager-form"
+          asp-action="UpdateGame"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-success="OnGameUpdated">
+        <card title="Edit Game">
+            <hidden asp-for="Id" />
+            <hidden asp-for="ParentId" />
+            <textbox asp-for="Name" />
+            <textbox asp-for="SortName" />
+            <textarea asp-for="Description" />
+            <textbox asp-for="ReleaseDate" />
+            <textbox asp-for="Players" />
+            <textbox asp-for="Developer" />
+            <textbox asp-for="Publisher" />
+            <button type="submit" text="Update Game" />
         </card>
     </form>
 </column>
@@ -60,16 +99,18 @@
                         'dnd',
                         'types'
                     ]
-                    }).bind('move_node.jstree', function (e, data) {
-                        var treeData = tree.jstree(true).get_json(null, { 'flat': true });
-                        $.ajax({
-                            type: 'POST',
-                            url: '@Url.Action("SaveTree")',
-                            data: { Nodes: treeData },
-                            success: function () { },
-                            dataType: 'json'
-                        });
+                }).bind('move_node.jstree', function (e, data) {
+                    var treeData = tree.jstree(true).get_json(null, { 'flat': true });
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("SaveTree")',
+                        data: { Nodes: treeData },
+                        success: function () { },
+                        dataType: 'json'
                     });
+                    }).bind('select_node.jstree', function (e, data) {
+                        LoadEditGameForm(data.node.id);
+                });
             });
         }
 
@@ -80,25 +121,100 @@
             });
         }
 
+        function LoadEditGameForm(id) {
+            $('.game-manager-form').hide();
+            $.getJSON('@Url.Action("GetById")?id=' + id, function (data) {
+                $('#edit-game-form').show().setViewModel(data);
+            });
+        }
+
+        function LoadAddGameForm(viewModel) {
+            $('.game-manager-form').hide();
+            $('#add-game-form').show().setViewModel(viewModel);
+        }
+
         LoadGameTree();
     </script>
 
     <script>
         $('input[type="file"]').change(function () {
-            var file = this.files[0];
-            ExtractSerialFromBinFile(file);
+            var cueFiles = [];
+            var binFiles = [];
+
+            for (let file of this.files) {
+                switch (file.name.split('.').pop()) {
+                    case 'cue':
+                        cueFiles.push(file);
+                        break;
+                    case 'bin':
+                        binFiles.push(file);
+                        break;
+                }
+            }
+
+            if (cueFiles.length > 1) {
+                alert('Multiple cue files are not supported at this time.');
+            } else {
+                var formdata = new FormData();
+
+                formdata.append('File', cueFiles[0]);
+
+                $.ajax({
+                    url: '@Url.Action("ValidateCueSheet")',
+                    contentType: false,
+                    processData: false,
+                    data: formdata,
+                    type: 'POST',
+                    success: function (data) {
+                        var availableBinFiles = [];
+                        var missingBinFiles = [];
+
+                        for (let binFile of binFiles) {
+                            availableBinFiles.push(binFile.name);
+                        }
+
+                        for (let binFile of data.BinFiles) {
+                            // Check to make sure all the bin files are chosen in the uploader
+                            if (availableBinFiles.indexOf(binFile) === -1) {
+                                missingBinFiles.push(binFile);
+                            }
+                        }
+
+                        if (missingBinFiles.length > 0) {
+                            alert('Your selection is incomplete. Please make sure you select your .cue file with all of the necessary .bin files. The following files are missing:\n' + missingBinFiles.join('\n'));
+                        } else {
+                            ExtractSerialFromBinFile(binFiles[0]);
+                        }
+                    },
+                    error: function (data) {
+                        alert(data.Message);
+                    }
+                });
+            }
         });
 
         $(document).on('SerialParsed', function (e, serial) {
             $.getJSON('@Url.Action("GetBySerial")?serial=' + serial, function (data) {
-                $('#add-game-form').setViewModel(data);
+                LoadAddGameForm(data);
             });
+        });
+
+        $('.add-game-button').on('click', function () {
+            LoadAddGameForm();
         });
 
         var OnGameAdded = function (context) {
             $('input[type="file"]').val(null);
             ReloadGameTree();
             $('#add-game-form').clearForm();
+            $('.game-manager-form').hide();
+        }
+
+        var OnGameUpdated = function (context) {
+            $('input[type="file"]').val(null);
+            ReloadGameTree();
+            $('#update-game-form').clearForm();
+            $('.game-manager-form').hide();
         }
     </script>
 }

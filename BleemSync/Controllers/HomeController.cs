@@ -16,13 +16,11 @@ namespace BleemSync.Controllers
     [MenuSection(Name = "Home", Icon = "home", Position = 999999)]
     public class HomeController : Controller
     {
-        MenuService _menuService { get; set; }
         private IGameManagerNodeRepository _gameRepository { get; set; }
         private IStorage _storage { get; set; }
 
-        public HomeController(MenuService menuService, IStorage storage)
+        public HomeController(IStorage storage)
         {
-            _menuService = menuService;
             _gameRepository = storage.GetRepository<IGameManagerNodeRepository>();
             _storage = storage;
         }

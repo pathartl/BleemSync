@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BleemSync.Services.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace BleemSync.ViewModels
         public int? Players { get; set; }
         public string Developer { get; set; }
         public string Publisher { get; set; }
+        public int ParentId { get; set; }
 
         public Game() { }
 

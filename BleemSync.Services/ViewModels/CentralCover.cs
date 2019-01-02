@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace BleemSync.Central.ViewModels
+namespace BleemSync.Services.ViewModels
 {
-    public class CoverDTO
+    public class CentralCover
     {
         public int Id { get; set; }
         public string File { get; set; }
