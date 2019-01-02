@@ -35,3 +35,4 @@ msbuild.wrn
 BleemSync-*.zip
 Publish/
 BleemSync.Payload/System/BleemSync/
+*.flag

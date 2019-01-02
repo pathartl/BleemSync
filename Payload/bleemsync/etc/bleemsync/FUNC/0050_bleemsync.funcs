@@ -4,6 +4,60 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
+### LOCAL FUNCTIONS ###########################################################
+launch_RetroArch(){
+	echo "[BLEEMSYNC](INFO) launching RetroArch"
+	while true; do
+		#/media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
+		killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display
+		[ ! -d "$mountpoint/bleemsync/opt/retroArch" ] && mkdir -p "$mountpoint/bleemsync/opt/retroarch"
+		[ -d "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
+		#Check for old deployment of RA and migrate it
+		if [ -d "$mountpoint/RetroArch" ]; then
+			mv -f "$mountpoint/RetroArch/*" "$mountpoint/bleemsync/opt/retroarch"
+			mv "$mountpoint/RetroArch" "$mountpoint/retroarch-RemoveMe"
+			mkdir -p "$mountpoint/REVIEW_AND_DELETE_ME/"
+			mv -f "$mountpoint/"*"-RemoveMe" "/media/REVIEW_AND_DELETE_ME/"
+			touch "$mountpoint/REVIEW_AND_DELETE_ME/README.txt"
+			echo "These folders are from old installs before BleemSync 0.7 and are not required. Please check you haven't put any useful files in here then delete this directory" >> "$mountpoint/REVIEW_AND_DELETE_ME/README.txt"
+		fi  
+		[ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch" ] && break #FAIL
+		mkdir -p "/tmp/ra_cache"
+		chmod +x "$mountpoint/bleemsync/opt/retroArch/retroarch"
+		export HOME="$mountpoint/bleemsync/opt/retroArch"
+		$mountpoint/bleemsync/opt/retroArch/retroarch -v &> "$runtime_log_path/retroarch.log"
+		rm -rf "/tmp/ra_cache"
+		sync
+		reboot
+	done
+	#you done goofed.
+	/media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
+	sleep 1
+	echo "[BLEEMSYNC](FAIL) tried to launch RetroArch and it's not installed! Opening Stock UI..."
+	launch_BootMenu
+}
+
+launch_BootMenu(){
+	echo "[BLEEMSYNC](INFO) launching BootMenu"
+	$mountpoint/bleemsync/bin/boot_menu 
+	[ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand")
+	if [ "$command" = "/media/lolhack/retroarch.sh" ]; then
+		echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching RetroArch"
+		launch_RetroArch
+	else
+		echo "[BLEEMSYNC](INFO) BS selected from boot menu (or failsafed). Launching stock UI"
+		launch_StockUI
+	fi
+}
+
+launch_StockUI(){
+	echo "[BLEEMSYNC](INFO) launching stock UI"
+	cd "/data/AppData/sony/pcsx"
+	export PCSX_ESC_KEY=2
+	/usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
+}
+###############################################################################
+
 execute_bleemsync_func(){
 	echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
 	echo 1 > /sys/class/leds/red/brightness
@@ -51,7 +105,7 @@ execute_bleemsync_func(){
 	mount -o bind "/tmp/gaadatatmp" "/gaadata" || MOUNT_FAIL=1 
 	mount -o bind "/tmp/datatmp" "/data" || MOUNT_FAIL=1 
 	mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1 
-	if [ $MOUNT_FAIL -eq 1 ]; then
+	if [ "$MOUNT_FAIL" = "1" ]; then
 		#display error message
 		echo 0 > /sys/class/leds/green/brightness
 		echo 1 > /sys/class/leds/red/brightness
@@ -90,22 +144,49 @@ execute_bleemsync_func(){
 	# Default pcsx.cfg
 	cd "$mountpoint/Games"
 	for D in *; do
-		if [ -d "${D}" ]; then
-			if [ ! -f "${D}/GameData/pcsx.cfg" ]; then
-				cp -f "../System/Defaults/pcsx.cfg" "${D}/GameData/pcsx.cfg"
+		if [ -d "$D" ]; then
+			if [ ! -f "$D/GameData/pcsx.cfg" ]; then
+				cp -f "../System/Defaults/pcsx.cfg" "$D/GameData/pcsx.cfg"
 			fi
 		fi
 	done
 	cd -
+
+	#Patch out health check if toggled.
+	if [ "$boot_disable_health" = "1" ]; then
+		echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
+		PATCH_FAIL=0
+		PATCH_DIR="/tmp/health_patch"
+		PATCH_BIN="$PATCH_DIR/patch.bin"
+		PATCH_TARGET="/usr/sony/bin/ui_menu"
+		PATCH_WORKING="$PATCH_DIR/ui_menu"
+
+		# Perform patching
+		mkdir -p "$PATCH_DIR"
+		cp -f "$PATCH_TARGET" "$PATCH_WORKING"
+		echo -n -e '\xb8\x0c\x00\x06\x03\x58\xbe' > "$PATCH_BIN"
+		dd bs=1 if="$PATCH_BIN" skip=0 of="$PATCH_WORKING" seek=28084 count=3 conv=notrunc
+		dd bs=1 if="$PATCH_BIN" skip=3 of="$PATCH_WORKING" seek=28120 count=2 conv=notrunc
+		dd bs=1 if="$PATCH_BIN" skip=5 of="$PATCH_WORKING" seek=28712 count=2 conv=notrunc
+		rm -f "$PATCH_BIN"
+		mount -o bind "$PATCH_WORKING" "$PATCH_TARGET" || PATCH_FAIL=1
+		if [ "$PATCH_FAIL" = "0" ]; then
+			echo "[BLEEMSYNC](INFO) patched out H+S statement"
+		else
+			echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
+		fi
+	fi
 	
 	echo 0 > /sys/class/leds/red/brightness
-	echo "[BLEEMSYNC](INFO) completed bleemsync boot, starting PSX UI"
+	echo "[BLEEMSYNC](INFO) completed bleemsync boot"
 	
 	killall -s KILL sdl_display
 
-	cd "/data/AppData/sony/pcsx"
-	export PCSX_ESC_KEY=2
-	/usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
+	booted=0
+
+	[ "$boot_target_stock_UI" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
+	[ "$boot_target_stock_BM" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_BootMenu
+	[ "$boot_target_stock_RA" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_RetroArch
 	
 	#Cleanup and shutdown (If active telnet session don't shutdown console.)
 	if [ "$(who | wc -l)" = "1" ]; then
@@ -113,11 +194,11 @@ execute_bleemsync_func(){
 			sleep 999
 		done		
 	else
+		[ -d "/tmp/ra_cache" ] && rm -rf "/tmp/ra_cache"
 		sync
 		sync
 		echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
 		reboot
 	fi
 	exit 0
-
 }
