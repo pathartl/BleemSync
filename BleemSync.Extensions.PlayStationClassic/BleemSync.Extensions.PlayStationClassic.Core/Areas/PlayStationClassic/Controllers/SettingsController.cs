@@ -4,15 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BleemSync.Extensions.PlayStationClassic.Core.Controllers
+namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.Controllers
 {
+    [Area("PlayStationClassic")]
     [MenuSection(Icon = "theaters", Name = "PlayStation Classic")]
-    public class PlayStationClassicController : Controller
+    public class SettingsController : Controller
     {
         [MenuItem(Name = "Settings")]
         public ActionResult Index()
         {
-            return Json("Hello World!");
+            return View();
         }
     }
 }

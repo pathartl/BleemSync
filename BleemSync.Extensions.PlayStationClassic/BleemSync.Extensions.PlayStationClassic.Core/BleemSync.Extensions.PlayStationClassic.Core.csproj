@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Areas\PlayStationClassic\Views\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
     <ProjectReference Include="..\..\BleemSync.Services\BleemSync.Services.csproj" />
   </ItemGroup>
