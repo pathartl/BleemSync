@@ -11,16 +11,7 @@ launch_RetroArch(){
 		#/media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
 		killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display
 		[ ! -d "$mountpoint/bleemsync/opt/retroArch" ] && mkdir -p "$mountpoint/bleemsync/opt/retroarch"
-		[ -d "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
-		#Check for old deployment of RA and migrate it
-		if [ -d "$mountpoint/RetroArch" ]; then
-			mv -f "$mountpoint/RetroArch/*" "$mountpoint/bleemsync/opt/retroarch"
-			mv "$mountpoint/RetroArch" "$mountpoint/retroarch-RemoveMe"
-			mkdir -p "$mountpoint/REVIEW_AND_DELETE_ME/"
-			mv -f "$mountpoint/"*"-RemoveMe" "/media/REVIEW_AND_DELETE_ME/"
-			touch "$mountpoint/REVIEW_AND_DELETE_ME/README.txt"
-			echo "These folders are from old installs before BleemSync 0.7 and are not required. Please check you haven't put any useful files in here then delete this directory" >> "$mountpoint/REVIEW_AND_DELETE_ME/README.txt"
-		fi  
+		[ -d "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
 		[ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch" ] && break #FAIL
 		mkdir -p "/tmp/ra_cache"
 		chmod +x "$mountpoint/bleemsync/opt/retroArch/retroarch"
