@@ -144,7 +144,16 @@
             $.extend(options, {
                 processData: false,
                 contentType: false,
-                data: formdata
+                data: formdata,
+                xhr: function () {
+                    var myXhr = $.ajaxSettings.xhr();
+
+                    if (myXhr.upload) {
+                        myXhr.upload.addEventListener('progress', progress, false);
+                    }
+
+                    return myXhr;
+                }
             });
         }
         // end change
@@ -155,6 +164,19 @@
     function validate(form) {
         var validationInfo = $(form).data(data_validation);
         return !validationInfo || !validationInfo.validate || validationInfo.validate();
+    }
+
+    function progress(e) {
+        var max = e.total;
+        var current = e.loaded;
+
+        var Percentage = (current * 100) / max;
+        console.log(Percentage);
+
+
+        if (Percentage >= 100) {
+            // process completed  
+        }
     }
 
     $(document).on("click", "a[data-ajax=true]", function (evt) {
