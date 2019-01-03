@@ -19,7 +19,6 @@ namespace BleemSync.Data
         {
             if (!_created)
             {
-                Database.EnsureDeleted();
                 Database.EnsureCreated();
             }
         }
