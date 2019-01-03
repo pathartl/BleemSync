@@ -7,6 +7,8 @@ namespace BleemSync.Services.Abstractions
 {
     public interface IGameManagerService
     {
-        void UploadGame(GameManagerNode node, IEnumerable<string> files);
+        void AddGame(GameManagerNode node);
+        void UpdateGame(GameManagerNode node);
+        void DeleteGame(GameManagerNode node);
     }
 }

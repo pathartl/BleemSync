@@ -12,5 +12,6 @@ namespace BleemSync.Data.Abstractions
         GameManagerNode Get(int id);
         void Create(GameManagerNode node);
         void Update(GameManagerNode node);
+        void Delete(GameManagerNode node);
     }
 }

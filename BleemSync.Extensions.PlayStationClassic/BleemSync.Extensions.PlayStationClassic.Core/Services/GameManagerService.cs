@@ -2,10 +2,7 @@
 using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 {
@@ -18,7 +15,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context = context;
         }
 
-        public void UploadGame(GameManagerNode node, IEnumerable<string> filePaths)
+        public void AddGame(GameManagerNode node)
         {
             var game = new Game()
             {
@@ -36,10 +33,35 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             Directory.CreateDirectory(outputDirectory);
 
-            foreach (var filePath in filePaths)
+            foreach (var file in node.Files)
             {
-                File.Move(filePath, Path.Combine(outputDirectory, $"{game.Title}.bin"));
+                File.Move(file.Path, Path.Combine(outputDirectory, file.Name));
             }
+        }
+
+        public void UpdateGame(GameManagerNode node)
+        {
+            var game = _context.Games.Find(node.Id);
+
+            game.Title = node.Name;
+            game.Publisher = node.Publisher;
+            game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
+            game.Players = node.Players.HasValue ? node.Players.Value : 0;
+
+            _context.Games.Update(game);
+            _context.SaveChanges();
+        }
+
+        public void DeleteGame(GameManagerNode node)
+        {
+            // Delete files first
+            var gameDirectory = Path.Combine("Games", node.Id.ToString());
+            Directory.Delete(gameDirectory, true);
+
+            var game = _context.Games.Find(node.Id);
+
+            _context.Games.Remove(game);
+            _context.SaveChanges();
         }
     }
 }

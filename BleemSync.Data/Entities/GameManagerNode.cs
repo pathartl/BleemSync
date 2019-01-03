@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace BleemSync.Data.Entities
 {
@@ -30,5 +29,14 @@ namespace BleemSync.Data.Entities
         public int? ParentId { get; set; }
         public virtual GameManagerNode Parent { get; set; }
         public virtual List<GameManagerNode> Children { get; set; }
+        public virtual List<GameManagerFile> Files { get; set; }
+
+        public GameManagerNode()
+        {
+            Genres = new List<GameGenre>();
+            Meta = new List<GameMeta>();
+            Children = new List<GameManagerNode>();
+            Files = new List<GameManagerFile>();
+        }
     }
 }

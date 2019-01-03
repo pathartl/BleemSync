@@ -30,5 +30,10 @@ namespace BleemSync.Data.Repositories
         {
             storageContext.Entry(node).State = EntityState.Modified;
         }
+
+        public void Delete(GameManagerNode node)
+        {
+            dbSet.Remove(node);
+        }
     }
 }

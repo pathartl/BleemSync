@@ -104,7 +104,7 @@ namespace BleemSync.Controllers
         [HttpPost]
         public async Task<ActionResult> AddGame(string serial, GameUpload gameUpload)
         {
-            var temporaryFileLocations = new Dictionary<string, string>();
+            var temporaryFiles = new List<GameManagerFile>();
 
             foreach (var file in gameUpload.Files)
             {
@@ -114,7 +114,11 @@ namespace BleemSync.Controllers
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
-                    temporaryFileLocations[file.FileName] = filePath;
+                    temporaryFiles.Add(new GameManagerFile()
+                    {
+                        Name = file.FileName,
+                        Path = filePath
+                    });
                 }
             }
 
@@ -134,7 +138,7 @@ namespace BleemSync.Controllers
             _gameManagerNodeRepository.Create(node);
             _storage.Save();
 
-            _gameManagerService.UploadGame(node, temporaryFileLocations.Values);
+            _gameManagerService.AddGame(node);
 
             Response.StatusCode = (int)HttpStatusCode.OK;
             return Json("Game added!");
@@ -148,7 +152,17 @@ namespace BleemSync.Controllers
 
             _storage.Save();
 
+            _gameManagerService.UpdateGame(game);
+
             return Json("Game updated!");
+        }
+
+        [HttpPost]
+        public ActionResult DeleteGame(GameManagerNode game)
+        {
+            _gameManagerNodeRepository.Delete(game);
+            _storage.Save();
+            _gameManagerService.DeleteGame(game);
         }
 
         [HttpPost]
