@@ -9,5 +9,7 @@ namespace BleemSync.Data.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
+        public int NodeId { get; set; }
+        public virtual GameManagerNode Node { get; set; }
     }
 }

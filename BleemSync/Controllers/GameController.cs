@@ -132,7 +132,8 @@ namespace BleemSync.Controllers
                 Players = gameUpload.Players,
                 Developer = gameUpload.Developer,
                 Publisher = gameUpload.Publisher,
-                Type = GameManagerNodeType.Game
+                Type = GameManagerNodeType.Game,
+                Files = temporaryFiles
             };
 
             _gameManagerNodeRepository.Create(node);
@@ -163,6 +164,8 @@ namespace BleemSync.Controllers
             _gameManagerNodeRepository.Delete(game);
             _storage.Save();
             _gameManagerService.DeleteGame(game);
+
+            return Json("Game deleted!");
         }
 
         [HttpPost]

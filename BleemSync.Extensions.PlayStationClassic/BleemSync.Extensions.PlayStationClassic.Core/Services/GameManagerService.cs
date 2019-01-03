@@ -1,7 +1,9 @@
 ﻿using BleemSync.Data;
+using BleemSync.Data.Abstractions;
 using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
+using ExtCore.Data.Abstractions;
 using System.IO;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Services
@@ -9,10 +11,14 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
     public class GameManagerService : IGameManagerService
     {
         private MenuDatabaseContext _context { get; set; }
+        private IStorage _storage { get; set; }
+        private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
 
-        public GameManagerService(MenuDatabaseContext context)
+        public GameManagerService(MenuDatabaseContext context, IStorage storage)
         {
             _context = context;
+            _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
+            _storage = storage;
         }
 
         public void AddGame(GameManagerNode node)
@@ -29,14 +35,21 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.Games.Add(game);
             _context.SaveChanges();
 
+            // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
             var outputDirectory = Path.Combine("Games", game.Id.ToString(), "GameData");
 
             Directory.CreateDirectory(outputDirectory);
 
             foreach (var file in node.Files)
             {
-                File.Move(file.Path, Path.Combine(outputDirectory, file.Name));
+                var source = file.Path;
+                var destination = Path.Combine(outputDirectory, file.Name);
+
+                File.Move(source, destination);
+                file.Path = destination;
             }
+
+            _storage.Save();
         }
 
         public void UpdateGame(GameManagerNode node)

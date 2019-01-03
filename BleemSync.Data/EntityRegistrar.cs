@@ -18,6 +18,14 @@ namespace BleemSync.Data
                 etb.HasOne(e => e.Parent).WithMany(e => e.Children);
                 etb.ToTable("GameManagerNodes");
             });
+
+            modelbuilder.Entity<GameManagerFile>(etb =>
+            {
+                etb.HasKey(e => e.Id);
+                etb.Property(e => e.Id);
+                etb.HasOne(e => e.Node).WithMany(e => e.Files);
+                etb.ToTable("GameManagerFiles");
+            });
         }
     }
 }
