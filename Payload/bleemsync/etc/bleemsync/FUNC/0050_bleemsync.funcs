@@ -8,18 +8,21 @@
 launch_RetroArch(){
 	echo "[BLEEMSYNC](INFO) launching RetroArch"
 	while true; do
-		#/media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
 		killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display
 		[ ! -d "$mountpoint/bleemsync/opt/retroArch" ] && mkdir -p "$mountpoint/bleemsync/opt/retroarch"
 		[ -d "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
 		[ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch" ] && break #FAIL
+		if [ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch/system/scph102b.bin" ]; then
+			cp -f "/gaadata/system/bios/romw.bin" "$mountpoint/bleemsync/opt/retroArch/retroarch/system/scph102b.bin"
+			echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
+		fi
 		mkdir -p "/tmp/ra_cache"
 		chmod +x "$mountpoint/bleemsync/opt/retroArch/retroarch"
 		export HOME="$mountpoint/bleemsync/opt/retroArch"
 		$mountpoint/bleemsync/opt/retroArch/retroarch -v &> "$runtime_log_path/retroarch.log"
 		rm -rf "/tmp/ra_cache"
-		sync
-		reboot
+		cd / &&	sync
+		launch_BootMenu
 	done
 	#you done goofed.
 	/media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
