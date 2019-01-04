@@ -1,6 +1,7 @@
 ﻿using BleemSync.Extensions.PlayStationClassic.Core.Attributes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 {
     public class Preference
     {
-        public Preference() { }
+        public Preference() : this("") {
+        }
         public Preference(string preferencesString)
         {
             var preferenceProperties = new Dictionary<string, string>();
@@ -36,8 +38,10 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
             foreach (var property in derivedType.GetProperties())
             {
+                var useDefault = true;
                 var attributes = property.GetCustomAttributes(true);
 
+                // Set values based on attribute
                 foreach (var attribute in attributes)
                 {
                     if (attribute.GetType() == typeof(PreferencePropertyAttribute))
@@ -52,24 +56,42 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
                             {
                                 case 'i':
                                     property.SetValue(preference, Convert.ToInt32(valueFromInput), null);
+                                    useDefault = false;
                                     break;
 
                                 case 'b':
                                     property.SetValue(preference, Convert.ToBoolean(valueFromInput), null);
+                                    useDefault = false;
                                     break;
 
                                 case 'd':
                                     property.SetValue(preference, Convert.ToDouble(valueFromInput), null);
+                                    useDefault = false;
                                     break;
 
                                 case 's':
                                     property.SetValue(preference, valueFromInput, null);
+                                    useDefault = false;
                                     break;
 
                                 default:
                                     throw new InvalidDataException($"Preference {preferencePropertyAttribute.Name} is not formatted correctly. It must either start with 'i', 'b', 'd', or 's'.");
                                     break;
                             }
+                        }
+                    }
+                }
+
+                // Otherwise set based on default attribute
+                if (useDefault)
+                {
+                    foreach (var attribute in attributes)
+                    {
+                        if (attribute.GetType() == typeof(DefaultValueAttribute))
+                        {
+                            var defaultAttribute = (DefaultValueAttribute)attribute;
+
+                            property.SetValue(preference, defaultAttribute.Value, null);
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 ﻿using BleemSync.Extensions.Infrastructure.Attributes;
 using BleemSync.Extensions.PlayStationClassic.Core.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using SharpConfig;
 using System;
 using System.Collections.Generic;
@@ -12,24 +13,39 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
     [MenuSection(Icon = "theaters", Name = "PlayStation Classic")]
     public class SettingsController : Controller
     {
-        [MenuItem(Name = "Settings")]
-        public ActionResult Index()
+        private IConfiguration _configuration { get; set; }
+
+        public SettingsController(IConfiguration configuration)
         {
-            //var config = Configuration.LoadFromFile("regional.pre");
-            var configString = System.IO.File.ReadAllText("regional.pre");
+            _configuration = configuration;
+        }
 
-            var readPreferences = new RegionalPreferences(configString);
+        [MenuItem(Name = "System Preferences")]
+        [HttpGet]
+        public ActionResult SystemPreferences()
+        {
+            SystemPreferences preferences;
 
-            var preferences = new RegionalPreferences()
+            try
             {
-                RegionId = 1,
-                LanguageId = 2,
-                ReverseEnterKey = true,
-                AutoPowerOff = 1
-            };
+                var preferencesString = System.IO.File.ReadAllText(_configuration["PlayStationClassic:SystemPreferencesPath"]);
+                preferences = new SystemPreferences(preferencesString);
+            } catch
+            {
+                preferences = new SystemPreferences();
+            }
 
-            var prefstring = preferences.ToString();
-            return View();
+            return View(preferences);
+        }
+
+        [HttpPost]
+        public ActionResult SystemPreferences(SystemPreferences preferences)
+        {
+            var path = _configuration["PlayStationClassic:SystemPreferencesPath"];
+
+            System.IO.File.WriteAllText(path, preferences.ToString());
+
+            return View(preferences);
         }
     }
 }
