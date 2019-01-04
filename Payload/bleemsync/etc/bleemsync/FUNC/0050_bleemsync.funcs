@@ -102,6 +102,8 @@ exit_checkSaveState(){
 			echo "[BLEEMSYNC](INFO) New game path: $intercept_game_path"
             
             echo "[BLEEMSYNC](INFO) New Game ID: $intercept_game_id"
+		else
+			echo "[BLEEMSYNC](INFO) but it does not appear to belong to the game we launched from, so we'll ignore it [${ra_last_game}.${intercept_game_ext}]"
         fi
     fi
 
