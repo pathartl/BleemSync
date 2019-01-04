@@ -149,6 +149,47 @@ launch_RetroArch_from_StockUI(){
 
 }
 
+link_ra_memory_cards(){
+
+	##
+	#	WORK IN PROGRESS
+	##
+	return 0
+
+	#	This function will link ui_menu and RetroArch memory cards
+	#	ui_menu memory cards take precedence
+
+	echo "[BLEEMSYNC](INFO) linking ui_menu memory cards to RetroArch"
+
+	if ls -la | grep -i ".pcsx ->"; then
+
+        if [ ! -f /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd ]; then
+
+            mkdir -p /data/AppData/sony/pcsx/.pcsx/memcards
+            cp /usr/sony/share/data/memcard/card.mcd /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd
+        fi
+        
+		#	Will this work if $mountpoint is FAT32?
+        ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $mountpoint/bleemsync/opt/retroArch/saves/${intercept_game_id}.srm
+
+        #   RetroArch creates a memory card per game, which means all possible game discs need to be linked back to
+		#	/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd for them to function with a shared memory card which can be
+		#	managed from ui_menu
+		#
+        #   This is rather brute force at the moment, but iterate through each file in the directory and create a memory card symlink
+        for e in /data/AppData/sony/title/*; do
+    
+            if [ -f "$e" ]; then
+
+                temp_id="${e##*/}"
+                temp_id="${temp_id%.*}"
+                ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $mountpoint/bleemsync/opt/retroArch/saves/${temp_id}.srm
+            fi
+        done
+
+    fi
+	
+}
 
 ###############################################################################
 
