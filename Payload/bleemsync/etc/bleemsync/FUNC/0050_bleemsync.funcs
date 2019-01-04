@@ -97,8 +97,6 @@ exit_checkSaveState(){
             
             echo "[BLEEMSYNC](INFO) New Game ID: $intercept_game_id"
         fi
-    else
-        echo "We same game boys"
     fi
 
 	#	Check if an auto save state exists and then move it to the correct location for ui_menu to handle
@@ -120,6 +118,35 @@ exit_checkSaveState(){
 	#	so these need to be removed to ensure things work correctly
     #	F for orphaned auto saves
     rm $mountpoint/bleemsync/opt/retroArch/savestates/*.auto
+}
+
+launch_RetroArch_from_StockUI(){
+
+	echo "[BLEEMSYNC](INFO) launching RetroArch from menu_ui"
+
+	#	Check RA Exists and is configured correctly
+	[ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
+	[ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch" ] && break #FAIL
+	if [ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch/system/scph102b.bin" ]; then
+		cp -f "/gaadata/system/bios/romw.bin" "$mountpoint/bleemsync/opt/retroArch/retroarch/system/scph102b.bin"
+		echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
+	fi
+	mkdir -p "/tmp/ra_cache"
+	chmod +x "$mountpoint/bleemsync/opt/retroArch/retroarch"
+	export HOME="$mountpoint/bleemsync/opt/retroArch"
+
+	#	Check if this is a Save State load
+	if [ "$intercept_save_state" = true ]; then
+		echo "[BLEEMSYNC](INFO) this is a save state load"
+        mv /data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000 $mountpoint/bleemsync/opt/retroArch/savestates/${intercept_game_id}.state.auto
+    fi
+
+	#	Launch RetroArch
+	echo "[BLEEMSYNC](INFO) Launching RetroArch for game $intercept_game_path"
+	$mountpoint/bleemsync/opt/retroArch/retroarch -v -L $mountpoint/bleemsync/opt/retroArch/retroarch/.config/retroarch/cores/pcsx_rearmed_libretro.so $intercept_game_path &> "$runtime_log_path/retroarch.log"
+	echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
+	rm -rf "/tmp/ra_cache"
+
 }
 
 
