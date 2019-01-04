@@ -52,6 +52,79 @@ launch_StockUI(){
 }
 ###############################################################################
 
+###	UI_MENU -> RETROARCH INTERACTION FUNCTIONS ################################
+
+#	The follow variables will need to have been gathered from an intercept script
+#	prior to these functions being called
+#
+#
+#	intercept_game_path="" 		# The full path to the launching game file (follows argument -cdfile)
+#	intercept_game_dir="" 		# The directory game launched from - should be /data/AppData/sony/title
+#	intercept_game_id="" 		# The file name of the game minus the extension (ie. SCUS-0001)
+#	intercept_game_ext="" 		# The extension of game minus . (ie. cue)
+#	intercept_save_state=false 	# Set to true if ui_menu launches with -load
+#
+##
+
+exit_checkSaveState(){
+
+	# This function should only be called from the intercept script after RetroArch exits
+
+	echo "[BLEEMSYNC](INFO) checking for auto save state on RetroArch exit"
+
+	# An auto save state is created automatically, but what if the game disc was changed since
+	# RetroArch was originally launched. Check that the last saved state matches the ID of the launching
+	# game
+    
+    ra_last_game=`ls -t $mountpoint/bleemsync/opt/retroArch/savestates/*.auto | head -1`
+    ra_last_game="${ra_last_game##*/}"          #   Remove leading directories
+    ra_last_game="${ra_last_game%.state.auto}"  #   Remove trailing file extension .state.auto
+
+    if [ ! "$ra_last_game" == "$intercept_game_id" ]; then
+        
+		#   The last save state was for a different game, check if this disc belongs to the launching game
+		#	If it does then a disc swap has occured, so update the game ids so the correct save state
+		#	data is passed to ui_menu
+        echo "[BLEEMSYNC](INFO) last auto save state is from a game which is different to the launched game"
+
+        if [ -f "/data/AppData/sony/title/${ra_last_game}.${intercept_game_ext}" ]; then
+
+			echo "[BLEEMSYNC](INFO) ${ra_last_game}.${intercept_game_ext} exists and belongs to the launching game, updating save state"
+            intercept_game_path="/data/AppData/sony/title/${ra_last_game}.${intercept_game_ext}"
+            intercept_game_id=$ra_last_game
+			
+			echo "[BLEEMSYNC](INFO) New game path: $intercept_game_path"
+            
+            echo "[BLEEMSYNC](INFO) New Game ID: $intercept_game_id"
+        fi
+    else
+        echo "We same game boys"
+    fi
+
+	#	Check if an auto save state exists and then move it to the correct location for ui_menu to handle
+
+    if [ -f $mountpoint/bleemsync/opt/retroArch/savestates/${intercept_game_id}.state.auto ]; then
+		echo "[BLEEMSYNC](INFO) an auto save state exists"
+
+		#	Create filename.txt
+        echo $intercept_game_path > /data/AppData/sony/pcsx/.pcsx/filename.txt
+        echo $intercept_game_id >> /data/AppData/sony/pcsx/.pcsx/filename.txt
+
+		#	Move save state files
+        mv $mountpoint/bleemsync/opt/retroArch/savestates/${intercept_game_id}.state.auto /data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000
+        mv $mountpoint/bleemsync/opt/retroArch/savestates/${intercept_game_id}.state.auto.png /data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png
+        
+    fi
+
+	#	Remove any remaining auto save states. We're completly hijacking the auto-save state process
+	#	so these need to be removed to ensure things work correctly
+    #	F for orphaned auto saves
+    rm $mountpoint/bleemsync/opt/retroArch/savestates/*.auto
+}
+
+
+###############################################################################
+
 execute_bleemsync_func(){
 	echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
 	echo 1 > /sys/class/leds/red/brightness
