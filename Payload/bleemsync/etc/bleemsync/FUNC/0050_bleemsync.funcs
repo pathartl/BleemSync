@@ -55,10 +55,13 @@ launch_StockUI(){
 }
 ###############################################################################
 
+
+### MAIN BLEEMSYNC FUNCTION ###################################################
 execute_bleemsync_func(){
   echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
   echo 1 > /sys/class/leds/red/brightness
   
+  #Run on console bleemsync (This will be replaced in 1.0)
   if [ -f "$mountpoint/system/BleemSync/BleemSync" ]
   then
     cd "$mountpoint/system/BleemSync"
@@ -67,9 +70,8 @@ execute_bleemsync_func(){
     cd -
   fi
 
-  # Extract system files to avoid crashing
+  # Build external directory structure
   mkdir -p "$mountpoint/system/bios"
-  mkdir -p "$mountpoint/system/preferences"
   mkdir -p "$mountpoint/system/preferences/system"
   mkdir -p "$mountpoint/system/preferences/user"
   mkdir -p "$mountpoint/system/preferences/autodimmer"
@@ -77,15 +79,13 @@ execute_bleemsync_func(){
   mkdir -p "$mountpoint/system/region"
   mkdir -p "$mountpoint/system/ui"
 
-  # Copy the bios files to USB
+  # Copy the bios files
   [ ! -f "$mountpoint/system/bios/romw.bin" ] && cp -fr "/gaadata/system/bios/"* "$mountpoint/system/bios"
-  # Copy the regional.pre to USB
-  # This contains settings for the ui region
+  # Copy the regional.pre
   [ ! -f "$mountpoint/system/preferences/system/regional.pre" ] && cp -f "/gaadata/preferences/"* "$mountpoint/system/preferences/system"
-  # Copy out the user.pre to USB
-  # This contains things like language setting
+  # Copy out the user.pre
   [ ! -f "$mountpoint/system/preferences/user/user.pre" ] && cp -f "/data/AppData/sony/ui/"* "$mountpoint/system/preferences/user"
-  # Copy out the auto dimming config to USB
+  # Copy out the auto dimming config
   [ ! -f "$mountpoint/system/preferences/autodimmer/config.cnf" ] && cp -f "/data/AppData/sony/auto_dimmer/"* "$mountpoint/system/preferences/autodimmer"
   # Copy out the region info
   [ ! -f "$mountpoint/system/region/REGION" ] && cp -f "/gaadata/geninfo/"* "$mountpoint/system/region"
@@ -106,6 +106,8 @@ execute_bleemsync_func(){
     #display error message
     echo 0 > /sys/class/leds/green/brightness
     echo 1 > /sys/class/leds/red/brightness
+    /media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
+    sleep 1
     reboot
     exit 1
   fi
@@ -130,42 +132,36 @@ execute_bleemsync_func(){
   cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/tmp/datatmp/AppData/sony/pcsx"
   ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /tmp/datatmp/AppData/sony/pcsx/% && ln -s $mountpoint/games/% /tmp/datatmp/AppData/sony/pcsx/%"
  
-  echo "### EMMC Game loader ##################"
-
+  # Unite EMMC and MEDIA games and databases
   [ -d "/tmp/emmc_gaadata" ] && umount "/tmp/emmc_gaadata" && rm -fr "/tmp/emmc_gaadata"
   [ -d "/tmp/emmc_data" ] && umount "/tmp/emmc_data" && rm -fr "/tmp/emmc_data"
-  mkdir -p /tmp/emmc_gaadata && mount -o ro /dev/mapper/gaadata /tmp/emmc_gaadata/
-  mkdir -p /tmp/emmc_data && mount /dev/mmcblk0p10 /tmp/emmc_data/
+  mkdir -p "/tmp/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/tmp/emmc_gaadata/"
+  mkdir -p "/tmp/emmc_data" && mount "/dev/mmcblk0p10" "/tmp/emmc_data/"
 
-  EMMC_gaadata=$(ls "/tmp/emmc_gaadata" | grep -v "[a-z]" | grep -v "[A-Z]" | wc -l)
-  media_gaadata=$(ls "/tmp/gaadatatmp" | grep -v "[a-z]" | grep -v "[A-Z]" | wc -l)
-  x=1
+  emmc_gaadata_count=$(ls "/tmp/emmc_gaadata" | grep '^[0-9]\+$' | wc -l)
+  media_gaadata_count=$(ls "/tmp/gaadatatmp" | grep '^[0-9]\+$' | wc -l)
+  i=1
 
-  sqlite3 /tmp/emmc_gaadata/databases/regional.db -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
-  [ -f "/tmp/join.sql" ] && rm -f "/tmp/join.sql" && touch /tmp/join.sql
-  echo "BEGIN TRANSACTION;" >> /tmp/join.sql
+  sqlite3 "/tmp/emmc_gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
+  [ -f "/tmp/join.sql" ] && rm -f "/tmp/join.sql" && touch "/tmp/join.sql"
 
-  echo "Custom Games Loaded: $media_gaadata"
-  echo "EMMC Games Loaded: $EMMC_gaadata"
-
+  echo "BEGIN TRANSACTION;" >> "/tmp/join.sql"
   while true; do
-    [ "$x" = "$(( $EMMC_gaadata + 1))" ] && break
-    echo "--------------------"
-    echo "linking EMMC game $x to directory: $(( $media_gaadata + $x ))"
-    echo "ln -s /tmp/emmc_gaadata/$x /tmp/gaadatatmp/$(( $media_gaadata + $x ))"
-    if [ -d "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata + $x ))" ]; then
-      echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata + $x )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata + $x ))"
+    [ "$i" = "$(( $emmc_gaadata_count + 1))" ] && break
+    echo "ln -s /tmp/emmc_gaadata/$i /tmp/gaadatatmp/$(( $media_gaadata_count + $i ))"
+    if [ -d "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" ]; then
+      echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
     else
-      mkdir -p "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata + $x ))"
-      echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata + $x )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata + $x ))"
+      mkdir -p "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+      echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
     fi
-    echo $(grep "GAME VALUES($x," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata + $x )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >>$
-    echo $(grep "DISC VALUES($x," "/tmp/emmc.sql" | awk -F ")" '{ print $1",'\'''\'')"$2 }') >> "/tmp/join.sql"
-    x=$(( $x + 1 ))
+    echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
+    echo $(grep "DISC VALUES(" "test.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }' | awk -F ")" '{ print $1",'\'''\'')"$2 }') >> "/tmp/join.sql"
+    x=$(( $i + 1 ))
   done
-  echo "COMMIT;" >> /tmp/join.sql
+  echo "COMMIT;" >> "/tmp/join.sql"
 
-  sed -e 's/;,/;/g' "/tmp/join.sql"
+  sed -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
 
   #sqlite3 /tmp/gaadatatmp/databases/regional.db -cmd ".read /tmp/join.sql" ".quit"
 
@@ -238,3 +234,4 @@ execute_bleemsync_func(){
   fi
   exit 0
 }
+###############################################################################
