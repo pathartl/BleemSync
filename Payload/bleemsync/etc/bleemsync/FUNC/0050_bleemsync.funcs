@@ -77,6 +77,12 @@ exit_checkSaveState(){
 	# game
     
     ra_last_game=`ls -t $mountpoint/bleemsync/opt/retroArch/savestates/*.auto | head -1`
+
+	if [ "$ra_last_game" == "" ]; then
+		echo "[BLEEMSYNC](INFO) no auto save state exists"
+		return 0
+	fi
+
     ra_last_game="${ra_last_game##*/}"          #   Remove leading directories
     ra_last_game="${ra_last_game%.state.auto}"  #   Remove trailing file extension .state.auto
 
