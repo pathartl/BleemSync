@@ -1,0 +1,27 @@
+#!/bin/sh
+###############################################################################
+# BleemSync Bootstapper executor v0.1
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+### LOAD CONFIGURATION ########################################################
+source /media/bleemsync/etc/bleemsync/CFG/bleemsync.cfg
+
+### CUSTOM COMMANDLINE ARGUMENTS ##############################################
+command_args="--pretty-logo --dump-fstruct --debug-run"
+### BLEEMSYNC COMMANDLINE ARGUMENT ############################################
+[ "$enable_bs" = "1" ] && command_args="$command_args --execute-bleemsync"
+
+### BOOT ROUTINE ##############################################################
+
+if [ "$runtime_log" = "1" ]; then
+    chmod +x $runtime_exe_path/execute-child
+		$runtime_exe_path/execute-child $command_args &> "$runtime_log_path/bleemsync.log"
+else
+    chmod +x $runtime_exe_path/execute-child
+		$runtime_exe_path/execute-child $command_args 
+fi
+
+#If we get here... Panic and Reboot
+reboot
+exit 1
