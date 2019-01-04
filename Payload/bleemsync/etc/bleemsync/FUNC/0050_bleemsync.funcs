@@ -34,6 +34,7 @@ launch_RetroArch(){
 
 launch_BootMenu(){
 	echo "[BLEEMSYNC](INFO) launching BootMenu"
+	echo 2 > /data/power/disable
 	$mountpoint/bleemsync/bin/boot_menu 
 	[ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand")
 	if [ "$command" = "/media/lolhack/retroarch.sh" ]; then
@@ -47,6 +48,7 @@ launch_BootMenu(){
 
 launch_StockUI(){
 	echo "[BLEEMSYNC](INFO) launching stock UI"
+	echo 0 > /data/power/disable
 	cd "/data/AppData/sony/pcsx"
 	export PCSX_ESC_KEY=2
 	/usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
