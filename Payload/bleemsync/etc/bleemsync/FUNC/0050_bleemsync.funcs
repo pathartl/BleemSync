@@ -10,7 +10,7 @@ launch_RetroArch(){
 	while true; do
 		killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display
 		[ ! -d "$mountpoint/bleemsync/opt/retroArch" ] && mkdir -p "$mountpoint/bleemsync/opt/retroarch"
-		[ -d "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
+		[ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
 		[ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch" ] && break #FAIL
 		if [ ! -f "$mountpoint/bleemsync/opt/retroArch/retroarch/system/scph102b.bin" ]; then
 			cp -f "/gaadata/system/bios/romw.bin" "$mountpoint/bleemsync/opt/retroArch/retroarch/system/scph102b.bin"
