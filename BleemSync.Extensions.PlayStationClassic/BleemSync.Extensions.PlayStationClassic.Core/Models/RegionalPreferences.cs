@@ -5,10 +5,10 @@ using BleemSync.Extensions.PlayStationClassic.Core.Attributes;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 {
-    public class SystemPreferences : Preference
+    public class RegionalPreferences : Preference
     {
-        public SystemPreferences() { }
-        public SystemPreferences(string configString) : base(configString) { }
+        public RegionalPreferences() { }
+        public RegionalPreferences(string configString) : base(configString) { }
 
         [PreferenceProperty(Name = "iUiSystemSettingRegionId")]
         public int RegionId { get; set; }

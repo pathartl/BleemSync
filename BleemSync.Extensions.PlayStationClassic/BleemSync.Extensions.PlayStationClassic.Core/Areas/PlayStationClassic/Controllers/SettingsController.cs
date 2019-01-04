@@ -1,6 +1,7 @@
 ﻿using BleemSync.Extensions.Infrastructure.Attributes;
 using BleemSync.Extensions.PlayStationClassic.Core.Models;
 using Microsoft.AspNetCore.Mvc;
+using SharpConfig;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,9 +18,9 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
             //var config = Configuration.LoadFromFile("regional.pre");
             var configString = System.IO.File.ReadAllText("regional.pre");
 
-            var readPreferences = new SystemPreferences(configString);
+            var readPreferences = new RegionalPreferences(configString);
 
-            var preferences = new SystemPreferences()
+            var preferences = new RegionalPreferences()
             {
                 RegionId = 1,
                 LanguageId = 2,
