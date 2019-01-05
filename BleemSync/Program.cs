@@ -18,7 +18,7 @@ namespace BleemSync
         static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
                 .AddJsonFile("BleemSync.Config.json", optional: false, reloadOnChange: true);
 
             IConfigurationRoot configuration = builder.Build();
