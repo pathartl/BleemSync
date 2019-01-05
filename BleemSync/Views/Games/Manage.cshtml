@@ -74,66 +74,9 @@
 @section Scripts {
     <script src="~/lib/jstree/jstree.min.js"></script>
     <script src="~/lib/bleemsync/playstation-utilities.js"></script>
+    <script src="~/lib/bleemsync/game-manager.js"></script>
     <script>
-        var tree = $('.game-manager-node-tree');
-
-        function LoadGameTree() {
-            $.getJSON('@Url.Action("GetTree")', function (data) {
-                tree.jstree({
-                    'core': {
-                        'data': data,
-                        'check_callback': true
-                    },
-                    'types': {
-                        '#': {
-                            'valid_children': ['Folder', 'Game']
-                        },
-                        'Folder': {
-                            'valid_children': ['Folder', 'Game']
-                        },
-                        'Game': {
-                            'valid_children': []
-                        }
-                    },
-                    'plugins': [
-                        'dnd',
-                        'types'
-                    ]
-                }).bind('move_node.jstree', function (e, data) {
-                    var treeData = tree.jstree(true).get_json(null, { 'flat': true });
-                    $.ajax({
-                        type: 'POST',
-                        url: '@Url.Action("SaveTree")',
-                        data: { Nodes: treeData },
-                        success: function () { },
-                        dataType: 'json'
-                    });
-                    }).bind('select_node.jstree', function (e, data) {
-                        LoadEditGameForm(data.node.id);
-                });
-            });
-        }
-
-        function ReloadGameTree() {
-            $.getJSON('@Url.Action("GetTree")', function (data) {
-                tree.jstree(true).settings.core.data = data;
-                tree.jstree(true).refresh();
-            });
-        }
-
-        function LoadEditGameForm(id) {
-            $('.game-manager-form').hide();
-            $.getJSON('@Url.Action("GetById")?id=' + id, function (data) {
-                $('#edit-game-form').show().setViewModel(data);
-            });
-        }
-
-        function LoadAddGameForm(viewModel) {
-            $('.game-manager-form').hide();
-            $('#add-game-form').show().setViewModel(viewModel);
-        }
-
-        LoadGameTree();
+        var gameManager = new GameManager();
     </script>
 
     <script>

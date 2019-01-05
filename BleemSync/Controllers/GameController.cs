@@ -76,7 +76,7 @@ namespace BleemSync.Controllers
             _storage.Save();
         }
 
-        [HttpGet]
+        [HttpGet("{serial}")]
         public ActionResult GetBySerial(string serial)
         {
             Game game;
@@ -93,7 +93,7 @@ namespace BleemSync.Controllers
             return new JsonResult(game);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public ActionResult GetById(int id)
         {
             var game = _gameManagerNodeRepository.Get(id);
@@ -102,7 +102,7 @@ namespace BleemSync.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddGame(string serial, GameUpload gameUpload)
+        public async Task<ActionResult> AddGame(GameUpload gameUpload)
         {
             var temporaryFiles = new List<GameManagerFile>();
 
