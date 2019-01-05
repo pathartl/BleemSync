@@ -36,12 +36,12 @@ launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
   $mountpoint/bleemsync/bin/boot_menu 
-  [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand")
+  [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
   if [ "$command" = "/media/lolhack/retroarch.sh" ]; then
     echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching RetroArch"
     launch_RetroArch
   else
-    echo "[BLEEMSYNC](INFO) BS selected from boot menu (or failsafed). Launching stock ui"
+    echo "[BLEEMSYNC](INFO) BS selected from boot menu"
     launch_StockUI
   fi
 }
@@ -132,7 +132,9 @@ execute_bleemsync_func(){
   cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/tmp/datatmp/AppData/sony/pcsx"
   ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /tmp/datatmp/AppData/sony/pcsx/% && ln -s $mountpoint/games/% /tmp/datatmp/AppData/sony/pcsx/%"
  
+  echo "[BLEEMSYNC](INFO) Starting to unite EMMC and MEDIA games and databases"
   # Unite EMMC and MEDIA games and databases
+  start=`date +%s%N`
   [ -d "/tmp/emmc_gaadata" ] && umount "/tmp/emmc_gaadata" && rm -fr "/tmp/emmc_gaadata"
   [ -d "/tmp/emmc_data" ] && umount "/tmp/emmc_data" && rm -fr "/tmp/emmc_data"
   mkdir -p "/tmp/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/tmp/emmc_gaadata/"
@@ -156,14 +158,19 @@ execute_bleemsync_func(){
       echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
     fi
     echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-    echo $(grep "DISC VALUES(" "test.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }' | awk -F ")" '{ print $1",'\'''\'')"$2 }') >> "/tmp/join.sql"
-    x=$(( $i + 1 ))
+    echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }' | awk -F ")" '{ print $1",'\'''\'')"$2 }') >> "/tmp/join.sql"
+    i=$(( $i + 1 ))
   done
   echo "COMMIT;" >> "/tmp/join.sql"
 
-  sed -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
+  sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
+  end=`date +%s%N`
 
   #sqlite3 /tmp/gaadatatmp/databases/regional.db -cmd ".read /tmp/join.sql" ".quit"
+
+  runtime=$(((end-start)/1000000))
+  echo "[BLEEMSYNC](INFO) Uniting EMMC and MEDIA games and databases took: $runtime milliseconds"
+
 
   # Fix for last selected game issue. If not in place user may experience ui issue
   sed -i "s/iuiuserSettingLastSelectGameCursorPos.*/iuiuserSettingLastSelectGameCursorPos=0/" "/tmp/datatmp/AppData/sony/ui/user.pre"
