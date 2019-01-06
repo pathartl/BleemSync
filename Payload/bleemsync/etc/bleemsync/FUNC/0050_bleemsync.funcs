@@ -24,7 +24,6 @@ launch_RetroArch(){
     sync
     launch_BootMenu
   else
-    #you done goofed.
     /media/bleemsync/bin/sdl_display "/media/bleemsync/etc/bleemsync/IMG/woah.png"
     sleep 1
     echo "[BLEEMSYNC](FAIL) tried to launch RetroArch and it's not installed! Opening Stock ui..."
