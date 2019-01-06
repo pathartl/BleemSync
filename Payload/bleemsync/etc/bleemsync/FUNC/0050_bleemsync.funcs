@@ -113,8 +113,8 @@ execute_bleemsync_func(){
   fi
 
   # Create gaadata on tmpfs
-  mkdir -p "/tmp/gaadatatmp/system/"
-  ln -s "$mountpoint/system/databases" "/tmp/gaadatatmp/databases"
+  mkdir -p "/tmp/gaadatatmp/system/" "/tmp/gaadatatmp/databases/"
+  cp -f "$mountpoint/system/databases/regional.db" "/tmp/gaadatatmp/databases/"
   ln -s "$mountpoint/system/region" "/tmp/gaadatatmp/geninfo"
   ln -s "$mountpoint/system/bios" "/tmp/gaadatatmp/system/bios"
   ln -s "$mountpoint/system/preferences/system" "/tmp/gaadatatmp/preferences"
@@ -127,12 +127,11 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/ui" "/tmp/datatmp/sony/ui"
   ln -s "$mountpoint/system/preferences/user" "/tmp/datatmp/AppData/sony/ui"
   ln -s "$mountpoint/system/preferences/autodimmer" "/tmp/datatmp/AppData/sony/auto_dimmer"
-  ln -s "$mountpoint/system/bios" "/tmp/datatmp/AppData/sony/pcsx/bios"
-  ln -s "/usr/sony/bin/plugins" "/tmp/datatmp/AppData/sony/pcsx/plugins"
   cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/tmp/datatmp/AppData/sony/pcsx"
   ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /tmp/datatmp/AppData/sony/pcsx/% && ln -s $mountpoint/games/% /tmp/datatmp/AppData/sony/pcsx/%"
- 
-  echo "[BLEEMSYNC](INFO) Starting to unite EMMC and MEDIA games and databases"
+  ln -s "$mountpoint/system/bios" "/tmp/datatmp/AppData/sony/pcsx/bios"
+  ln -s "/usr/sony/bin/plugins" "/tmp/datatmp/AppData/sony/pcsx/plugins"
+
   # Unite EMMC and MEDIA games and databases
   start=`date +%s%N`
   [ -d "/tmp/emmc_gaadata" ] && umount "/tmp/emmc_gaadata" && rm -fr "/tmp/emmc_gaadata"
@@ -144,21 +143,21 @@ execute_bleemsync_func(){
   media_gaadata_count=$(ls "/tmp/gaadatatmp" | grep '^[0-9]\+$' | wc -l)
   i=1
 
-  sqlite3 "/tmp/emmc_gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
+  $mountpoint/bleemsync/bin/sqlite3 "/tmp/emmc_gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
   [ -f "/tmp/join.sql" ] && rm -f "/tmp/join.sql" && touch "/tmp/join.sql"
 
   echo "BEGIN TRANSACTION;" >> "/tmp/join.sql"
   while true; do
     [ "$i" = "$(( $emmc_gaadata_count + 1))" ] && break
-    echo "ln -s /tmp/emmc_gaadata/$i /tmp/gaadatatmp/$(( $media_gaadata_count + $i ))"
+    ln -s "/tmp/emmc_gaadata/$i" "/tmp/gaadatatmp/$(( $media_gaadata_count + $i ))"
     if [ -d "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" ]; then
-      echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+      ln -s "/tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
     else
       mkdir -p "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
-      echo "ln -s /tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i )) /tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+      ln -s "/tmp/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/tmp/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
     fi
     echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-    echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }' | awk -F ")" '{ print $1",'\'''\'')"$2 }') >> "/tmp/join.sql"
+    echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
     i=$(( $i + 1 ))
   done
   echo "COMMIT;" >> "/tmp/join.sql"
@@ -166,11 +165,10 @@ execute_bleemsync_func(){
   sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
   end=`date +%s%N`
 
-  #sqlite3 /tmp/gaadatatmp/databases/regional.db -cmd ".read /tmp/join.sql" ".quit"
+  $mountpoint/bleemsync/bin/sqlite3 "/tmp/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
   runtime=$(((end-start)/1000000))
   echo "[BLEEMSYNC](INFO) Uniting EMMC and MEDIA games and databases took: $runtime milliseconds"
-
 
   # Fix for last selected game issue. If not in place user may experience ui issue
   sed -i "s/iuiuserSettingLastSelectGameCursorPos.*/iuiuserSettingLastSelectGameCursorPos=0/" "/tmp/datatmp/AppData/sony/ui/user.pre"
@@ -195,7 +193,7 @@ execute_bleemsync_func(){
   if [ "$boot_disable_health" = "1" ]; then
     echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
     PATCH_FAIL=0
-    PATCH_DIR="/tmp/health_patch"
+    PATCH_DIR="/var/volatile/health_patch"
     PATCH_BIN="$PATCH_DIR/patch.bin"
     PATCH_TARGET="/usr/sony/bin/ui_menu"
     PATCH_WORKING="$PATCH_DIR/ui_menu"
@@ -215,6 +213,8 @@ execute_bleemsync_func(){
       echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
     fi
   fi
+
+    [ -d "/tmp/diag" ] && rm -rf "/tmp/diag"
   
   echo 0 > /sys/class/leds/red/brightness
   echo "[BLEEMSYNC](INFO) completed bleemsync boot"

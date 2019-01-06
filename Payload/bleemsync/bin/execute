@@ -1,27 +1,40 @@
 #!/bin/sh
 ###############################################################################
-# BleemSync Bootstapper executor v0.1
+# BleemSync Bootstapper executor v0.7
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
 ### LOAD CONFIGURATION ########################################################
-source /media/bleemsync/etc/bleemsync/CFG/bleemsync.cfg
+source "/media/bleemsync/etc/bleemsync/CFG/bleemsync.cfg"
+source "/media/bleemsync/etc/bleemsync/CFG/boot_sequence.cfg"
 
-### CUSTOM COMMANDLINE ARGUMENTS ##############################################
-command_args="--pretty-logo --dump-fstruct --debug-run"
-### BLEEMSYNC COMMANDLINE ARGUMENT ############################################
-[ "$enable_bs" = "1" ] && command_args="$command_args --execute-bleemsync"
+### LOAD FUNCTION LIBRARIES ###################################################
+source "/media/bleemsync/etc/bleemsync/FUNC/0000_shared.funcs"
+source "/media/bleemsync/etc/bleemsync/FUNC/0010_execute.funcs"
+source "/media/bleemsync/etc/bleemsync/FUNC/0050_bleemsync.funcs"
 
-### BOOT ROUTINE ##############################################################
+### EXECUTE ###################################################################
+main(){
+  for x in "${boot_sequence[@]}"; do
+    if [ "$runtime_log" = "1" ]; then
+      if [ ! -z $(echo "$x" | grep "dump_") ] && [ "$force_redump" = "1" ]; then
+        $x"_func" --force &> "$runtime_log_path/bleemsync.log"
+        continue
+      fi
+      $x"_func" &> "$runtime_log_path/bleemsync.log"
+    else
+      if [ ! -z $(echo "$x" | grep "dump_") ] && [ "$force_redump" = "1" ]; then
+        $x"_func" --force
+        continue
+      fi
+      $x"_func" 
+    fi
+  done 
+}
 
-if [ "$runtime_log" = "1" ]; then
-    chmod +x $runtime_exe_path/execute-child
-		$runtime_exe_path/execute-child $command_args &> "$runtime_log_path/bleemsync.log"
-else
-    chmod +x $runtime_exe_path/execute-child
-		$runtime_exe_path/execute-child $command_args 
-fi
+main #Do stuff and things
 
 #If we get here... Panic and Reboot
+sync
 reboot
 exit 1
