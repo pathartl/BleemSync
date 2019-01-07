@@ -63,7 +63,9 @@ launch_StockUI(){
 execute_bleemsync_func(){
   echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
   echo 1 > /sys/class/leds/red/brightness
-  
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+
   #Run on console bleemsync (This will be replaced in 1.0)
   if [ -f "$mountpoint/system/bleemsync/BleemSync" ]
   then
@@ -72,6 +74,11 @@ execute_bleemsync_func(){
     ./BleemSync
     cd "/home/root"
   fi
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync DB processing took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
 
   # Build external directory structure
   mkdir -p "$mountpoint/system/bios"
@@ -96,6 +103,11 @@ execute_bleemsync_func(){
   [ ! -f "$mountpoint/system/ui/error.log" ] && cp -f "/data/sony/ui/"* "$mountpoint/system/ui"
   sync
 
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync DB processing took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+
   # Unmount partitons and create tmpfs - Shut system down on failure
   MOUNT_FAIL=0
   umount /data || MOUNT_FAIL=1 
@@ -114,6 +126,11 @@ execute_bleemsync_func(){
     reboot
     exit 1
   fi
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs mounting took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
 
   # Create gaadata on tmpfs
   mkdir -p "/var/volatile/gaadatatmp/system/" "/var/volatile/gaadatatmp/databases/"
@@ -139,9 +156,12 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/bios" "/var/volatile/datatmp/AppData/sony/pcsx/bios"
   ln -s "/usr/sony/bin/plugins" "/var/volatile/datatmp/AppData/sony/pcsx/plugins"
 
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs symbolic linking took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
   # Unite EMMC and MEDIA games and databases
   if [ "$link_EMMC_and_USB" = "1" ]; then
-    start=`date +%s%N`
+    start=$(date +%s%N)
     [ -d "/var/volatile/emmc_gaadata" ] && umount "/var/volatile/emmc_gaadata" && rm -fr "/var/volatile/emmc_gaadata"
     [ -d "/var/volatile/emmc_data" ] && umount "/var/volatile/emmc_data" && rm -fr "/var/volatile/emmc_data"
     mkdir -p "/var/volatile/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/var/volatile/emmc_gaadata/"
@@ -171,16 +191,16 @@ execute_bleemsync_func(){
     echo "COMMIT;" >> "/tmp/join.sql"
 
     sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
-    end=`date +%s%N`
-
+    
     $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
-    runtime=$(((end-start)/1000000))
-    echo "[BLEEMSYNC](INFO) Uniting EMMC and MEDIA games and databases took: $runtime milliseconds"
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((time1-time2)/1000000))ms to execute"
   fi
-
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
   # Fix for last selected game issue. If not in place user may experience ui issue
-  sed -i "s/iuiuserSettingLastSelectGameCursorPos.*/iuiuserSettingLastSelectGameCursorPos=0/" "/var/volatile/datatmp/AppData/sony/ui/user.pre"
+  sed -i "s/iUiuserSettingLastSelectGameCursorPos.*/iuiuserSettingLastSelectGameCursorPos=0/" "/var/volatile/datatmp/AppData/sony/ui/user.pre"
 
   # Reload and apply udev rules that were overmounted above
   # Allows both controllers to be detected through a USB hub
@@ -198,8 +218,12 @@ execute_bleemsync_func(){
   done
   cd "/home/root"
 
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync general fixing took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
   #Patch out health check if toggled.
   if [ "$boot_disable_health" = "1" ]; then
+    start=$(date +%s%N)
     echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
     PATCH_FAIL=0
     PATCH_DIR="/var/volatile/health_patch"
@@ -221,11 +245,14 @@ execute_bleemsync_func(){
     else
       echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
     fi
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) BleemSync H+S patching took: $(((end-start)/1000000))ms to execute"
   fi
-  
+#-----------------------------------------------------------------------------#
   echo 0 > /sys/class/leds/red/brightness
   echo "[BLEEMSYNC](INFO) completed bleemsync boot"
-  
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
   #Cleanup before starting main user applications
   rm -rf "/tmp/systemd"*  
   rm -rf "/tmp/diag"
@@ -234,10 +261,15 @@ execute_bleemsync_func(){
   killall -s KILL sdl_display
   booted=0
 
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+
   [ "$boot_target_stock_ui" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
   [ "$boot_target_stock_BM" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_BootMenu
   [ "$boot_target_stock_RA" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_RetroArch
-  
+
+#-----------------------------------------------------------------------------#
   #Cleanup and shutdown (If active telnet session don't shutdown console.)
   if [ "$(who | wc -l)" = "1" ]; then
     while true; do
