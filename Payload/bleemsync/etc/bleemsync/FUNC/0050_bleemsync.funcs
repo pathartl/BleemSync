@@ -41,7 +41,7 @@ launch_BootMenu(){
   if [ "$command" = "retroarch" ]; then
     echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching RetroArch"
     launch_RetroArch
-  else if [ "$command" = "bleemsync" ]; then
+  elif [ "$command" = "bleemsync" ]; then
     echo "[BLEEMSYNC](INFO) BS selected from boot menu"
     launch_StockUI
   else
@@ -156,17 +156,17 @@ execute_bleemsync_func(){
 
     echo "BEGIN TRANSACTION;" >> "/tmp/join.sql"
     while true; do
-      [ "$i" = "$(( $emmc_gaadata_count + 1))" ] && break
-      ln -s "/var/volatile/emmc_gaadata/$i" "/var/volatile/gaadatatmp/$(( $media_gaadata_count + $i ))"
-      if [ -d "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" ]; then
-        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+      [ "$i" = "$(( emmc_gaadata_count + 1))" ] && break
+      ln -s "/var/volatile/emmc_gaadata/$i" "/var/volatile/gaadatatmp/$(( media_gaadata_count + i ))"
+      if [ -d "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))" ]; then
+        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( media_gaadata_count + i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
       else
-        mkdir -p "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
-        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+        mkdir -p "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
+        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( media_gaadata_count + i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
       fi
-      echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
-      i=$(( $i + 1 ))
+      echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
+      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
+      i=$(( i + 1 ))
     done
     echo "COMMIT;" >> "/tmp/join.sql"
 
