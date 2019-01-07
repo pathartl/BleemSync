@@ -16,10 +16,26 @@ launch_RetroArch(){
       echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
     fi
     mkdir -p "/tmp/ra_cache"
+    custom_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/xmb/custom"
+    if [ "$ra_use_custom_theme" = "1" ] && [ -d "$custom_theme_path" ]; then
+      MOUNT_FAIL=0
+      [ ! -f "$custom_theme_path/font.tff" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.tff"
+      [ ! -f "$custom_theme_path/png/bg.png" ] && cp -f "/usr/sony/share/data/images/GR/JP_US_BG.png" "$custom_theme_path/png/bg.png"
+      cp -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" "/var/volatile/retroarch.cfg"
+      mount -o bind "/var/volatile/retroarch.cfg" "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" || MOUNT_FAIL=1 
+      if [ "$MOUNT_FAIL" = 0 ]; then
+        sed -i -e 's/xmb_theme = "[^"]*"/xmb_theme = "7"/g' "/var/volatile/retroarch.cfg"
+        [ "$ra_use_custom_background" = "1" ] && sed -i -e 's/menu_wallpaper = "[^"]*"/video_font_path = ":/.config/retroarch/assets/xmb/custom/bg.png"/g' "/var/volatile/retroarch.cfg"
+        [ "$ra_use_custom_background" = "1" ] && sed -i -e 's/menu_wallpaper_opacity = "[^"]*"/menu_wallpaper_opacity = "0.700000"/g' "/var/volatile/retroarch.cfg"
+        sed -i -e 's/video_font_path = "[^"]*"/video_font_path = ":/.config/retroarch/assets/xmb/custom/font.ttf"/g' "/var/volatile/retroarch.cfg"
+        sed -i -e 's/xmb_font = "[^"]*"/xmb_font = ":/.config/retroarch/assets/xmb/custom/font.ttf"/g' "/var/volatile/retroarch.cfg"
+      fi
+    fi
     chmod +x "$bleemsync_path/opt/retroarch/retroarch"
     export HOME="$bleemsync_path/opt/retroarch"
     $bleemsync_path/opt/retroarch/retroarch -v &> "$runtime_log_path/retroarch.log"
-    [ -d "/tmp/ra_cache" ] && rm -rf "/tmp/ra_cache"
+    rm -rf "/tmp/ra_cache"
+    umount "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" &> "/dev/null"
     export HOME="/home/root" && cd "/home/root"
     sync
     launch_BootMenu
