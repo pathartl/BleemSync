@@ -195,7 +195,7 @@ execute_bleemsync_func(){
     $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
     end=$(date +%s%N)
-    echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((time1-time2)/1000000))ms to execute"
+    echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
