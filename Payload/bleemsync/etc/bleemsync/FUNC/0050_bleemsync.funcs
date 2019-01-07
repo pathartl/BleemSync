@@ -20,7 +20,7 @@ launch_RetroArch(){
     export HOME="$bleemsync_path/opt/retroarch"
     $bleemsync_path/opt/retroarch/retroarch -v &> "$runtime_log_path/retroarch.log"
     [ -d "/tmp/ra_cache" ] && rm -rf "/tmp/ra_cache"
-    cd /
+    export HOME="/home/root" && cd "/home/root"
     sync
     launch_BootMenu
   else
@@ -70,7 +70,7 @@ execute_bleemsync_func(){
     cd "$mountpoint/system/bleemsync"
     chmod +x "BleemSync"
     ./BleemSync
-    cd -
+    cd "/home/root"
   fi
 
   # Build external directory structure
@@ -117,7 +117,11 @@ execute_bleemsync_func(){
 
   # Create gaadata on tmpfs
   mkdir -p "/var/volatile/gaadatatmp/system/" "/var/volatile/gaadatatmp/databases/"
-  cp -f "$mountpoint/system/databases/regional.db" "/var/volatile/gaadatatmp/databases/"
+  if [ "$link_EMMC_and_USB" = "1" ]; then
+    cp -f "$mountpoint/system/databases/regional.db" "/var/volatile/gaadatatmp/databases/"
+  else
+    ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/databases"
+  fi
   ln -s "$mountpoint/system/region" "/var/volatile/gaadatatmp/geninfo"
   ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"
   ln -s "$mountpoint/system/preferences/system" "/var/volatile/gaadatatmp/preferences"
@@ -136,42 +140,44 @@ execute_bleemsync_func(){
   ln -s "/usr/sony/bin/plugins" "/var/volatile/datatmp/AppData/sony/pcsx/plugins"
 
   # Unite EMMC and MEDIA games and databases
-  start=`date +%s%N`
-  [ -d "/var/volatile/emmc_gaadata" ] && umount "/var/volatile/emmc_gaadata" && rm -fr "/var/volatile/emmc_gaadata"
-  [ -d "/var/volatile/emmc_data" ] && umount "/var/volatile/emmc_data" && rm -fr "/var/volatile/emmc_data"
-  mkdir -p "/var/volatile/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/var/volatile/emmc_gaadata/"
-  mkdir -p "/var/volatile/emmc_data" && mount "/dev/mmcblk0p10" "/var/volatile/emmc_data/"
+  if [ "$link_EMMC_and_USB" = "1" ]; then
+    start=`date +%s%N`
+    [ -d "/var/volatile/emmc_gaadata" ] && umount "/var/volatile/emmc_gaadata" && rm -fr "/var/volatile/emmc_gaadata"
+    [ -d "/var/volatile/emmc_data" ] && umount "/var/volatile/emmc_data" && rm -fr "/var/volatile/emmc_data"
+    mkdir -p "/var/volatile/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/var/volatile/emmc_gaadata/"
+    mkdir -p "/var/volatile/emmc_data" && mount "/dev/mmcblk0p10" "/var/volatile/emmc_data/"
 
-  emmc_gaadata_count=$(ls "/var/volatile/emmc_gaadata" | grep '^[0-9]\+$' | wc -l)
-  media_gaadata_count=$(ls "/var/volatile/gaadatatmp" | grep '^[0-9]\+$' | wc -l)
-  i=1
+    emmc_gaadata_count=$(ls "/var/volatile/emmc_gaadata" | grep '^[0-9]\+$' | wc -l)
+    media_gaadata_count=$(ls "/var/volatile/gaadatatmp" | grep '^[0-9]\+$' | wc -l)
+    i=1
 
-  $bleemsync_path/bin/sqlite3 "/var/volatile/emmc_gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
-  [ -f "/tmp/join.sql" ] && rm -f "/tmp/join.sql" && touch "/tmp/join.sql"
+    $bleemsync_path/bin/sqlite3 "/var/volatile/emmc_gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
+    [ -f "/tmp/join.sql" ] && rm -f "/tmp/join.sql" && touch "/tmp/join.sql"
 
-  echo "BEGIN TRANSACTION;" >> "/tmp/join.sql"
-  while true; do
-    [ "$i" = "$(( $emmc_gaadata_count + 1))" ] && break
-    ln -s "/var/volatile/emmc_gaadata/$i" "/var/volatile/gaadatatmp/$(( $media_gaadata_count + $i ))"
-    if [ -d "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" ]; then
-      ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
-    else
-      mkdir -p "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
-      ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
-    fi
-    echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-    echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
-    i=$(( $i + 1 ))
-  done
-  echo "COMMIT;" >> "/tmp/join.sql"
+    echo "BEGIN TRANSACTION;" >> "/tmp/join.sql"
+    while true; do
+      [ "$i" = "$(( $emmc_gaadata_count + 1))" ] && break
+      ln -s "/var/volatile/emmc_gaadata/$i" "/var/volatile/gaadatatmp/$(( $media_gaadata_count + $i ))"
+      if [ -d "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" ]; then
+        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+      else
+        mkdir -p "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))" "/var/volatile/datatmp/AppData/sony/pcsx/$(( $media_gaadata_count + $i ))"
+      fi
+      echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
+      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( $media_gaadata_count + $i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
+      i=$(( $i + 1 ))
+    done
+    echo "COMMIT;" >> "/tmp/join.sql"
 
-  sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
-  end=`date +%s%N`
+    sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
+    end=`date +%s%N`
 
-  $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
+    $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
-  runtime=$(((end-start)/1000000))
-  echo "[BLEEMSYNC](INFO) Uniting EMMC and MEDIA games and databases took: $runtime milliseconds"
+    runtime=$(((end-start)/1000000))
+    echo "[BLEEMSYNC](INFO) Uniting EMMC and MEDIA games and databases took: $runtime milliseconds"
+  fi
 
   # Fix for last selected game issue. If not in place user may experience ui issue
   sed -i "s/iuiuserSettingLastSelectGameCursorPos.*/iuiuserSettingLastSelectGameCursorPos=0/" "/var/volatile/datatmp/AppData/sony/ui/user.pre"
@@ -190,7 +196,7 @@ execute_bleemsync_func(){
       fi
     fi
   done
-  cd -
+  cd "/home/root"
 
   #Patch out health check if toggled.
   if [ "$boot_disable_health" = "1" ]; then
