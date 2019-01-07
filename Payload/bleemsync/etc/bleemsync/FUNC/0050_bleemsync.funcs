@@ -34,14 +34,18 @@ launch_RetroArch(){
 launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
-  $bleemsync_path/bin/boot_menu 
+  rm -f "/tmp/launchfilecommand"
+  $bleemsync_path/bin/boot_menu --image-folder "$bleemsync_path/etc/bleemsync/IMG"
+  command=""
   [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
-  if [ "$command" = "/media/lolhack/retroarch.sh" ]; then
+  if [ "$command" = "retroarch" ]; then
     echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching RetroArch"
     launch_RetroArch
-  else
+  else if [ "$command" = "bleemsync" ]; then
     echo "[BLEEMSYNC](INFO) BS selected from boot menu"
     launch_StockUI
+  else
+    return 0
   fi
 }
 
