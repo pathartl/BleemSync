@@ -9,17 +9,18 @@
 onmessage = function (e) {
     let reader = new FileReaderSync();
     let files = e.data;
+    let games = [];
 
     for (let file of files) {
         let extension = file.name.split('.').pop();
-        let games = [];
 
         switch (extension) {
             case 'cue':
                 games.push(ParseCueFile(file, files));
         }
     }
-    let text = reader.readAsText(e.data[0]);
+
+    postMessage(games);
 
     function ParseCueFile(file, files) {
         // Need all files so we can verify all parts of the .cue exist
@@ -54,17 +55,26 @@ onmessage = function (e) {
             if (binFilesFound.length === binFiles.length) {
                 response.Valid = true;
                 response.Game = GetGameInfoFromBinaryFiles(binFilesFound);
+                response.Game.Files = [file];
+                response.Game.Files.push(binFilesFound);
             } else {
                 response.Valid = false;
                 response.Message = "Not all binary files were selected, or they are misnamed."
             }
         }
+
+        return response;
     }
 
     function GetGameInfoFromBinaryFiles(files) {
         var fingerprint = "";
 
+        // Test PlayStation first, other parsers will go under here
         fingerprint = GetPlayStationFingerprint(files[0]);
+
+        if (fingerprint != '') {
+            return GetGameInfoFromCentral(fingerprint, 'PlayStation');
+        }
     }
 
     function GetPlayStationFingerprint(file) {
@@ -131,5 +141,19 @@ onmessage = function (e) {
         }
 
         return cleanSerial;
+    }
+
+    function GetGameInfoFromCentral(fingerprint, system) {
+        let request = new XMLHttpRequest();
+
+        request.open('GET', `https://central.bleemsync.app/api/${system}/GetBySerial/${fingerprint}`, false);
+        request.send(null);
+
+        if (request.status === 200) {
+            console.log(request.responseText);
+            return JSON.parse(request.responseText);
+        } else {
+            throw new DOMException(`Could not scrape data for a game with the fingerprint of ${fingerprint} for the system ${system}.`);
+        }
     }
 };

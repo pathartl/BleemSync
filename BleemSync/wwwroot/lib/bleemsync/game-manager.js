@@ -92,19 +92,13 @@
 
         worker.postMessage(uploader.files);
 
-        var parsingPromises = [];
-
-        for (let file of uploader.files) {
-            switch (file.name.split('.').pop()) {
-                case 'cue':
-                    //parsingPromises.push(this.ParseCueSheet(file, uploader.files));
-                    break;
+        worker.onmessage = (response) => {
+            if (Array.isArray(response.data) && response.data.length > 0) {
+                if (response.data[0].Valid) {
+                    this.LoadAddGameForm(response.data[0].Game);
+                }
             }
         }
-
-        var gameResults = Promise.all(parsingPromises).then((games) => {
-            console.log(games);
-        });
     }
 
     ParseCueSheet(cueSheet, allFiles) {

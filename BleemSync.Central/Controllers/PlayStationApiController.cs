@@ -49,6 +49,14 @@ namespace BleemSync.Central.Controllers
         }
 
         [HttpGet("{serial}")]
+        public ActionResult GetByFingerprint(string serial)
+        {
+            var game = _service.GetGameBySerialNumber(serial);
+
+            return new JsonResult(game);
+        }
+
+        [HttpGet("{serial}")]
         public ActionResult GetCoverBySerial(string serial)
         {
             var game = _service.GetGameBySerialNumber(serial);
