@@ -35,3 +35,6 @@ BleemSync-*.zip
 Publish/
 BleemSync.Payload/System/BleemSync/
 *.flag
+Payload/system/bleemsync/
+Payload/system/defaults/cover.png
+Payload/system/defaults/pcsx.cfg
