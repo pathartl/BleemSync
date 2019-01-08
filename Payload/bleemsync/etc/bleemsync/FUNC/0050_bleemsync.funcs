@@ -8,7 +8,7 @@
 launch_RetroArch(){
   echo "[BLEEMSYNC](INFO) launching RetroArch"
   if [ -f "$bleemsync_path/opt/retroarch/retroarch" ]; then
-    killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display
+    killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
     [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
     if [ ! -f "$bleemsync_path/opt/retroarch/system/scph102b.bin" ]; then
       mkdir -p "$bleemsync_path/opt/retroarch/system"
@@ -182,12 +182,8 @@ execute_bleemsync_func(){
     while true; do
       [ "$i" = "$(( emmc_gaadata_count + 1))" ] && break
       ln -s "/var/volatile/emmc_gaadata/$i" "/var/volatile/gaadatatmp/$(( media_gaadata_count + i ))"
-      if [ -d "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))" ]; then
-        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( media_gaadata_count + i ))" "/var/volatile/datatmp/AppData/sony/pcsx/"
-      else
-        mkdir -p "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
-        ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$(( media_gaadata_count + i ))" "/var/volatile/datatmp/AppData/sony/pcsx/"
-      fi
+      rm -rf "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
+      ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$i" "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
       echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
       echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
       i=$(( i + 1 ))
