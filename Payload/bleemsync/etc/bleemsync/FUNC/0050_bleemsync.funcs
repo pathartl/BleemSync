@@ -194,6 +194,11 @@ execute_bleemsync_func(){
     
     $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
+    if [ "$link_alphabeticalise" = "1" ]; then
+      echo "create table new as select * from GAME order by GAME_TITLE_STRING; drop table GAME; create table GAME as select * from new order by GAME_TITLE_STRING; drop table new; .quit" \
+      | $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db"
+    fi
+
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
@@ -265,7 +270,7 @@ execute_bleemsync_func(){
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
 
-  [ "$boot_target_stock_ui" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
+  [ "$boot_target_stock_UI" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
   [ "$boot_target_stock_BM" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_BootMenu
   [ "$boot_target_stock_RA" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_RetroArch
 
