@@ -146,8 +146,8 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/region" "/var/volatile/gaadatatmp/geninfo"
   ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"
   ln -s "$mountpoint/system/preferences/system" "/var/volatile/gaadatatmp/preferences"
-  ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s $mountpoint/games/%/GameData /var/volatile/gaadatatmp/% && mkdir -p $mountpoint/games/%/.pcsx && cp $mountpoint/games/%/GameData/pcsx.cfg $mountpoint/games/%/.pcsx"
-
+  ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s $mountpoint/games/%/GameData /var/volatile/gaadatatmp/%"
+  
   # Create data on tmpfs
   mkdir -p "/var/volatile/datatmp/sony/sgmo" "/var/volatile/datatmp/AppData/sony"
   # ln -s "/tmp/diag" "/tmp/datatmp/sony/sgmo/diag"
@@ -201,6 +201,11 @@ execute_bleemsync_func(){
 
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
+  else
+    [ -d "/var/volatile/emmc_gaadata" ] && umount "/var/volatile/emmc_gaadata" && rm -fr "/var/volatile/emmc_gaadata"
+    [ -d "/var/volatile/emmc_data" ] && umount "/var/volatile/emmc_data" && rm -fr "/var/volatile/emmc_data"
+    mkdir -p "/var/volatile/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/var/volatile/emmc_gaadata/"
+    mkdir -p "/var/volatile/emmc_data" && mount "/dev/mmcblk0p10" "/var/volatile/emmc_data/"
   fi
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
@@ -216,8 +221,9 @@ execute_bleemsync_func(){
   cd "$mountpoint/games"
   for D in *; do
     if [ -d "$D" ]; then
-      if [ ! -f "$D/GameData/pcsx.cfg" ]; then
-        cp -f "../system/Defaults/pcsx.cfg" "$D/GameData/pcsx.cfg"
+      if [ ! -f "$D/.pcsx/pcsx.cfg" ]; then
+        mkdir -p "$D/.pcsx"
+        cp -f "$mountpoint/system/defaults/pcsx.cfg" "$D/.pcsx/pcsx.cfg"
       fi
     fi
   done
