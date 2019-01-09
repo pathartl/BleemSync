@@ -5,8 +5,8 @@
 ###############################################################################
 
 ### LOCAL FUNCTIONS ###########################################################
-launch_RetroArch(){
-  echo "[BLEEMSYNC](INFO) launching RetroArch"
+launch_retroarch(){
+  echo "[BLEEMSYNC](INFO) launching retroarch"
   if [ -f "$bleemsync_path/opt/retroarch/retroarch" ]; then
     killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
     [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
@@ -30,7 +30,7 @@ launch_RetroArch(){
   else
     $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png"
     sleep 1
-    echo "[BLEEMSYNC](FAIL) tried to launch RetroArch and it's not installed! Opening Stock ui..."
+    echo "[BLEEMSYNC](FAIL) tried to launch retroarch and it's not installed! Opening Stock ui..."
     launch_StockUI
   fi
 }
@@ -43,8 +43,8 @@ launch_BootMenu(){
   command=""
   [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
   if [ "$command" = "retroarch" ]; then
-    echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching RetroArch"
-    launch_RetroArch
+    echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching retroarch"
+    launch_retroarch
   elif [ "$command" = "bleemsync" ]; then
     echo "[BLEEMSYNC](INFO) BS selected from boot menu"
     launch_StockUI
@@ -62,6 +62,130 @@ launch_StockUI(){
 }
 ###############################################################################
 
+### UI_MENU -> retroarch INTERACTION FUNCTIONS ################################
+
+#  The follow variables will need to have been gathered from an intercept script
+#  prior to these functions being called
+#
+#
+#  intercept_game_path=""     # The full path to the launching game file (follows argument -cdfile)
+#  intercept_game_dir=""      # The directory game launched from - should be /data/AppData/sony/title
+#  intercept_game_id=""        # The file name of the game minus the extension (ie. SCUS-0001)
+#  intercept_game_ext=""      # The extension of game minus . (ie. cue)
+#  intercept_save_state=false # Set to true if ui_menu launches with -load
+
+exit_checkSaveState(){
+  # This function should only be called from the intercept script after retroarch exits
+  echo "[BLEEMSYNC](INFO) checking for auto save state on retroarch exit"
+
+  # An auto save state is created automatically, but what if the game disc was changed since
+  # retroarch was originally launched. Check that the last saved state matches the ID of the launching
+  # game
+    
+  ra_last_game=`ls -t $mountpoint/bleemsync/opt/retroarch/savestates/*.auto | head -1`
+
+  if [ "$ra_last_game" == "" ]; then
+    echo "[BLEEMSYNC](INFO) no auto save state exists"
+    return 0
+  fi
+
+  ra_last_game="${ra_last_game##*/}"          # Remove leading directories
+  ra_last_game="${ra_last_game%.state.auto}"  # Remove trailing file extension .state.auto
+
+  if [ ! "$ra_last_game" == "$intercept_game_id" ]; then    
+    #  The last save state was for a different game, check if this disc belongs to the launching game
+    #  If it does then a disc swap has occured, so update the game ids so the correct save state
+    #  data is passed to ui_menu state is from a game which is different to the launched game"
+    if [ -f "/data/AppData/sony/title/${ra_last_game}.${intercept_game_ext}" ]; then
+      echo "[BLEEMSYNC](INFO) ${ra_last_game}.${intercept_game_ext} exists and belongs to the launching game, updating save state"
+      intercept_game_path="/data/AppData/sony/title/${ra_last_game}.${intercept_game_ext}"
+      intercept_game_id=$ra_last_game
+      echo "[BLEEMSYNC](INFO) New game path: $intercept_game_path"
+      echo "[BLEEMSYNC](INFO) New Game ID: $intercept_game_id"
+    else
+      echo "[BLEEMSYNC](INFO) but it does not appear to belong to the game we launched from, so we'll ignore it [${ra_last_game}.${intercept_game_ext}]"
+    fi
+  fi
+
+  #  Check if an auto save state exists and then move it to the correct location for ui_menu to handle
+  if [ -f $mountpoint/bleemsync/opt/retroarch/savestates/${intercept_game_id}.state.auto ]; then
+    echo "[BLEEMSYNC](INFO) an auto save state exists"
+    #  Create filename.txt
+    echo $intercept_game_path > /data/AppData/sony/pcsx/.pcsx/filename.txt
+    echo $intercept_game_id >> /data/AppData/sony/pcsx/.pcsx/filename.txt
+    #  Move save state files
+    mv $mountpoint/bleemsync/opt/retroarch/savestates/${intercept_game_id}.state.auto /data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000
+    mv $mountpoint/bleemsync/opt/retroarch/savestates/${intercept_game_id}.state.auto.png /data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png      
+  fi
+
+  # Remove any remaining auto save states. We're completly hijacking the auto-save state process
+  # so these need to be removed to ensure things work correctly
+  # F for orphaned auto saves
+  rm $mountpoint/bleemsync/opt/retroarch/savestates/*.auto
+}
+
+launch_retroarch_from_StockUI(){
+  echo "[BLEEMSYNC](INFO) launching retroarch from menu_ui"
+  #  Check RA Exists and is configured correctly
+  [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
+  [ ! -f "$mountpoint/bleemsync/opt/retroarch/retroarch" ] && break #FAIL
+  if [ ! -f "$mountpoint/bleemsync/opt/retroarch/retroarch/system/scph102b.bin" ]; then
+    cp -f "/gaadata/system/bios/romw.bin" "$mountpoint/bleemsync/opt/retroarch/retroarch/system/scph102b.bin"
+    echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
+  fi
+  mkdir -p "/tmp/ra_cache"
+  chmod +x "$mountpoint/bleemsync/opt/retroarch/retroarch"
+  export HOME="$mountpoint/bleemsync/opt/retroarch"
+  #  Check if this is a Save State load
+  if [ "$intercept_save_state" = true ]; then
+    echo "[BLEEMSYNC](INFO) this is a save state load"
+    mv /data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000 $mountpoint/bleemsync/opt/retroarch/savestates/${intercept_game_id}.state.auto
+  fi
+
+  #  Launch retroarch
+  echo "[BLEEMSYNC](INFO) Launching retroarch for game $intercept_game_path"
+  $mountpoint/bleemsync/opt/retroarch/retroarch -v -L $mountpoint/bleemsync/opt/retroarch/retroarch/.config/retroarch/cores/pcsx_rearmed_libretro.so $intercept_game_path &> "$runtime_log_path/retroarch.log"
+  echo "[BLEEMSYNC](INFO) retroarch exit code $?"
+  rm -rf "/tmp/ra_cache"
+}
+
+link_ra_memory_cards(){
+
+  ##
+  #  WORK IN PROGRESS
+  ##
+  return 0
+
+  #  This function will link ui_menu and retroarch memory cards
+  #  ui_menu memory cards take precedence
+  echo "[BLEEMSYNC](INFO) linking ui_menu memory cards to retroarch"
+  if ls -la | grep -i ".pcsx ->"; then
+    if [ ! -f /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd ]; then
+      mkdir -p /data/AppData/sony/pcsx/.pcsx/memcards
+      cp /usr/sony/share/data/memcard/card.mcd /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd
+    fi
+        
+    # Will this work if $mountpoint is FAT32? 
+    # NO IT WON'T ANDSHREW
+    ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $mountpoint/bleemsync/opt/retroarch/saves/${intercept_game_id}.srm
+
+    # retroarch creates a memory card per game, which means all possible game discs need to be linked back to
+    # /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd for them to function with a shared memory card which can be
+    # managed from ui_menu
+    #
+    # This is rather brute force at the moment, but iterate through each file in the directory and create a memory card symlink
+    for e in /data/AppData/sony/title/*; do
+      if [ -f "$e" ]; then
+        temp_id="${e##*/}"
+        temp_id="${temp_id%.*}"
+        ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $mountpoint/bleemsync/opt/retroarch/saves/${temp_id}.srm
+      fi
+    done
+  fi
+  
+}
+
+###############################################################################
 
 ### MAIN BLEEMSYNC FUNCTION ###################################################
 execute_bleemsync_func(){
@@ -227,7 +351,7 @@ execute_bleemsync_func(){
       fi
     fi
   done
-  cd "/home/root"
+  cd "/home/root" 
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync general fixing took: $(((end-start)/1000000))ms to execute"
@@ -278,7 +402,7 @@ execute_bleemsync_func(){
 
   [ "$boot_target_stock_UI" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
   [ "$boot_target_stock_BM" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_BootMenu
-  [ "$boot_target_stock_RA" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_RetroArch
+  [ "$boot_target_stock_RA" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_retroarch
 
 #-----------------------------------------------------------------------------#
   #Cleanup and shutdown (If active telnet session don't shutdown console.)
