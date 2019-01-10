@@ -39,7 +39,12 @@ launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
   rm -f "/tmp/launchfilecommand"
-  $bleemsync_path/bin/boot_menu --image-folder "$bleemsync_path/etc/bleemsync/IMG"
+  if [ "boot_menu_music" = "1" ]; then
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$boot_menu_music"
+  else
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path"
+  fi
+  
   command=""
   [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
   if [ "$command" = "retroarch" ]; then
