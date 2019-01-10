@@ -58,6 +58,13 @@ launch_StockUI(){
   echo 0 > /data/power/disable
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
+
+  if [ "$enable_intercept" = "1" ]; then
+    mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "/usr/sony/share/data/preferences/system.pre"
+    cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
+    chmod +x "/tmp/intercept"
+  fi
+  
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
 }
 ###############################################################################
