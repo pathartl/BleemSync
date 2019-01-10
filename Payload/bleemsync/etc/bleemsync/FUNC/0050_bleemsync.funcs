@@ -251,6 +251,8 @@ execute_bleemsync_func(){
   mount -o bind "/var/volatile/gaadatatmp" "/gaadata" || MOUNT_FAIL=1 
   mount -o bind "/var/volatile/datatmp" "/data" || MOUNT_FAIL=1 
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1 
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
+
   if [ "$MOUNT_FAIL" = "1" ]; then
     #display error message
     echo 0 > /sys/class/leds/green/brightness
