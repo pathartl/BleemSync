@@ -11,6 +11,7 @@ source "/media/bleemsync/etc/bleemsync/CFG/boot_sequence.cfg"
 ### LOAD FUNCTION LIBRARIES ###################################################
 source "/media/bleemsync/etc/bleemsync/FUNC/0000_shared.funcs"
 source "/media/bleemsync/etc/bleemsync/FUNC/0010_execute.funcs"
+source "/media/bleemsync/etc/bleemsync/FUNC/0030_retroarch.funcs"
 source "/media/bleemsync/etc/bleemsync/FUNC/0050_bleemsync.funcs"
 
 ### EXECUTE ###################################################################
