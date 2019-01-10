@@ -1,55 +1,64 @@
 #!/bin/sh
+###############################################################################
+# BleemSync Function Library - Stock UI Themes
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
 
-# Set vars
-log_file="$runtime_log_path/theme_remounter.log"
+select_UI_theme(){
+  echo "[BLEEMSYNC](Executing) select_UI_theme()"
+  echo 1 > /sys/class/leds/red/brightness
+  start=$(date +%s%N)
+  # Check for upper-case folder names and lower-case them
+  for theme_folder in $( ls $themes_path/ | grep [A-Z] ); do
+    mv -f "$themes_path/$theme_folder" "$themes_path/_$theme_folder"
+    mv -f "$themes_path/_$theme_folder" "$(echo $themes_path/$theme_folder | tr 'A-Z' 'a-z')"
+  done
 
-# Check for upper-case folder names and lower-case them
-for theme_folder in $( ls $themes_path/ | grep [A-Z] );
-do
-	mv -i "$themes_path/$theme_folder" "$themes_path/_$theme_folder"
-	mv -i "$themes_path/_$theme_folder" "`echo $themes_path/$theme_folder | tr 'A-Z' 'a-z'`"
-done
+  # Set random theme if setting is set
+  if [ "$random_theme_onload" = "1" ]; then
+    cd "$themes_path"
+    selected_theme=$(ls * | sort --random-sort | head -1)
+    cd "/home/root"
+  fi
 
-# Set random theme if setting is set
-if [ "$random_theme_onload" = "1" ]; then
-	cd "$themes_path"
-	selected_theme=`ls * | sort --random-sort | head -1`
-	cd -
-fi
+  # Lower-case the theme variable incase it causes and issue
+  selected_theme="$(echo $selected_theme | tr 'A-Z' 'a-z')"
 
-# Lower-case the theme variable incase it causes and issue
-selected_theme="`echo $selected_theme | tr 'A-Z' 'a-z'`"; 
-
-if [ -d "$themes_path/$selected_theme" ]; then
-    echo "[THEME REMOUNTER] found $selected_theme"
+  if [ "$selected_theme" != "stock" ] && [ -d "$themes_path/$selected_theme" ]; then
+    echo "[BLEEMSYNC](INFO)(theme) found $selected_theme"
     # Check for the font folder
     if [ -d "$themes_path/$selected_theme/font" ]; then
-        mount -o bind "$themes_path/$selected_theme/font" "/usr/sony/share/data/font"
-        echo "[THEME REMOUNTER] mounted font folder for $selected_theme"
+      mount -o bind "$themes_path/$selected_theme/font" "/usr/sony/share/data/font"
+      echo "[BLEEMSYNC](INFO)(theme) mounted font folder for $selected_theme"
     else
-        echo "[THEME REMOUNTER] no font folder found for $selected_theme"
+      echo "[BLEEMSYNC](INFO)(theme) no font folder found for $selected_theme"
     fi
     # Check for the images folder
     if [ -d "$themes_path/$selected_theme/images" ]; then
-        mount -o bind "$themes_path/$selected_theme/images" "/usr/sony/share/data/images"
-        echo "[THEME REMOUNTER] mounted images folder for $selected_theme"
+      mount -o bind "$themes_path/$selected_theme/images" "/usr/sony/share/data/images"
+      echo "[BLEEMSYNC](INFO)(theme) mounted images folder for $selected_theme"
     else
-        echo "[THEME REMOUNTER] no images folder found for $selected_theme"
+      echo "[BLEEMSYNC](INFO)(theme) no images folder found for $selected_theme"
     fi
     # Check for the music folder
     if [ -d "$themes_path/$selected_theme/music" ] && [ "$override_theme_music" = "0" ]; then
-        mount -o bind "$themes_path/$selected_theme/music" "$sounds_path/music"
-        echo "[THEME REMOUNTER] mounted music folder for $selected_theme"
+      mount -o bind "$themes_path/$selected_theme/music" "$sounds_path/music"
+      echo "[BLEEMSYNC](INFO)(theme) mounted music folder for $selected_theme"
     else
-        echo "[THEME REMOUNTER] Using default music files"  
+      echo "[BLEEMSYNC](INFO)(theme) Using default music files"  
     fi
     # Check for the sounds folder
     if [ -d "$themes_path/$selected_theme/sounds" ]; then
-        mount -o bind "$themes_path/$selected_theme/sounds" "/usr/sony/share/data/sounds"
-        echo "[THEME REMOUNTER] mounted sounds folder for $selected_theme"
+      mount -o bind "$themes_path/$selected_theme/sounds" "/usr/sony/share/data/sounds"
+      echo "[BLEEMSYNC](INFO)(theme) mounted sounds folder for $selected_theme"
     else
-        echo "[THEME REMOUNTER] no sounds folder found for $selected_theme"
+      echo "[BLEEMSYNC](INFO)(theme) no sounds folder found for $selected_theme"
     fi
-else
-    echo "[THEME REMOUNTER] set theme to stock theme"
-fi &>$log_file
+  else
+    echo "[BLEEMSYNC](INFO)(theme) set theme to stock theme"
+  fi
+  echo 0 > /sys/class/leds/red/brightness
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) select_UI_theme() took: $(((end-start)/1000000))ms to execute"
+  echo "[BLEEMSYNC](INFO) completed select_UI_theme()"
+}
