@@ -39,7 +39,12 @@ launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
   rm -f "/tmp/launchfilecommand"
-  $bleemsync_path/bin/boot_menu --image-folder "$bleemsync_path/etc/bleemsync/IMG"
+  if [ "boot_menu_music" = "1" ]; then
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path"
+  else
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path"
+  fi
+  
   command=""
   [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
   if [ "$command" = "retroarch" ]; then
@@ -56,6 +61,7 @@ launch_BootMenu(){
 launch_StockUI(){
   echo "[BLEEMSYNC](INFO) launching stock ui"
   echo 0 > /data/power/disable
+  select_UI_theme
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
 
@@ -128,6 +134,8 @@ execute_bleemsync_func(){
   mount -o bind "/var/volatile/gaadatatmp" "/gaadata" || MOUNT_FAIL=1 
   mount -o bind "/var/volatile/datatmp" "/data" || MOUNT_FAIL=1 
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1 
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
+
   if [ "$MOUNT_FAIL" = "1" ]; then
     #display error message
     echo 0 > /sys/class/leds/green/brightness
@@ -148,7 +156,7 @@ execute_bleemsync_func(){
   if [ "$link_EMMC_and_USB" = "1" ]; then
     cp -f "$mountpoint/system/databases/regional.db" "/var/volatile/gaadatatmp/databases/"
   else
-    ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/databases"
+    ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/"
   fi
   ln -s "$mountpoint/system/region" "/var/volatile/gaadatatmp/geninfo"
   ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"
