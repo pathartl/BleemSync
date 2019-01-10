@@ -146,7 +146,7 @@ onmessage = function (e) {
     function GetGameInfoFromCentral(fingerprint, system) {
         let request = new XMLHttpRequest();
 
-        request.open('GET', `https://central.bleemsync.app/api/${system}/GetBySerial/${fingerprint}`, false);
+        request.open('GET', `/api/GameInfo/GetByFingerprint/${system}/${fingerprint}`, false);
         request.send(null);
 
         if (request.status === 200) {

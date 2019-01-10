@@ -57,6 +57,13 @@
         this.LoadEditGameForm(data.node.id);
     }
 
+    TreeReload() {
+        $.getJSON('/Games/GetTree', (data) => {
+            this._tree.jstree(true).settings.core.data = data;
+            this._tree.jstree(true).refresh();
+        });
+    }
+
     LoadEditGameForm(id) {
         this._forms.hide();
 
@@ -101,55 +108,11 @@
         }
     }
 
-    ParseCueSheet(cueSheet, allFiles) {
-        let contentPromise = this.ReadFileAsText(cueSheet);
-        /*
-        return new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            
-            reader.onerror = () => {
-                reader.abort();
-                reject(new DOMException("There was a problem parsing the cue sheet as a file."));
-            };
-
-            reader.onload = () => {
-                var binFiles = [];
-
-                var regex = /FILE \"(.+)\" BINARY/m;
-                var matches = reader.result.match(regex);
-
-                for (var match of matches) {
-                    binFiles.push(match);
-                }
-
-                if (binFiles.length == 0) {
-                    reject(new DOMException("No reference to any .bin files was found."));
-                } else {
-                    var binFilesFound = [];
-
-                    for (var binFile of binFiles) {
-                        var foundFile = false;
-
-                        for (var file of allFiles) {
-                            if (file.name == binFile && !foundFile) {
-                                binFilesFound.push(file);
-                                foundFile = true;
-                            }
-                        }
-                    }
-
-                    if (binFilesFound.length === binFiles.length) {
-                        resolve(binFiles);
-                    } else {
-                        reject(new DOMException("You must upload all .bin files associated with the cue sheet."));
-                    }
-                }
-
-                reader.readAsText(cueSheet);
-            };
-        });
-        */
+    OnGameAdded() {
+        this._uploadInput.val(null);
+        ReloadGameTree();
+        this._addGameForm.clearForm();
+        this._forms.hide();
     }
-
 
 }

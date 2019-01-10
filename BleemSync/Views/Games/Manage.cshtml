@@ -54,7 +54,7 @@
           asp-action="UpdateGame"
           data-ajax="true"
           data-ajax-method="POST"
-          data-ajax-success="OnGameUpdated">
+          data-ajax-success="gameManager.OnGameUpdated">
         <card title="Edit Game">
             <hidden asp-for="Id" />
             <hidden asp-for="ParentId" />

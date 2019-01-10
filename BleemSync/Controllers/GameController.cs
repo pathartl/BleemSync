@@ -167,41 +167,5 @@ namespace BleemSync.Controllers
 
             return Json("Game deleted!");
         }
-
-        [HttpPost]
-        public ActionResult ValidateCueSheet(IFormFile file)
-        {
-            var response = new CueSheetValidationResponse()
-            {
-                Valid = true
-            };
-
-            string cueSheet;
-
-            using (var reader = new StreamReader(file.OpenReadStream()))
-            {
-                cueSheet = reader.ReadToEnd();
-            }
-
-            var binaryFiles = new List<string>();
-
-            Regex regex = new Regex("FILE \"(.+)\" BINARY", RegexOptions.Multiline);
-            
-            foreach (Match match in regex.Matches(cueSheet))
-            {
-                if (match.Groups.Count == 2)
-                {
-                    response.BinFiles.Add(match.Groups[1].Value);
-                }
-            }
-
-            if (response.BinFiles.Count == 0)
-            {
-                response.Valid = false;
-                response.Message = "No reference to .bin files found.";
-            }
-
-            return new JsonResult(response);
-        }
     }
 }
