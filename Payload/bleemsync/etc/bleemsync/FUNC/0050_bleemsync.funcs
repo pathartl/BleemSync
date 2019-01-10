@@ -61,6 +61,7 @@ launch_BootMenu(){
 launch_StockUI(){
   echo "[BLEEMSYNC](INFO) launching stock ui"
   echo 0 > /data/power/disable
+  select_UI_theme
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
