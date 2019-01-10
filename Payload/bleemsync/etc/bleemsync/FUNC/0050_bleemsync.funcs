@@ -265,7 +265,7 @@ execute_bleemsync_func(){
   if [ "$link_EMMC_and_USB" = "1" ]; then
     cp -f "$mountpoint/system/databases/regional.db" "/var/volatile/gaadatatmp/databases/"
   else
-    ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/databases"
+    ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/"
   fi
   ln -s "$mountpoint/system/region" "/var/volatile/gaadatatmp/geninfo"
   ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"

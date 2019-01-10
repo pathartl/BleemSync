@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# Set vars
+log_file="$runtime_log_path/theme_remounter.log"
+
+# Check for upper-case folder names and lower-case them
+for theme_folder in $( ls $themes_path/ | grep [A-Z] );
+do
+	mv -i "$themes_path/$theme_folder" "$themes_path/_$theme_folder"
+	mv -i "$themes_path/_$theme_folder" "`echo $themes_path/$theme_folder | tr 'A-Z' 'a-z'`"
+done
+
+# Set random theme if setting is set
+if [ "$random_theme_onload" = "1" ]; then
+	cd "$themes_path"
+	selected_theme=`ls * | sort --random-sort | head -1`
+	cd -
+fi
+
+# Lower-case the theme variable incase it causes and issue
+selected_theme="`echo $selected_theme | tr 'A-Z' 'a-z'`"; 
+
+if [ -d "$themes_path/$selected_theme" ]; then
+    echo "[THEME REMOUNTER] found $selected_theme"
+    # Check for the font folder
+    if [ -d "$themes_path/$selected_theme/font" ]; then
+        mount -o bind "$themes_path/$selected_theme/font" "/usr/sony/share/data/font"
+        echo "[THEME REMOUNTER] mounted font folder for $selected_theme"
+    else
+        echo "[THEME REMOUNTER] no font folder found for $selected_theme"
+    fi
+    # Check for the images folder
+    if [ -d "$themes_path/$selected_theme/images" ]; then
+        mount -o bind "$themes_path/$selected_theme/images" "/usr/sony/share/data/images"
+        echo "[THEME REMOUNTER] mounted images folder for $selected_theme"
+    else
+        echo "[THEME REMOUNTER] no images folder found for $selected_theme"
+    fi
+    # Check for the music folder
+    if [ -d "$themes_path/$selected_theme/music" ] && [ "$override_theme_music" = "0" ]; then
+        mount -o bind "$themes_path/$selected_theme/music" "$sounds_path/music"
+        echo "[THEME REMOUNTER] mounted music folder for $selected_theme"
+    else
+        echo "[THEME REMOUNTER] Using default music files"  
+    fi
+    # Check for the sounds folder
+    if [ -d "$themes_path/$selected_theme/sounds" ]; then
+        mount -o bind "$themes_path/$selected_theme/sounds" "/usr/sony/share/data/sounds"
+        echo "[THEME REMOUNTER] mounted sounds folder for $selected_theme"
+    else
+        echo "[THEME REMOUNTER] no sounds folder found for $selected_theme"
+    fi
+else
+    echo "[THEME REMOUNTER] set theme to stock theme"
+fi &>$log_file
