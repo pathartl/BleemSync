@@ -61,7 +61,6 @@ launch_BootMenu(){
 launch_StockUI(){
   echo "[BLEEMSYNC](INFO) launching stock ui"
   echo 0 > /data/power/disable
-  select_UI_theme
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
@@ -238,7 +237,7 @@ execute_bleemsync_func(){
   sync
 
   end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) BleemSync DB processing took: $(((end-start)/1000000))ms to execute"
+  echo "[BLEEMSYNC](PROFILE) BleemSync data processing took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
@@ -269,8 +268,9 @@ execute_bleemsync_func(){
   start=$(date +%s%N)
 
   # Create gaadata on tmpfs
-  mkdir -p "/var/volatile/gaadatatmp/system/" "/var/volatile/gaadatatmp/databases/"
+  mkdir -p "/var/volatile/gaadatatmp/system/"
   if [ "$link_EMMC_and_USB" = "1" ]; then
+    mkdir -p "/var/volatile/gaadatatmp/databases/"
     cp -f "$mountpoint/system/databases/regional.db" "/var/volatile/gaadatatmp/databases/"
   else
     ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/"
@@ -327,7 +327,7 @@ execute_bleemsync_func(){
     $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
     if [ "$link_alphabeticalise" = "1" ]; then
-      echo "create table new as select * from GAME order by GAME_TITLE_STRING; drop table GAME; create table GAME as select * from new order by GAME_TITLE_STRING; drop table new; .quit" \
+      echo "create table new as select * from GAME order by GAME_TITLE_STRING; drop table GAME; create table GAME as select * from new order by GAME_TITLE_STRING; drop table new" \
       | $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db"
     fi
 
@@ -400,12 +400,15 @@ execute_bleemsync_func(){
   rm -rf "/tmp/systemd"*  
   rm -rf "/tmp/diag"
   rm -rf "/tmp/"*".sql"
+
+  #Select UI theme whilst load screen available
+  select_UI_theme
   
-  killall -s KILL sdl_display
+  killall -s KILL sdl_display &> /dev/null
   booted=0
 
   end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
+  echo "[BLEEMSYNC](PROFILE) BleemSync pre run took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
 
   [ "$boot_target_stock_UI" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
