@@ -392,6 +392,9 @@ execute_bleemsync_func(){
     echo "[BLEEMSYNC](PROFILE) BleemSync H+S patching took: $(((end-start)/1000000))ms to execute"
   fi
 #-----------------------------------------------------------------------------#
+  #Select UI theme whilst load screen available (Profiler built in)
+  select_UI_theme
+#-----------------------------------------------------------------------------#
   echo 0 > /sys/class/leds/red/brightness
   echo "[BLEEMSYNC](INFO) completed bleemsync boot"
 #-----------------------------------------------------------------------------#
@@ -400,15 +403,12 @@ execute_bleemsync_func(){
   rm -rf "/tmp/systemd"*  
   rm -rf "/tmp/diag"
   rm -rf "/tmp/"*".sql"
-
-  #Select UI theme whilst load screen available
-  select_UI_theme
   
   killall -s KILL sdl_display &> /dev/null
   booted=0
 
   end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) BleemSync pre run took: $(((end-start)/1000000))ms to execute"
+  echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
 
   [ "$boot_target_stock_UI" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI

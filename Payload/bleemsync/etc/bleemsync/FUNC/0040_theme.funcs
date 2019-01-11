@@ -21,13 +21,11 @@ select_UI_theme(){
     cd "/home/root"
   fi
   
-  echo $selected_theme
-
   # Lower-case the theme variable incase it causes and issue
   selected_theme="$(echo $selected_theme | tr 'A-Z' 'a-z')"
 
   if [ "$selected_theme" != "stock" ] && [ -d "$themes_path/$selected_theme" ]; then
-    echo "[BLEEMSYNC](INFO)(theme) $selected_theme"
+    echo "[BLEEMSYNC](INFO)(theme) theme '$selected_theme' selected"
     # Check for the font folder
     if [ -d "$themes_path/$selected_theme/font" ]; then
       mount -o bind "$themes_path/$selected_theme/font/SST-Bold.ttf" "/usr/sony/share/data/font/SST-Bold.ttf"
