@@ -1,0 +1,110 @@
+#!/bin/sh
+###############################################################################
+# PlayStation Classic Stock UI to Emulator Intercept Script
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+### LOAD CONFIGURATION ########################################################
+source "/media/bleemsync/etc/bleemsync/CFG/bleemsync.cfg"
+
+### LOAD FUNCTION LIBRARIES ###################################################
+source "/media/bleemsync/etc/bleemsync/FUNC/0030_retroarch.funcs"
+
+### INTERCEPT VARIABLES #######################################################
+intercept_pcsx_path="/usr/sony/bin/pcsx"
+intercept_game_path=""
+intercept_game_dir=""
+intercept_game_id=""
+intercept_game_ext=""
+intercept_game_alternative_path=""
+intercept_save_state=false
+
+### START INTERCEPT SCRIPT ####################################################
+# This should be launched directly from ui_menu by
+# substituing the sPcsxExecPath in /usr/sony/share/data/preferences/system.pre
+# with the path to this script
+###############################################################################
+echo "[INTERCEPT](INFO) Starting PS Classic Intercept"
+if [ "$#" -ge 1 ]; then
+    echo "[INTERCEPT](INFO) There are $# parameters:"
+    echo "[INTERCEPT](INFO) $*"
+else
+    echo "[INTERCEPT](INFO) There are no parameters"
+fi
+
+echo "[INTERCEPT](INFO) The current working directory: $PWD"
+
+intercept_command=""
+found_cdfile=false
+
+# Loop through each argument to pull out information relating to which game is being loaded
+# and whether this is a Save State load
+for arg in "$@" 
+do
+
+    if [ "$found_cdfile" = true ]; then
+        
+        intercept_game_path="$arg"
+        echo "[INTERCEPT](INFO) Game full path: ${intercept_game_path}"
+        intercept_game_dir="${arg%/*}/"
+        echo "[INTERCEPT](INFO) Game directory: ${intercept_game_dir}"
+        intercept_game_id="${arg##*/}"
+        intercept_game_id="${intercept_game_id%.*}"
+        echo "[INTERCEPT](INFO) Game ID: $intercept_game_id"
+        intercept_game_ext="${arg##*.}"
+        echo "[INTERCEPT](INFO) Game extension: $intercept_game_ext"
+
+        # This is the place to check if the game exists in an alternative format
+        # The game path always has .cue appened to the BASENAME field of the DISC table in regional.db
+        # EXCEPT when the game is launched from a Save State. In this case the Game Path is determined from
+        # the first line of filename.txt.res in the games PCSX data directory (ie. /data/AppData/sony/pcsx/1/.pcsx/filename.txt.res)
+        if [ "$intercept_save_state" = false ]; then
+
+            # This is an example to check for a PBP format game
+            intercept_game_alternative_path="${arg%.cue}.pbp"
+            if [ -f $intercept_game_alternative_path ]; then
+
+                echo "[INTERCEPT](INFO) Alternative game format exists (PBP), this will be used instead of the .cue"
+                arg=$intercept_game_alternative_path
+                intercept_game_path="$arg"
+                intercept_game_ext="pbp"
+                echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
+                echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
+            fi
+        fi
+
+        found_cdfile=false
+    fi
+
+    case $arg in 
+        -cdfile)
+            found_cdfile=true
+            ;;
+
+       -load)
+            echo "[INTERCEPT](INFO) This is a Save State load"
+            intercept_save_state=true
+            ;;
+    esac
+
+    #   Build the new parameters for PCSX
+    intercept_command="${intercept_command} ${arg}"
+done
+
+
+
+if [ "$launch_ra_from_stock_UI" = "1" ]; then
+
+    echo "[INTERCEPT](INFO) RetroArch is enabled as the emulator"
+    link_ra_memory_cards
+    launch_retroarch_from_StockUI
+    exit_checkSaveState
+    exit 0
+
+fi
+
+echo "[INTERCEPT](INFO) Launching $intercept_pcsx_path $intercept_command"
+$intercept_pcsx_path $intercept_command
+
+# Exit returning the pcsx exit code
+exit $?
