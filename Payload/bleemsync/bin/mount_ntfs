@@ -1,0 +1,23 @@
+#!/bin/sh
+
+echo "-------------------------------------------------------------------------------"
+echo "NTFS Drive mounter for the Playstation Classic"
+echo "-------------------------------------------------------------------------------"
+
+for drive in /dev/sd*; do
+	drive=$(echo $drive | awk -F "/" '{ print $3 }') && echo "$drive" | grep -q '[0-9]'
+	if [ ! "$?" = "0" ]; then
+		echo "Attempting to mount drive: $drive"
+		mkdir -p "/var/volatile/mount/$drive" 
+		if  ntfs-3g "/dev/$drive" "/var/volatile/mount/$drive"; then
+			echo "*******************************************************************************"
+			echo "Drive $drive successfully mounted!"
+			echo "*******************************************************************************"
+		else
+			echo "Drive $drive failed to mount!"
+			rm -rf "/var/volatile/mount/$drive"
+		fi  
+	fi
+done
+
+echo "-------------------------------------------------------------------------------"
