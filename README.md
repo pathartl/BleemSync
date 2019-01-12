@@ -16,7 +16,7 @@ BleemSync is a relatively safe way to add games to your PlayStation Classic.
 ## Automatic Game Configuration
 BleemSync has the ability to download game info from BleemSync Central, an online database. To utilize automatic metadata scraping, make sure your folder structure looks something like this:
 ```
-Games/
+games/
     1/
         GameData/
             Cool Boarders.bin
@@ -24,11 +24,12 @@ Games/
     2/
         GameData/
             Cool Boarders 2.bin
-            Cool Boarders 2.cue
-    3/
-        ...
+            Cool Boarders 2.cue            
+    Need For Speed III/
+        Need For Speed III.cue
+        Need For Speed III.bin
 ```
-On the root of your flash drive, create a `Games` folder. In this folder, create a folder for each game you would like to add to the system. The folders must be numbered sequentially.
+On the root of your flash drive, create a `games` folder. In this folder, create a folder for each game you would like to add to the system.
 
 Please note that it is not mandatory to have your `bin`/`cue` files named something specific. However, your `cue` file must reference your `bin` file exactly. The name of these files has no effect on the automatic metadata scraping. BleemSync will find the serial number embedded in the disc image and run it against the database.
 
@@ -41,11 +42,35 @@ From here, you can skip the "Manual Game Configuration" step and move onto "Sync
 **Also also please note that automatic metadata scraping will not run on boot of the system as it has no internet connectivity. Please run on a desktop/laptop to use this feature.**
 
 ## Manual Game Configuration
-On the root of your flash drive, create a `Games` folder. In this folder, create a folder for each game you would like to add to the system. The folders must be numbered sequentially. Each game folder must contain a `GameData` folder which contains a `Game.ini`, cover art image, `pcsx.cfg`, and the game's `bin` and `cue` files. A template of the `Games` folder can be found in the release ZIP.
+On the root of your flash drive, create a `games` folder. In this folder, create a folder for each game you would like to add to the system. Each game folder must contain a `Game.ini`, cover art image, `pcsx.cfg`, and the game's `bin` and `cue` files. A template of the `games` folder can be found in the release ZIP.
 
 A proper folder structure looks something like this:
 ```
-Games/
+games/
+    Final Fantasy VII/
+        Game.ini
+        pcsx.cfg
+        Final Fantasy VII CD1.cue
+        Final Fantasy VII CD1.bin
+        Final Fantasy VII CD2.cue
+        Final Fantasy VII CD2.bin
+        Final Fantasy VII CD3.cue
+        Final Fantasy VII CD3.bin
+    Need For Speed III/
+        Game.ini
+        pcsx.cfg
+        Need For Speed III.cue
+        Need For Speed III.bin
+    Crash Bandicoot/
+        ...
+
+```
+
+Please note:
+
+You can also use the old folder structure from Bleemsync < 0.7 . Be aware that this will be deprecated soon!
+```
+games/
     1/
         GameData/
             Game.ini

@@ -15,4 +15,9 @@
     <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+  </ItemGroup>
+
+
 </Project>

@@ -43,6 +43,30 @@ namespace BleemSync.Utilities
             return gameIds;
         }
 
+        public static List<String> GetGamePaths(string gamesDir = "")
+        {
+            gamesDir = GetGamesDirectory(gamesDir);
+
+            var dirList = Directory.GetDirectories(gamesDir).Select(path => new DirectoryInfo(path).Name);
+
+            var gamePaths = dirList.Select(directoryName =>
+            {
+                if (int.TryParse(directoryName, out var gameId))
+                {
+                    return Path.Join(directoryName, "GameData");
+                }
+                else
+                {
+                    return directoryName;
+                }
+
+            }).ToList();
+
+            gamePaths.Sort();
+
+        	  return gamePaths;
+        }
+
         public static string GetGamesDirectory(string gamesDir = "")
         {
             var currentPath = GetExecutingDirectory();

@@ -44,7 +44,7 @@ launch_BootMenu(){
   else
     $bleemsync_path/bin/boot_menu --image-folder "$images_path"
   fi
-  
+
   command=""
   [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
   if [ "$command" = "retroarch" ]; then
@@ -69,7 +69,7 @@ launch_StockUI(){
     cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
     chmod +x "/tmp/intercept"
   fi
-  
+
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
 }
 ###############################################################################
@@ -126,13 +126,13 @@ execute_bleemsync_func(){
 
   # Unmount partitons and create tmpfs - Shut system down on failure
   MOUNT_FAIL=0
-  umount /data || MOUNT_FAIL=1 
-  umount /gaadata || MOUNT_FAIL=1 
+  umount /data || MOUNT_FAIL=1
+  umount /gaadata || MOUNT_FAIL=1
   # Create gaadata and data folders in tmp then mount over original folders
   mkdir -p "/var/volatile/gaadatatmp" "/var/volatile/datatmp"
-  mount -o bind "/var/volatile/gaadatatmp" "/gaadata" || MOUNT_FAIL=1 
-  mount -o bind "/var/volatile/datatmp" "/data" || MOUNT_FAIL=1 
-  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1 
+  mount -o bind "/var/volatile/gaadatatmp" "/gaadata" || MOUNT_FAIL=1
+  mount -o bind "/var/volatile/datatmp" "/data" || MOUNT_FAIL=1
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
 
   if [ "$MOUNT_FAIL" = "1" ]; then
@@ -161,8 +161,18 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/region" "/var/volatile/gaadatatmp/geninfo"
   ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"
   ln -s "$mountpoint/system/preferences/system" "/var/volatile/gaadatatmp/preferences"
-  ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "ln -s $mountpoint/games/%/GameData /var/volatile/gaadatatmp/%"
-  
+
+  i=1
+  for game in $mountpoint/games/*
+  do
+    if [ -d "${game}" ]; then
+      game_dir="${game}"
+      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
+      ln -s "${game_dir}" /var/volatile/gaadatatmp/$i
+      i=$((i+1))
+    fi
+  done
+
   # Create data on tmpfs
   mkdir -p "/var/volatile/datatmp/sony/sgmo" "/var/volatile/datatmp/AppData/sony"
   # ln -s "/tmp/diag" "/tmp/datatmp/sony/sgmo/diag"
@@ -171,7 +181,19 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/preferences/user" "/var/volatile/datatmp/AppData/sony/ui"
   ln -s "$mountpoint/system/preferences/autodimmer" "/var/volatile/datatmp/AppData/sony/auto_dimmer"
   cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/var/volatile/datatmp/AppData/sony/pcsx"
-  ls "$mountpoint/games" | grep '^[0-9]\+$' | xargs -I % sh -c "rm -rf /var/volatile/datatmp/AppData/sony/pcsx/% && ln -s $mountpoint/games/% /var/volatile/datatmp/AppData/sony/pcsx/%"
+
+  i=1
+  for game in $mountpoint/games/*
+  do
+    if [ -d "${game}" ]; then
+      game_dir="${game}"
+      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
+      rm -rf /var/volatile/datatmp/AppData/sony/pcsx/$i
+      ln -s "${game_dir}" /var/volatile/datatmp/AppData/sony/pcsx/$i
+      i=$((i+1))
+    fi
+  done
+
   ln -s "$mountpoint/system/bios" "/var/volatile/datatmp/AppData/sony/pcsx/bios"
   ln -s "/usr/sony/bin/plugins" "/var/volatile/datatmp/AppData/sony/pcsx/plugins"
 
@@ -206,7 +228,7 @@ execute_bleemsync_func(){
     echo "COMMIT;" >> "/tmp/join.sql"
 
     sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
-    
+
     $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
     if [ "$link_alphabeticalise" = "1" ]; then
@@ -233,16 +255,16 @@ execute_bleemsync_func(){
   udevadm trigger
 
   # Default pcsx.cfg
-  cd "$mountpoint/games"
-  for D in *; do
-    if [ -d "$D" ]; then
-      if [ ! -f "$D/.pcsx/pcsx.cfg" ]; then
-        mkdir -p "$D/.pcsx"
-        cp -f "$mountpoint/system/defaults/pcsx.cfg" "$D/.pcsx/pcsx.cfg"
-      fi
+  for game in $mountpoint/games/*
+  do
+    if [ -d "${game}" ]; then
+      game_dir="${game}"
+      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
+      [ ! -f "${game_dir}/.pcsx/pcsx.cfg" ] && mkdir -p "${game_dir}/.pcsx" && cp -f "$mountpoint/system/defaults/pcsx.cfg" "${game_dir}/.pcsx/pcsx.cfg"
     fi
   done
-  cd "/home/root" 
+
+  cd "/home/root"
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync general fixing took: $(((end-start)/1000000))ms to execute"
@@ -283,10 +305,10 @@ execute_bleemsync_func(){
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
   #Cleanup before starting main user applications
-  rm -rf "/tmp/systemd"*  
+  rm -rf "/tmp/systemd"*
   rm -rf "/tmp/diag"
   rm -rf "/tmp/"*".sql"
-  
+
   killall -s KILL sdl_display &> /dev/null
   booted=0
 
@@ -303,7 +325,7 @@ execute_bleemsync_func(){
   if [ "$(who | wc -l)" = "1" ]; then
     while true; do
       sleep 9999
-    done    
+    done
   else
     rm -rf "/tmp/ra_cache"
     sync
