@@ -4,6 +4,11 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
+### LOCAL VARIABLES ###########################################################
+ra_save_path="/tmp/ra_save"
+ra_savestate_path="/tmp/ra_savestate"
+###############################################################################
+
 ### LOCAL FUNCTIONS ###########################################################
 
 ### UI_MENU -> retroarch INTERACTION FUNCTIONS ################################
@@ -102,34 +107,32 @@ exit_checkSaveState(){
 
 link_ra_memory_cards(){
 
-  ##
-  #  WORK IN PROGRESS
-  ##
-  return 0
-
   #  This function will link ui_menu and retroarch memory cards
   #  ui_menu memory cards take precedence
-  echo "[BLEEMSYNC](INFO) linking ui_menu memory cards to retroarch"
+  echo "[BLEEMSYNC](INFO) linking Stock UI memory cards to RetroArch"
   if ls -la | grep -i ".pcsx ->"; then
-    if [ ! -f /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd ]; then
-      mkdir -p /data/AppData/sony/pcsx/.pcsx/memcards
-      cp /usr/sony/share/data/memcard/card.mcd /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd
+    if [ ! -f "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" ]; then
+      mkdir -p "/data/AppData/sony/pcsx/.pcsx/memcards"
+      cp "/usr/sony/share/data/memcard/card.mcd" "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd"
     fi
-        
-    # Will this work if $mountpoint is FAT32? 
-    # NO IT WON'T ANDSHREW
-    ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $retroarch_path/saves/${intercept_game_id}.srm
 
-    # retroarch creates a memory card per game, which means all possible game discs need to be linked back to
-    # /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd for them to function with a shared memory card which can be
-    # managed from ui_menu
+    if [ -d "$ra_save_path" ]; then
+      # This is a temporary save location for use by the current RetroArch game only
+      rmdir -fR "$ra_save_path"
+    fi
+    mkdir -p "$ra_save_path"
+    ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${intercept_game_id}.srm"
+
+    # RetroArch creates a memory card per game, which means all possible game discs need to be linked back to
+    # /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd. If this isn't done then each individual disc will have its
+    # own memory card
     #
     # This is rather brute force at the moment, but iterate through each file in the directory and create a memory card symlink
     for e in /data/AppData/sony/title/*; do
       if [ -f "$e" ]; then
         temp_id="${e##*/}"
         temp_id="${temp_id%.*}"
-        ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $retroarch_path/saves/${temp_id}.srm
+        ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${intercept_game_id}.srm"
       fi
     done
   fi
