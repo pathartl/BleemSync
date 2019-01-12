@@ -24,7 +24,7 @@ ra_savestate_path="/tmp/ra_savestate"
 #  intercept_save_state=false # Set to true if ui_menu launches with -load
 
 launch_retroarch_from_StockUI(){
-  echo "[BLEEMSYNC](INFO) Launching RetroArch from menu_ui"
+  echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
   [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
   [ ! -f "$retroarch_path/retroarch" ] && break #FAIL
@@ -34,6 +34,10 @@ launch_retroarch_from_StockUI(){
   fi
   mkdir -p "/tmp/ra_cache"
   chmod +x "$retroarch_path/retroarch"
+  if [ -d "$ra_savestate_path" ]; then
+      rmdir -fR "$ra_savestate_path"
+  fi
+  mkdir -p "$ra_savestate_path"
   export HOME="$retroarch_path"
   #  Check if this is a Save State load
   if [ "$intercept_save_state" = true ]; then
@@ -45,7 +49,7 @@ launch_retroarch_from_StockUI(){
         cp "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
       fi
     fi
-    mv "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" "$retroarch_path/savestates/${intercept_game_id}.state.auto"
+    mv "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" "${ra_savestate_path}/${intercept_game_id}.state.auto"
   fi
 
   #  Launch retroarch
@@ -63,7 +67,7 @@ exit_checkSaveState(){
   # retroarch was originally launched. Check that the last saved state matches the ID of the launching
   # game
     
-  ra_last_game=`ls -t "$retroarch_path/savestates/"*.auto | head -1`
+  ra_last_game=`ls -t "${ra_savestate_path}/"*.auto | head -1`
 
   if [ "$ra_last_game" == "" ]; then
     echo "[BLEEMSYNC](INFO) no auto save state exists"
@@ -89,20 +93,19 @@ exit_checkSaveState(){
   fi
 
   #  Check if an auto save state exists and then move it to the correct location for ui_menu to handle
-  if [ -f "$retroarch_path/savestates/${intercept_game_id}.state.auto" ]; then
+  if [ -f "$ra_savestate_path/${intercept_game_id}.state.auto" ]; then
     echo "[BLEEMSYNC](INFO) an auto save state exists"
     #  Create filename.txt
     echo "$intercept_game_path" > /data/AppData/sony/pcsx/.pcsx/filename.txt
     echo "$intercept_game_id" >> /data/AppData/sony/pcsx/.pcsx/filename.txt
     #  Move save state files
-    mv "$retroarch_path/savestates/${intercept_game_id}.state.auto" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
-    mv "$retroarch_path/savestates/${intercept_game_id}.state.auto.png" "/data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png"
+    mv "${ra_savestate_path}/${intercept_game_id}.state.auto" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
+    mv "${ra_savestate_path}/${intercept_game_id}.state.auto.png" "/data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png"
   fi
 
-  # Remove any remaining auto save states. We're completly hijacking the auto-save state process
-  # so these need to be removed to ensure things work correctly
-  # F for orphaned auto saves
-  rm "$retroarch_path/savestates/"*.auto
+  # Remove the temporary save state folder. This is only used when Stock UI is launching RetroArch
+  # and only for the current game
+  rm -fR "$ra_savestate_path"
 }
 
 link_ra_memory_cards(){
