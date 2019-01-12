@@ -121,7 +121,7 @@ link_ra_memory_cards(){
 
     if [ -d "$ra_save_path" ]; then
       # This is a temporary save location for use by the current RetroArch game only
-      rmdir -fR "$ra_save_path"
+      rm -fR "$ra_save_path"
     fi
     mkdir -p "$ra_save_path"
     ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${intercept_game_id}.srm"
