@@ -33,6 +33,13 @@ launch_retroarch_from_StockUI(){
   #  Check if this is a Save State load
   if [ "$intercept_save_state" = true ]; then
     echo "[BLEEMSYNC](INFO) This is a Save State load"
+    if [ ! -f "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" ]; then
+      if [ -f "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" ]; then
+      # Stock PCSX trims spaces out of save state names if they exist, and Stock UI cannot restore save states
+      # which have a space in the name (despite being able to save them!) This save state has a space so copy it manually
+        cp "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
+      fi
+    fi
     mv "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" "$retroarch_path/savestates/${intercept_game_id}.state.auto"
   fi
 
@@ -51,7 +58,7 @@ exit_checkSaveState(){
   # retroarch was originally launched. Check that the last saved state matches the ID of the launching
   # game
     
-  ra_last_game=`ls -t "$retroarch_path/savestates/*.auto" | head -1`
+  ra_last_game=`ls -t "$retroarch_path/savestates/"*.auto | head -1`
 
   if [ "$ra_last_game" == "" ]; then
     echo "[BLEEMSYNC](INFO) no auto save state exists"
@@ -90,7 +97,7 @@ exit_checkSaveState(){
   # Remove any remaining auto save states. We're completly hijacking the auto-save state process
   # so these need to be removed to ensure things work correctly
   # F for orphaned auto saves
-  rm "$retroarch_path/savestates/*.auto"
+  rm "$retroarch_path/savestates/"*.auto
 }
 
 link_ra_memory_cards(){
