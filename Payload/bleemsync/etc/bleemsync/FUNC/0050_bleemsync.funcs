@@ -165,17 +165,16 @@ execute_bleemsync_func(){
   i=1
   for game in $mountpoint/games/*
   do
-    if [ -d "${game}" ]; then
-      game_dir="${game}"
-      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
-      ln -s "${game_dir}" /var/volatile/gaadatatmp/$i
+    if [ -d "$(game)" ]; then
+      game_dir="$(game)"
+      [ -d "$(game_dir)/GameData" ] && game_dir="$(game)/GameData"
+      ln -s "$(game_dir)" /var/volatile/gaadatatmp/$i
       i=$((i+1))
     fi
   done
 
   # Create data on tmpfs
   mkdir -p "/var/volatile/datatmp/sony/sgmo" "/var/volatile/datatmp/AppData/sony"
-  # ln -s "/tmp/diag" "/tmp/datatmp/sony/sgmo/diag"
   ln -s "/dev/shm/power" "/var/volatile/datatmp/power"
   ln -s "$mountpoint/system/ui" "/var/volatile/datatmp/sony/ui"
   ln -s "$mountpoint/system/preferences/user" "/var/volatile/datatmp/AppData/sony/ui"
@@ -185,11 +184,11 @@ execute_bleemsync_func(){
   i=1
   for game in $mountpoint/games/*
   do
-    if [ -d "${game}" ]; then
-      game_dir="${game}"
-      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
+    if [ -d "$(game)" ]; then
+      game_dir="$(game)"
+      [ -d "$(game_dir)/GameData" ] && game_dir="$(game)/GameData"
       rm -rf /var/volatile/datatmp/AppData/sony/pcsx/$i
-      ln -s "${game_dir}" /var/volatile/datatmp/AppData/sony/pcsx/$i
+      ln -s "$(game_dir)" /var/volatile/datatmp/AppData/sony/pcsx/$i
       i=$((i+1))
     fi
   done
@@ -257,10 +256,10 @@ execute_bleemsync_func(){
   # Default pcsx.cfg
   for game in $mountpoint/games/*
   do
-    if [ -d "${game}" ]; then
-      game_dir="${game}"
-      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
-      [ ! -f "${game_dir}/.pcsx/pcsx.cfg" ] && mkdir -p "${game_dir}/.pcsx" && cp -f "$mountpoint/system/defaults/pcsx.cfg" "${game_dir}/.pcsx/pcsx.cfg"
+    if [ -d "$(game)" ]; then
+      game_dir="$(game)"
+      [ -d "$(game_dir)/GameData" ] && game_dir="$(game)/GameData"
+      [ ! -f "$(game_dir)/.pcsx/pcsx.cfg" ] && mkdir -p "$(game_dir)/.pcsx" && cp -f "$mountpoint/system/defaults/pcsx.cfg" "$(game_dir)/.pcsx/pcsx.cfg"
     fi
   done
 
