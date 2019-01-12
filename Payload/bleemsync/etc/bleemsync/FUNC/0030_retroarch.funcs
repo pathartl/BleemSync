@@ -35,7 +35,7 @@ launch_retroarch_from_StockUI(){
   mkdir -p "/tmp/ra_cache"
   chmod +x "$retroarch_path/retroarch"
   if [ -d "$ra_savestate_path" ]; then
-      rmdir -fR "$ra_savestate_path"
+      rm -fR "$ra_savestate_path"
   fi
   mkdir -p "$ra_savestate_path"
   export HOME="$retroarch_path"
