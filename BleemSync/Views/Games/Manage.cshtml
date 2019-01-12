@@ -37,7 +37,7 @@
           enctype="multipart/form-data"
           data-ajax="true"
           data-ajax-method="POST"
-          data-ajax-success="OnGameAdded">
+          data-ajax-success="GameAdded">
         <card title="Add New Game">
             <input type="file" name="Files" class="game-upload" accept="@String.Join(",", fileExtensions)" multiple />
             <textbox asp-for="Name" />

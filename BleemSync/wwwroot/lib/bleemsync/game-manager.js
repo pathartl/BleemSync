@@ -13,6 +13,9 @@
         $.getJSON('/Games/GetTree', (data) => this.InitTree(data));
 
         this._uploadInput.change(() => this.ParseUploader());
+        this._addGameForm.on('GameAdded', () => {
+            this.OnGameAdded();
+        });
         this.LoadAddGameForm();
     }
 
@@ -110,7 +113,7 @@
 
     OnGameAdded() {
         this._uploadInput.val(null);
-        ReloadGameTree();
+        this.TreeReload();
         this._addGameForm.clearForm();
         this._forms.hide();
     }
