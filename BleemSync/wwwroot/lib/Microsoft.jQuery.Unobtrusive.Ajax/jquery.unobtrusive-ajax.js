@@ -172,11 +172,13 @@
         var current = e.loaded;
 
         var Percentage = (current * 100) / max;
-        console.log(Percentage);
 
+        // Change this later to use eventing
+        $('#progress-bar-modal').modal({ backdrop: 'static', keyboard: false });
+        $('#progress-bar-modal').find('.progress-bar').css('width', Percentage + '%');
 
         if (Percentage >= 100) {
-            // process completed  
+            //$('#progress-bar-modal').modal('hide');
         }
     }
 

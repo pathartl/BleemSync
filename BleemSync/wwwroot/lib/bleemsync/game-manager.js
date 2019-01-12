@@ -5,6 +5,7 @@
         this._editGameForm = $('#edit-game-form');
         this._addGameForm = $('#add-game-form');
         this._uploadInput = $('input[type="file"]');
+        this._progressBar = $('#progress-bar-modal');
 
         this.Init();
     }
@@ -17,6 +18,10 @@
             this.OnGameAdded();
         });
         this.LoadAddGameForm();
+
+        $(document).on('Progress', (percentage) => {
+            this.OnProgress(percentage);
+        });
     }
 
     InitTree(data) {
@@ -112,6 +117,7 @@
     }
 
     OnGameAdded() {
+        this._progressBar.modal('hide');
         this._uploadInput.val(null);
         this.TreeReload();
         this._addGameForm.clearForm();
