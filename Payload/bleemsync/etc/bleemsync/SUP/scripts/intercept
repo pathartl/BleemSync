@@ -62,23 +62,24 @@ do
 
             # This is an example to check for a PBP format game
             intercept_game_alternative_path="${arg%.cue}.pbp"
-            if [ -f $intercept_game_alternative_path ]; then
+            if [ -f "$intercept_game_alternative_path" ]; then
 
                 echo "[INTERCEPT](INFO) Alternative game format exists (PBP), this will be used instead of the .cue"
-                arg=$intercept_game_alternative_path
+                arg="$intercept_game_alternative_path"
                 intercept_game_path="$arg"
                 intercept_game_ext="pbp"
                 echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
                 echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
             fi
         fi
-
         found_cdfile=false
+        continue
     fi
 
     case $arg in 
         -cdfile)
             found_cdfile=true
+            continue
             ;;
 
        -load)
@@ -103,8 +104,8 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
 
 fi
 
-echo "[INTERCEPT](INFO) Launching $intercept_pcsx_path $intercept_command"
-$intercept_pcsx_path $intercept_command
+echo "[INTERCEPT](INFO) Launching $intercept_pcsx_path $intercept_command -cdfile $intercept_game_path"
+"$intercept_pcsx_path" $intercept_command -cdfile "$intercept_game_path"
 
 # Exit returning the pcsx exit code
 exit $?
