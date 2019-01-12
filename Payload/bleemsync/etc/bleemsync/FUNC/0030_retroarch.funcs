@@ -132,7 +132,7 @@ link_ra_memory_cards(){
       if [ -f "$e" ]; then
         temp_id="${e##*/}"
         temp_id="${temp_id%.*}"
-        ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${intercept_game_id}.srm"
+        ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${temp_id}.srm"
       fi
     done
   fi
