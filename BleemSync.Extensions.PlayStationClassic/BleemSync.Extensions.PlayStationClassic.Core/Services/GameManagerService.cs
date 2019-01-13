@@ -7,6 +7,7 @@ using ExtCore.Data.Abstractions;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Services
@@ -16,6 +17,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         private MenuDatabaseContext _context { get; set; }
         private IStorage _storage { get; set; }
         private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
+        private IGameManagerFileRepository _gameManagerFileRepository { get; set; }
         private IConfiguration _configuration { get; set; }
         private string _baseGamesDirectory { get; set; }
 
@@ -68,25 +70,56 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 switch (fileInfo.Extension.ToLower())
                 {
                     case ".pbp":
-                        CreateCueSheet(fileInfo);
+                        files.Add(CreateCueSheet(fileInfo, file));
                         break;
                 }
             }
+
+            var cueFiles = files.Where(f => f.Name.EndsWith(".cue"));
+
+            var discNum = 1;
+            foreach (var cueFile in cueFiles)
+            {
+                var disc = new Disc()
+                {
+                    DiscBasename = cueFile.Name.Replace(".cue", ""),
+                    DiscNumber = discNum,
+                    GameId = cueFile.NodeId,
+                };
+
+                _context.Discs.Add(disc);
+
+                discNum++;
+            }
+
+            _context.SaveChanges();
         }
 
-        private void CreateCueSheet(FileInfo sourceFile)
+        private GameManagerFile CreateCueSheet(FileInfo sourceFileInfo, GameManagerFile sourceFile)
         {
+            var managerFile = new GameManagerFile();
             var sb = new StringBuilder();
 
-            sb.AppendLine($"FILE \"{sourceFile.Name}\" BINARY");
+            sb.AppendLine($"FILE \"{sourceFileInfo.Name}\" BINARY");
             sb.AppendLine("  TRACK 01 MODE2/2352");
             sb.AppendLine("    INDEX 01 00:00:00");
 
+            var cueSheetFileName = sourceFile.Name.Replace(sourceFileInfo.Extension, "") + ".cue";
+
             File.WriteAllText(
                 Path.Combine(
-                    sourceFile.Directory.FullName,
-                    sourceFile.Name.Replace(sourceFile.Extension, "") + ".cue"),
+                    sourceFileInfo.Directory.FullName,
+                    cueSheetFileName),
                 sb.ToString());
+
+            managerFile.Name = cueSheetFileName;
+            managerFile.Path = sourceFile.Path;
+            managerFile.NodeId = sourceFile.Id;
+
+            _gameManagerFileRepository.Create(managerFile);
+            _storage.Save();
+
+            return managerFile;
         }
 
         public void UpdateGame(GameManagerNode node)
