@@ -4,6 +4,11 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
+### LOCAL VARIABLES ###########################################################
+ra_save_path="/tmp/ra_save"
+ra_savestate_path="/tmp/ra_savestate"
+###############################################################################
+
 ### LOCAL FUNCTIONS ###########################################################
 
 ### UI_MENU -> retroarch INTERACTION FUNCTIONS ################################
@@ -19,7 +24,7 @@
 #  intercept_save_state=false # Set to true if ui_menu launches with -load
 
 launch_retroarch_from_StockUI(){
-  echo "[BLEEMSYNC](INFO) Launching RetroArch from menu_ui"
+  echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
   [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
   [ ! -f "$retroarch_path/retroarch" ] && break #FAIL
@@ -29,16 +34,27 @@ launch_retroarch_from_StockUI(){
   fi
   mkdir -p "/tmp/ra_cache"
   chmod +x "$retroarch_path/retroarch"
+  if [ -d "$ra_savestate_path" ]; then
+      rm -fR "$ra_savestate_path"
+  fi
+  mkdir -p "$ra_savestate_path"
   export HOME="$retroarch_path"
   #  Check if this is a Save State load
   if [ "$intercept_save_state" = true ]; then
     echo "[BLEEMSYNC](INFO) This is a Save State load"
-    mv /data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000 $retroarch_path/savestates/${intercept_game_id}.state.auto
+    if [ ! -f "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" ]; then
+      if [ -f "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" ]; then
+      # Stock PCSX trims spaces out of save state names if they exist, and Stock UI cannot restore save states
+      # which have a space in the name (despite being able to save them!) This save state has a space so copy it manually
+        cp "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
+      fi
+    fi
+    mv "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" "${ra_savestate_path}/${intercept_game_id}.state.auto"
   fi
 
   #  Launch retroarch
   echo "[BLEEMSYNC](INFO) Launching RetroArch for game $intercept_game_path"
-  $retroarch_path/retroarch -v -L $retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so $intercept_game_path &> "$runtime_log_path/retroarch.log"
+  "$retroarch_path/retroarch" -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
   rm -rf "/tmp/ra_cache"
 }
@@ -51,7 +67,7 @@ exit_checkSaveState(){
   # retroarch was originally launched. Check that the last saved state matches the ID of the launching
   # game
     
-  ra_last_game=`ls -t $retroarch_path/savestates/*.auto | head -1`
+  ra_last_game=`ls -t "${ra_savestate_path}/"*.auto | head -1`
 
   if [ "$ra_last_game" == "" ]; then
     echo "[BLEEMSYNC](INFO) no auto save state exists"
@@ -68,7 +84,7 @@ exit_checkSaveState(){
     if [ -f "/data/AppData/sony/title/${ra_last_game}.${intercept_game_ext}" ]; then
       echo "[BLEEMSYNC](INFO) ${ra_last_game}.${intercept_game_ext} exists and belongs to the launching game, updating save state"
       intercept_game_path="/data/AppData/sony/title/${ra_last_game}.${intercept_game_ext}"
-      intercept_game_id=$ra_last_game
+      intercept_game_id="$ra_last_game"
       echo "[BLEEMSYNC](INFO) New game path: $intercept_game_path"
       echo "[BLEEMSYNC](INFO) New Game ID: $intercept_game_id"
     else
@@ -77,52 +93,49 @@ exit_checkSaveState(){
   fi
 
   #  Check if an auto save state exists and then move it to the correct location for ui_menu to handle
-  if [ -f $retroarch_path/savestates/${intercept_game_id}.state.auto ]; then
+  if [ -f "$ra_savestate_path/${intercept_game_id}.state.auto" ]; then
     echo "[BLEEMSYNC](INFO) an auto save state exists"
     #  Create filename.txt
-    echo $intercept_game_path > /data/AppData/sony/pcsx/.pcsx/filename.txt
-    echo $intercept_game_id >> /data/AppData/sony/pcsx/.pcsx/filename.txt
+    echo "$intercept_game_path" > /data/AppData/sony/pcsx/.pcsx/filename.txt
+    echo "$intercept_game_id" >> /data/AppData/sony/pcsx/.pcsx/filename.txt
     #  Move save state files
-    mv $retroarch_path/savestates/${intercept_game_id}.state.auto /data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000
-    mv $retroarch_path/savestates/${intercept_game_id}.state.auto.png /data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png      
+    mv "${ra_savestate_path}/${intercept_game_id}.state.auto" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
+    mv "${ra_savestate_path}/${intercept_game_id}.state.auto.png" "/data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png"
   fi
 
-  # Remove any remaining auto save states. We're completly hijacking the auto-save state process
-  # so these need to be removed to ensure things work correctly
-  # F for orphaned auto saves
-  rm $retroarch_path/savestates/*.auto
+  # Remove the temporary save state folder. This is only used when Stock UI is launching RetroArch
+  # and only for the current game
+  rm -fR "$ra_savestate_path"
 }
 
 link_ra_memory_cards(){
 
-  ##
-  #  WORK IN PROGRESS
-  ##
-  return 0
-
   #  This function will link ui_menu and retroarch memory cards
   #  ui_menu memory cards take precedence
-  echo "[BLEEMSYNC](INFO) linking ui_menu memory cards to retroarch"
+  echo "[BLEEMSYNC](INFO) linking Stock UI memory cards to RetroArch"
   if ls -la | grep -i ".pcsx ->"; then
-    if [ ! -f /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd ]; then
-      mkdir -p /data/AppData/sony/pcsx/.pcsx/memcards
-      cp /usr/sony/share/data/memcard/card.mcd /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd
+    if [ ! -f "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" ]; then
+      mkdir -p "/data/AppData/sony/pcsx/.pcsx/memcards"
+      cp "/usr/sony/share/data/memcard/card.mcd" "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd"
     fi
-        
-    # Will this work if $mountpoint is FAT32? 
-    # NO IT WON'T ANDSHREW
-    ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $retroarch_path/saves/${intercept_game_id}.srm
 
-    # retroarch creates a memory card per game, which means all possible game discs need to be linked back to
-    # /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd for them to function with a shared memory card which can be
-    # managed from ui_menu
+    if [ -d "$ra_save_path" ]; then
+      # This is a temporary save location for use by the current RetroArch game only
+      rm -fR "$ra_save_path"
+    fi
+    mkdir -p "$ra_save_path"
+    ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${intercept_game_id}.srm"
+
+    # RetroArch creates a memory card per game, which means all possible game discs need to be linked back to
+    # /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd. If this isn't done then each individual disc will have its
+    # own memory card
     #
     # This is rather brute force at the moment, but iterate through each file in the directory and create a memory card symlink
     for e in /data/AppData/sony/title/*; do
       if [ -f "$e" ]; then
         temp_id="${e##*/}"
         temp_id="${temp_id%.*}"
-        ln -sf /data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd $retroarch_path/saves/${temp_id}.srm
+        ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${temp_id}.srm"
       fi
     done
   fi
