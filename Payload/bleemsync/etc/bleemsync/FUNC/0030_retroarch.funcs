@@ -35,7 +35,7 @@ launch_retroarch_from_StockUI(){
   mkdir -p "/tmp/ra_cache"
   chmod +x "$retroarch_path/retroarch"
   if [ -d "$ra_savestate_path" ]; then
-      rm -fR "$ra_savestate_path"
+      rm -fr "$ra_savestate_path"
   fi
   mkdir -p "$ra_savestate_path"
   export HOME="$retroarch_path"
@@ -44,8 +44,8 @@ launch_retroarch_from_StockUI(){
     echo "[BLEEMSYNC](INFO) This is a Save State load"
     if [ ! -f "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" ]; then
       if [ -f "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" ]; then
-      # Stock PCSX trims spaces out of save state names if they exist, and Stock UI cannot restore save states
-      # which have a space in the name (despite being able to save them!) This save state has a space so copy it manually
+        # Stock PCSX trims spaces out of save state names if they exist, and Stock UI cannot restore save states
+        # which have a space in the name (despite being able to save them!) This save state has a space so copy it manually
         cp "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000.res" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
       fi
     fi
@@ -54,9 +54,9 @@ launch_retroarch_from_StockUI(){
 
   #  Launch retroarch
   echo "[BLEEMSYNC](INFO) Launching RetroArch for game $intercept_game_path"
-  "$retroarch_path/retroarch" -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
+  $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
-  rm -rf "/tmp/ra_cache"
+  rm -fr "/tmp/ra_cache"
 }
 
 exit_checkSaveState(){
@@ -109,10 +109,9 @@ exit_checkSaveState(){
 }
 
 link_ra_memory_cards(){
-
   #  This function will link ui_menu and retroarch memory cards
   #  ui_menu memory cards take precedence
-  echo "[BLEEMSYNC](INFO) linking Stock UI memory cards to RetroArch"
+  echo "[BLEEMSYNC](INFO) linking ui_menu memory cards to RetroArch"
   if ls -la | grep -i ".pcsx ->"; then
     if [ ! -f "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" ]; then
       mkdir -p "/data/AppData/sony/pcsx/.pcsx/memcards"
@@ -121,7 +120,7 @@ link_ra_memory_cards(){
 
     if [ -d "$ra_save_path" ]; then
       # This is a temporary save location for use by the current RetroArch game only
-      rm -fR "$ra_save_path"
+      rm -fr "$ra_save_path"
     fi
     mkdir -p "$ra_save_path"
     ln -sf "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" "${ra_save_path}/${intercept_game_id}.srm"
@@ -139,7 +138,6 @@ link_ra_memory_cards(){
       fi
     done
   fi
-  
 }
 
 ###############################################################################
