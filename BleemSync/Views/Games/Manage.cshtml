@@ -12,13 +12,13 @@
     }
 </style>
 
-<column lg="4" md="5" xs="12">
+<column lg="9" md="8" xs="12">
     <card title="Game Manager">
         <card-body>
             <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
         </card-body>
         <card-actions>
-            <button text="Add New Game" class="add-game-button" />
+            <button text="Add New Game" class="add-game-button" onclick="" />
         </card-actions>
     </card>
 </column>
@@ -37,7 +37,7 @@
     }
 }
 
-<column lg="8" md="7" xs="12">
+<column lg="3" md="4" xs="12">
     <form id="add-game-form" class="game-manager-form"
           asp-action="AddGame"
           enctype="multipart/form-data"

@@ -78,6 +78,7 @@ namespace BleemSync.UI
             var text = output.Attributes.SingleOrDefault(a => a.Name == "text");
             var action = output.Attributes.SingleOrDefault(a => a.Name == "asp-action");
             var controller = output.Attributes.SingleOrDefault(a => a.Name == "asp-controller");
+            var buttonClassAttr = output.Attributes.SingleOrDefault(a => a.Name == "class");
 
             output.Attributes.RemoveAll("raised");
             output.Attributes.RemoveAll("flat");
@@ -97,6 +98,11 @@ namespace BleemSync.UI
             output.Attributes.RemoveAll("text");
 
             var buttonClass = "btn";
+
+            if (buttonClassAttr != null)
+            {
+                buttonClass += " " + buttonClassAttr.Value;
+            }
 
             var labelAttributes = new Dictionary<string, object>();
 

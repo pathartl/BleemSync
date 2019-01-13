@@ -4,6 +4,7 @@
         this._forms = $('.game-manager-form');
         this._editGameForm = $('#edit-game-form');
         this._addGameForm = $('#add-game-form');
+        this._addGameButton = $('.add-game-button');
         this._uploadInput = $('input[type="file"]');
         this._progressBar = $('#progress-bar-modal');
 
@@ -27,6 +28,11 @@
 
         $(document).on('Progress', (percentage) => {
             this.OnProgress(percentage);
+        });
+
+        this._addGameButton.on('click', (e) => {
+            e.preventDefault();
+            this.LoadAddGameForm();
         });
     }
 
