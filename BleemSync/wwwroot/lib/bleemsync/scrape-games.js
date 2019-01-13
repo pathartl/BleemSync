@@ -63,7 +63,7 @@ onmessage = function (e) {
                 response.Game.Files.push(binFilesFound);
             } else {
                 response.Valid = false;
-                response.Message = "Not all binary files were selected, or they are misnamed."
+                response.Message = "Not all binary files were selected, or they are misnamed.";
             }
         }
 

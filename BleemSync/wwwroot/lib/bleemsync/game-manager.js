@@ -114,6 +114,7 @@
     }
 
     ParseUploader() {
+        AlertService.Clear();
         var uploader = this._uploadInput.get(0);
         var worker = new Worker('/lib/bleemsync/scrape-games.js');
 
@@ -123,6 +124,10 @@
             if (Array.isArray(response.data) && response.data.length > 0) {
                 if (response.data[0].Valid) {
                     this.LoadAddGameForm(response.data[0].Game);
+                } else {
+                    for (let error of response.data) {
+                        AlertService.Error(error.Message);
+                    }
                 }
             }
         }
