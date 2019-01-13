@@ -14,9 +14,13 @@ onmessage = function (e) {
     for (let file of files) {
         let extension = file.name.split('.').pop();
 
-        switch (extension) {
+        switch (extension.toLowerCase()) {
             case 'cue':
                 games.push(ParseCueFile(file, files));
+                break;
+            case 'pbp':
+                games.push(ParsePbpFile(file));
+                break;
         }
     }
 
@@ -61,6 +65,32 @@ onmessage = function (e) {
                 response.Valid = false;
                 response.Message = "Not all binary files were selected, or they are misnamed."
             }
+        }
+
+        return response;
+    }
+
+    function ParsePbpFile(file) {
+        var fingerprint = "";
+        let response = new ParserResponse();
+
+        fingerprint = GetPlayStationFingerprint(file);
+
+        if (fingerprint != '') {
+            try {
+                let game = GetGameInfoFromCentral(fingerprint, 'PlayStation');
+
+                response.Valid = true;
+                response.Game = game;
+            } catch {
+                response.Valid = false;
+                response.Message = "Could not get game info from BleemSync Central";
+            }
+
+
+        } else {
+            response.Valid = false;
+            response.Message = "Could not find a valid serial number inside of the PBP";
         }
 
         return response;
@@ -130,7 +160,7 @@ onmessage = function (e) {
     }
 
     function CleanPlayStationSerial(dirtySerial) {
-        const regex = /([C|E|H|L|S][A-Z]{2,3}).?(\d{2,5}).?(\d+)/gm;
+        const regex = /([C|E|H|L|S][A-Z]{2,3})\D?(\d{2,5}).?(\d+)/gm;
         m = regex.exec(dirtySerial);
 
         var cleanSerial = m[1] + '-';

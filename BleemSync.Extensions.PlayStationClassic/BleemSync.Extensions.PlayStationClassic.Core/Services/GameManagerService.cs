@@ -5,7 +5,9 @@ using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
 using ExtCore.Data.Abstractions;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 {
@@ -46,16 +48,45 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             Directory.CreateDirectory(outputDirectory);
 
-            foreach (var file in node.Files)
+            PostProcessGameFiles(node.Files, outputDirectory);
+
+            _storage.Save();
+        }
+
+        private void PostProcessGameFiles(List<GameManagerFile> files, string outputDirectory)
+        {
+            foreach (var file in files)
             {
                 var source = file.Path;
                 var destination = Path.Combine(outputDirectory, file.Name);
 
                 File.Move(source, destination);
                 file.Path = destination;
-            }
 
-            _storage.Save();
+                var fileInfo = new FileInfo(destination);
+
+                switch (fileInfo.Extension.ToLower())
+                {
+                    case ".pbp":
+                        CreateCueSheet(fileInfo);
+                        break;
+                }
+            }
+        }
+
+        private void CreateCueSheet(FileInfo sourceFile)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"FILE \"{sourceFile.Name}\" BINARY");
+            sb.AppendLine("  TRACK 01 MODE2/2352");
+            sb.AppendLine("    INDEX 01 00:00:00");
+
+            File.WriteAllText(
+                Path.Combine(
+                    sourceFile.Directory.FullName,
+                    sourceFile.Name.Replace(sourceFile.Extension, "") + ".cue"),
+                sb.ToString());
         }
 
         public void UpdateGame(GameManagerNode node)
