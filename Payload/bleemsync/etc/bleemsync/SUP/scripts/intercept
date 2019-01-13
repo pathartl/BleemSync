@@ -18,6 +18,14 @@ intercept_game_id=""
 intercept_game_ext=""
 intercept_game_alternative_path=""
 intercept_save_state=false
+intercept_file_formats=(    # alternative PCSX ReARMed game formats
+    "m3u"
+    "pbp"
+    "img"
+    "mdf"
+    "toc"
+    "cbn" 
+)
 
 ### START INTERCEPT SCRIPT ####################################################
 # This should be launched directly from ui_menu by
@@ -54,23 +62,24 @@ do
         intercept_game_ext="${arg##*.}"
         echo "[INTERCEPT](INFO) Game extension: $intercept_game_ext"
 
-        # This is the place to check if the game exists in an alternative format
+        # Check if the game exists in an alternative format
         # The game path always has .cue appened to the BASENAME field of the DISC table in regional.db
         # EXCEPT when the game is launched from a Save State. In this case the Game Path is determined from
         # the first line of filename.txt.res in the games PCSX data directory (ie. /data/AppData/sony/pcsx/1/.pcsx/filename.txt.res)
         if [ "$intercept_save_state" = false ]; then
 
-            # This is an example to check for a PBP format game
-            intercept_game_alternative_path="${arg%.cue}.pbp"
-            if [ -f "$intercept_game_alternative_path" ]; then
-
-                echo "[INTERCEPT](INFO) Alternative game format exists (PBP), this will be used instead of the .cue"
-                arg="$intercept_game_alternative_path"
-                intercept_game_path="$arg"
-                intercept_game_ext="pbp"
-                echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
-                echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
-            fi
+            for f in "${intercept_file_formats[@]}"; do
+                intercept_game_alternative_path="${arg%.cue}.${f}"
+                if [ -f "$intercept_game_alternative_path" ]; then
+                    echo "[INTERCEPT](INFO) Alternative game format exists (${f}), this will be used instead of the .cue"
+                    arg="$intercept_game_alternative_path"
+                    intercept_game_path="$arg"
+                    intercept_game_ext="${f}"
+                    echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
+                    echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
+                    break
+                fi
+            done
         fi
         found_cdfile=false
         continue
