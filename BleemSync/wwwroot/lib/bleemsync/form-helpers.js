@@ -7,7 +7,7 @@
 }
 
 $.fn.clearForm = function () {
-    this.find('[name]').val(null);
+    this.find('[name]').not('button').val(null);
 
     return this;
 }

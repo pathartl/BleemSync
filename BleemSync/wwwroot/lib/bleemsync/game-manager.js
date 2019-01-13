@@ -14,9 +14,15 @@
         $.getJSON('/Games/GetTree', (data) => this.InitTree(data));
 
         this._uploadInput.change(() => this.ParseUploader());
+
         this._addGameForm.on('GameAdded', () => {
             this.OnGameAdded();
         });
+
+        this._editGameForm.on('GameUpdated', () => {
+            this.OnGameUpdated();
+        });
+
         this.LoadAddGameForm();
 
         $(document).on('Progress', (percentage) => {
@@ -114,6 +120,12 @@
                 }
             }
         }
+    }
+
+    OnGameUpdated() {
+        this.TreeReload();
+        this._editGameForm.clearForm();
+        this._forms.hide();
     }
 
     OnGameAdded() {

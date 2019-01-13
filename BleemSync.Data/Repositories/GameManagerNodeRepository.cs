@@ -33,6 +33,7 @@ namespace BleemSync.Data.Repositories
 
         public void Delete(GameManagerNode node)
         {
+            storageContext.Database.ExecuteSqlCommand($"DELETE FROM GameManagerFiles WHERE NodeId = {node.Id};");
             dbSet.Remove(node);
         }
     }

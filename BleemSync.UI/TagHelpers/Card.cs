@@ -28,8 +28,8 @@ namespace BleemSync.UI
             output.TagName = "div";
             output.Attributes.SetAttribute("class", $"{classString} pmd-card pmd-card-default pmd-z-depth");
 
-            var pre = "<div class=\"pmd-card-body\">";
-            var post = "</div>";
+            var pre = "";
+            var post = "";
 
             if (titleString.ToString() != "")
             {

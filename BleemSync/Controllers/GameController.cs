@@ -146,7 +146,24 @@ namespace BleemSync.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateGame(GameManagerNode game)
+        public ActionResult ModifyGame(GameManagerNode game, string UpdateAction)
+        {
+            ActionResult result = Json("");
+
+            switch (UpdateAction)
+            {
+                case "Delete":
+                    result = DeleteGame(game);
+                    break;
+                case "Update":
+                    result = UpdateGame(game);
+                    break;
+            }
+
+            return result;
+        }
+
+        private ActionResult UpdateGame(GameManagerNode game)
         {
             game.Type = GameManagerNodeType.Game;
             _gameManagerNodeRepository.Update(game);
@@ -158,8 +175,7 @@ namespace BleemSync.Controllers
             return Json("Game updated!");
         }
 
-        [HttpPost]
-        public ActionResult DeleteGame(GameManagerNode game)
+        private ActionResult DeleteGame(GameManagerNode game)
         {
             _gameManagerNodeRepository.Delete(game);
             _storage.Save();
