@@ -1,4 +1,4 @@
-$version = "0.3.2"
+$version = "0.7.0d"
 
 # Must run the following as admin if you want to build and compress
 # Install-Module 7Zip4PowerShell -Force -Verbose
@@ -15,7 +15,7 @@ mkdir .\Publish
 mkdir .\Publish\BleemSync
 cp .\BleemSync\bin\Release\netcoreapp2.1\linux-x64\publish\* .\Publish\BleemSync
 cp -Recurse .\BleemSync.Payload\* .\Publish
-Compress-7Zip "Publish\*" -Verbose -ArchiveFileName BleemSync-$version-linux-x64.zip -Format Zip
+Compress-7Zip "Publish" -ArchiveFileName BleemSync-$version-linux-x64.zip -Format Zip
 
 dotnet publish -c release -r osx-x64
 rm -Recurse -Force .\Publish
