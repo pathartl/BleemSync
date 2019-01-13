@@ -25,6 +25,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         {
             _context = context;
             _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
+            _gameManagerFileRepository = storage.GetRepository<IGameManagerFileRepository>();
             _storage = storage;
             _configuration = configuration;
 
@@ -57,6 +58,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
         private void PostProcessGameFiles(List<GameManagerFile> files, string outputDirectory)
         {
+            var additionalFiles = new List<GameManagerFile>();
+
             foreach (var file in files)
             {
                 var source = file.Path;
@@ -70,11 +73,12 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 switch (fileInfo.Extension.ToLower())
                 {
                     case ".pbp":
-                        files.Add(CreateCueSheet(fileInfo, file));
+                        additionalFiles.Add(CreateCueSheet(fileInfo, file));
                         break;
                 }
             }
 
+            files.AddRange(additionalFiles);
             var cueFiles = files.Where(f => f.Name.EndsWith(".cue"));
 
             var discNum = 1;
