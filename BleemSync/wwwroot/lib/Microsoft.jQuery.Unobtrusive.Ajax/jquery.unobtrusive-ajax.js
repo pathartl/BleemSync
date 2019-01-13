@@ -110,7 +110,7 @@
             },
             success: function (data, status, xhr) {
                 asyncOnSuccess(element, data, xhr.getResponseHeader("Content-Type") || "text/html");
-                $(element).trigger(element.getAttribute('data-ajax-success')).apply(element, arguments);
+                $(element).trigger(element.getAttribute('data-ajax-success'));
                 // getFunction(element.getAttribute("data-ajax-success"), ["data", "status", "xhr"]).apply(element, arguments);
             },
             error: function () {
