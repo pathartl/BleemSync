@@ -47,7 +47,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.SaveChanges();
 
             // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
-            var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString(), "GameData");
+            var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
 
             Directory.CreateDirectory(outputDirectory);
 
