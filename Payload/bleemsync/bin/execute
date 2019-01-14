@@ -5,7 +5,20 @@
 ###############################################################################
 
 ### LOAD CONFIGURATION ########################################################
-for cfgs in /media/bleemsync/etc/bleemsync/CFG/*.cfg; do source "$cfgs"; done
+ini_file="/media/bleemsync/etc/bleemsync/CFG/bleemsync_cfg.INI"
+cfg_file="/var/volatile/bleemsync.cfg"
+
+[ -f "$cfg_file" ] && rm -f "$cfg_file" && touch "$cfg_file"
+echo "#!/bin/sh" >> "$cfg_file"
+cat "$ini_file" | grep -v ";" | grep -v "\[" >> "$cfg_file"
+
+if [ -f "$cfg_file" ]; then
+  . "$cfg_file"
+else
+  echo "wtf" #Add a proper error at some point here...
+fi
+
+source "/media/bleemsync/etc/bleemsync/CFG/boot_sequence.cfg"
 
 ### LOAD FUNCTION LIBRARIES ###################################################												  
 for funcs in /media/bleemsync/etc/bleemsync/FUNC/*.funcs; do source "$funcs"; done
@@ -26,7 +39,7 @@ main(){
       if [ ! -z $(echo "$x" | grep "dump_") ] && [ "$force_redump" = "1" ]; then
         $x"_func" --force
         continue
-      fi
+      fi  
       $x"_func" 
     fi
     time2=$(date +%s%N)
