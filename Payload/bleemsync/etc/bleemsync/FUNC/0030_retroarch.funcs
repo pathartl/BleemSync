@@ -24,6 +24,7 @@ ra_savestate_path="/tmp/ra_savestate"
 #  intercept_save_state=false # Set to true if ui_menu launches with -load
 
 launch_retroarch_from_StockUI(){
+  start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
   [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
@@ -54,6 +55,8 @@ launch_retroarch_from_StockUI(){
 
   #  Launch retroarch
   echo "[BLEEMSYNC](INFO) Launching RetroArch for game $intercept_game_path"
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) RetroArch launch_retroarch_from_StockUI function took: $(((end-start)/1000000))ms to execute (up to launching RetroArch executable)"
   $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
   rm -fr "/tmp/ra_cache"
@@ -61,6 +64,7 @@ launch_retroarch_from_StockUI(){
 
 exit_checkSaveState(){
   # This function should only be called from the intercept script after retroarch exits
+  start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) checking for auto save state on retroarch exit"
 
   # An auto save state is created automatically, but what if the game disc was changed since
@@ -71,6 +75,8 @@ exit_checkSaveState(){
 
   if [ "$ra_last_game" == "" ]; then
     echo "[BLEEMSYNC](INFO) no auto save state exists"
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) RetroArch check for save state took: $(((end-start)/1000000))ms to execute"
     return 0
   fi
 
@@ -106,11 +112,14 @@ exit_checkSaveState(){
   # Remove the temporary save state folder. This is only used when Stock UI is launching RetroArch
   # and only for the current game
   rm -fR "$ra_savestate_path"
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) RetroArch check for save state took: $(((end-start)/1000000))ms to execute"
 }
 
 link_ra_memory_cards(){
   #  This function will link ui_menu and retroarch memory cards
   #  ui_menu memory cards take precedence
+  start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) linking ui_menu memory cards to RetroArch"
   if ls -la | grep -i ".pcsx ->"; then
     if [ ! -f "/data/AppData/sony/pcsx/.pcsx/memcards/card1.mcd" ]; then
@@ -138,6 +147,8 @@ link_ra_memory_cards(){
       fi
     done
   fi
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) RetroArch link memory cards took: $(((end-start)/1000000))ms to execute"
 }
 
 ###############################################################################
