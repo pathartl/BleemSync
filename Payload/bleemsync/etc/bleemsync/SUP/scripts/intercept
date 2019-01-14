@@ -23,7 +23,7 @@
 
 start=$(date +%s%N)
 ### LOAD CONFIGURATION ########################################################
-source "/media/bleemsync/etc/bleemsync/CFG/bleemsync.cfg"
+source "/var/volatile/bleemsync.cfg"
 
 ### LOAD FUNCTION LIBRARIES ###################################################
 source "/media/bleemsync/etc/bleemsync/FUNC/0030_retroarch.funcs"
