@@ -4,6 +4,7 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
+start=$(date +%s%N)
 ### LOAD CONFIGURATION ########################################################
 source "/media/bleemsync/etc/bleemsync/CFG/bleemsync.cfg"
 
@@ -47,6 +48,7 @@ found_cdfile=false
 
 # Loop through each argument to pull out information relating to which game is being loaded
 # and whether this is a Save State load
+start_arg=$(date +%s%N)
 for arg in "$@" 
 do
 
@@ -67,7 +69,8 @@ do
         # EXCEPT when the game is launched from a Save State. In this case the Game Path is determined from
         # the first line of filename.txt.res in the games PCSX data directory (ie. /data/AppData/sony/pcsx/1/.pcsx/filename.txt.res)
         if [ "$intercept_save_state" = false ]; then
-
+            
+            start_alt=$(date +%s%N)
             for f in "${intercept_file_formats[@]}"; do
                 intercept_game_alternative_path="${arg%.cue}.${f}"
                 if [ -f "$intercept_game_alternative_path" ]; then
@@ -80,6 +83,8 @@ do
                     break
                 fi
             done
+            end_alt=$(date +%s%N)
+            echo "[INTERCEPT](PROFILE) finding alternative game formats took: $(((end_alt-start_alt)/1000000))ms to execute"
         fi
         found_cdfile=false
         continue
@@ -100,12 +105,15 @@ do
     #   Build the new parameters for PCSX
     intercept_command="${intercept_command} ${arg}"
 done
-
+end_arg=$(date +%s%N)
+echo "[INTERCEPT](PROFILE) extracting arguments took: $(((end_arg-start_arg)/1000000))ms to execute"
 
 
 if [ "$launch_ra_from_stock_UI" = "1" ]; then
 
     echo "[INTERCEPT](INFO) RetroArch is enabled as the emulator"
+    end=$(date +%s%N)
+    echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
     link_ra_memory_cards
     launch_retroarch_from_StockUI
     exit_checkSaveState
@@ -114,6 +122,8 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
 fi
 
 echo "[INTERCEPT](INFO) Launching $intercept_pcsx_path $intercept_command -cdfile $intercept_game_path"
+end=$(date +%s%N)
+echo "[INTERCEPT](PROFILE) up to launching stock pcsx took: $(((end-start)/1000000))ms to execute"
 "$intercept_pcsx_path" $intercept_command -cdfile "$intercept_game_path"
 
 # Exit returning the pcsx exit code
