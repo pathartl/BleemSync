@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BleemSync.Data.Models
 {
-    [Table("GAME")]
+    [Table("MENU_ENTRIES")]
     public class Game
     {
         [Key, Column("GAME_ID")]
@@ -32,6 +32,9 @@ namespace BleemSync.Data.Models
 
         [Column("LINK_GAME_ID")]
         public string LinkGameId { get; set; }
+
+        [Column("POSITION")]
+        public int? Position { get; set; }
 
         public ICollection<Disc> Discs { get; set; }
 

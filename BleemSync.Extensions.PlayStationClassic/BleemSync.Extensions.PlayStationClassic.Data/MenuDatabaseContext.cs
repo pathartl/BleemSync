@@ -17,10 +17,8 @@ namespace BleemSync.Data
 
         public MenuDatabaseContext(DbContextOptions<MenuDatabaseContext> options) : base(options)
         {
-            if (!_created)
-            {
-                Database.EnsureCreated();
-            }
+            // Database.EnsureCreated();
+            Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
