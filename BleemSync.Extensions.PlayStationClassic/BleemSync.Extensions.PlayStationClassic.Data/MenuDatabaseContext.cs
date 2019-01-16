@@ -25,7 +25,7 @@ namespace BleemSync.Data
         {
             modelBuilder.Entity<Game>(entity =>
             {
-                entity.ToTable("GAME");
+                entity.ToTable("MENU_ENTRIES");
             });
 
 
