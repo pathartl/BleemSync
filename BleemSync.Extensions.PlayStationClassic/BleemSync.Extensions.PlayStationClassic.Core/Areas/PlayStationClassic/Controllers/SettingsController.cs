@@ -47,5 +47,31 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
 
             return View(preferences);
         }
+
+        [MenuItem(Name = "BleemSync Preferences")]
+        [HttpGet]
+        public ActionResult BleemSyncPreferences()
+        {
+            PayloadConfig payloadConfig;
+
+            try
+            {
+                var configuration = Configuration.LoadFromFile(_configuration["PlayStationClassic:PayloadConfigPath"]);
+                payloadConfig = new PayloadConfig(configuration);
+            } catch
+            {
+                payloadConfig = new PayloadConfig();
+            }
+
+            return View(payloadConfig);
+        }
+
+        [HttpPost]
+        public ActionResult BleemSyncPreferences(PayloadConfig payloadConfig)
+        {
+            var submittedConfiguration = payloadConfig.ToConfiguration();
+
+            return View(payloadConfig);
+        }
     }
 }
