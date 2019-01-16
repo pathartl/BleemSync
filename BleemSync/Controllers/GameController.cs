@@ -46,6 +46,9 @@ namespace BleemSync.Controllers
         {
             var tree = _gameManagerNodeRepository
                 .All()
+                .OrderBy(n => n.Position)
+                .ThenBy(n => n.SortName)
+                .ThenBy(n => n.Name)
                 .Select(n => new GameManagerNodeTreeItem(n));
 
             return new JsonResult(tree, new JsonSerializerSettings() {
@@ -59,9 +62,12 @@ namespace BleemSync.Controllers
         {
             var dbNodes = _gameManagerNodeRepository.All();
 
+            var position = 0;
             foreach (var node in request.Nodes)
             {
                 var dbNode = dbNodes.Single(n => n.Id == Convert.ToInt32(node.Id));
+
+                dbNode.Position = position;
 
                 if (node.Parent == "#")
                 {
@@ -71,9 +77,12 @@ namespace BleemSync.Controllers
                 {
                     dbNode.ParentId = Convert.ToInt32(node.Parent);
                 }
+
+                position++;
             }
 
             _storage.Save();
+            _gameManagerService.UpdateGames(dbNodes);
         }
 
         [HttpGet("{serial}")]

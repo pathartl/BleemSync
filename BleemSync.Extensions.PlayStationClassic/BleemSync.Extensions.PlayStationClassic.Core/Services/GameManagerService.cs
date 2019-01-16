@@ -40,7 +40,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 Title = node.Name,
                 Publisher = node.Publisher,
                 Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0,
-                Players = node.Players.HasValue ? node.Players.Value : 0
+                Players = node.Players.HasValue ? node.Players.Value : 0,
+                Position = node.Position
             };
 
             _context.Games.Add(game);
@@ -134,8 +135,27 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             game.Publisher = node.Publisher;
             game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
             game.Players = node.Players.HasValue ? node.Players.Value : 0;
+            game.Position = node.Position;
 
             _context.Games.Update(game);
+            _context.SaveChanges();
+        }
+
+        public void UpdateGames(IEnumerable<GameManagerNode> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                var game = _context.Games.Find(node.Id);
+
+                game.Title = node.Name;
+                game.Publisher = node.Publisher;
+                game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
+                game.Players = node.Players.HasValue ? node.Players.Value : 0;
+                game.Position = node.Position;
+
+                _context.Games.Update(game);
+            }
+
             _context.SaveChanges();
         }
 
