@@ -23,6 +23,7 @@ namespace BleemSync.Data.Entities
         public string Developer { get; set; }
         public string Publisher { get; set; }
         public GameManagerNodeType Type { get; set; }
+        public int Position { get; set; }
         public virtual GameSystem System { get; set; }
         public virtual List<GameGenre> Genres { get; set; }
         public virtual List<GameMeta> Meta { get; set; }

@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ExtCore.Data.EntityFramework;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
+using BleemSync.Data;
+using System.Reflection;
 
 namespace BleemSync
 {
@@ -37,7 +39,10 @@ namespace BleemSync
             services.Configure<StorageContextOptions>(options =>
             {
                 options.ConnectionString = Configuration.GetConnectionString("Default");
+                options.MigrationsAssembly = typeof(DesignTimeStorageContextFactory).GetTypeInfo().Assembly.FullName;
             });
+
+            DesignTimeStorageContextFactory.Initialize(services.BuildServiceProvider());
 
             services.Configure<CookiePolicyOptions>(options =>
             {

@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
     <ProjectReference Include="..\..\BleemSync.Services\BleemSync.Services.csproj" />
+    <ProjectReference Include="..\BleemSync.Extensions.PlayStationClassic.Data\BleemSync.Extensions.PlayStationClassic.Data.csproj" />
   </ItemGroup>
 
 </Project>
