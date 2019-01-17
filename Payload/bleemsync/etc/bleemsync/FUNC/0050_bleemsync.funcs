@@ -150,17 +150,6 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"
   ln -s "$mountpoint/system/preferences/system" "/var/volatile/gaadatatmp/preferences"
 
-  i=1
-  for game in $mountpoint/games/*
-  do
-    if [ -d "${game}" ]; then
-      game_dir="${game}"
-      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
-      ln -s "${game_dir}" /var/volatile/gaadatatmp/$i
-      i=$((i+1))
-    fi
-  done
-
   # Create data on tmpfs
   mkdir -p "/var/volatile/datatmp/sony/sgmo" "/var/volatile/datatmp/AppData/sony"
   # ln -s "/tmp/diag" "/tmp/datatmp/sony/sgmo/diag"
@@ -170,18 +159,22 @@ execute_bleemsync_func(){
   ln -s "$mountpoint/system/preferences/autodimmer" "/var/volatile/datatmp/AppData/sony/auto_dimmer"
   cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/var/volatile/datatmp/AppData/sony/pcsx"
 
+  PrevIFS="$IFS"
+  IFS=$'\t\r\n'
   i=1
-  for game in $mountpoint/games/*
+  for game in `ls -d -v -1 $mountpoint/games/**`
   do
     if [ -d "${game}" ]; then
       game_dir="${game}"
       [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
+      ln -s "${game_dir}" /var/volatile/gaadatatmp/$i
       rm -rf /var/volatile/datatmp/AppData/sony/pcsx/$i
       ln -s "${game_dir}" /var/volatile/datatmp/AppData/sony/pcsx/$i
       i=$((i+1))
     fi
   done
-
+  IFS="$PrevIFS"
+  
   ln -s "$mountpoint/system/bios" "/var/volatile/datatmp/AppData/sony/pcsx/bios"
   ln -s "/usr/sony/bin/plugins" "/var/volatile/datatmp/AppData/sony/pcsx/plugins"
 
@@ -249,6 +242,7 @@ execute_bleemsync_func(){
       game_dir="${game}"
       [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
       [ ! -f "${game_dir}/.pcsx/pcsx.cfg" ] && mkdir -p "${game_dir}/.pcsx" && cp -f "$mountpoint/system/defaults/pcsx.cfg" "${game_dir}/.pcsx/pcsx.cfg"
+	  mkdir -p "${game_dir}/.pcsx/cfg" "${game_dir}/.pcsx/cheats" "${game_dir}/.pcsx/memcards" "${game_dir}/.pcsx/patches" "${game_dir}/.pcsx/plugins" "${game_dir}/.pcsx/screenshots" "${game_dir}/.pcsx/sstates"
     fi
   done
 
