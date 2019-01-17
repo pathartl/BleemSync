@@ -24,6 +24,7 @@
 ### CHECK FOR LAUNCH SCRIPT ###################################################
 # If launch script exists run it instead of pcsx/RA
 if [ -f "/data/AppData/sony/title/launch.sh" ]; then
+  echo "[INTERCEPT](INFO) launch.sh exists"
   exec "/data/AppData/sony/title/launch.sh" 
   # Shouldn't get to here
   exit 1
@@ -52,6 +53,35 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
     "toc"
     "cbn" 
 )
+ui_menu_pid=""
+
+### INTERCEPT FUNCTIONS #######################################################
+suspend_ui_menu() {
+  start_suspend=$(date +%s%N)
+  ui_menu_pid=`ps|grep ui_menu|grep -v grep|awk '{print $1}'`
+  if [ `echo "$ui_menu_pid" | wc -l` -ne 1 ]; then
+    echo "[INTERCEPT](ERROR) unable to suspend ui_menu"
+    echo "[INTERCEPT](ERROR) ui_menu is either not running, or more than one instance is running"
+    echo "[INTERCEPT](ERROR) ui_menu_pid: ${ui_menu_pid}"
+    ui_menu_pid=""
+  else
+    echo "[INTERCEPT](INFO) suspending ui_menu (PID ${ui_menu_pid})"
+    kill -STOP "$ui_menu_pid"
+  fi
+  end_suspend=$(date +%s%N)
+  echo "[INTERCEPT](PROFILE) suspending ui_menu took: $(((end_suspend-start_suspend)/1000000))ms to execute"
+}
+
+resume_ui_menu() {
+  start_suspend=$(date +%s%N)
+  if [ ! "$ui_menu_pid" = "" ]; then
+    echo "[INTERCEPT](INFO) resuming ui_menu (PID ${ui_menu_pid})"
+    kill -CONT "$ui_menu_pid"
+    ui_menu_pid=""
+  fi
+  end_suspend=$(date +%s%N)
+  echo "[INTERCEPT](PROFILE) resuming ui_menu took: $(((end_suspend-start_suspend)/1000000))ms to execute"
+}
 
 ### START INTERCEPT SCRIPT ####################################################
 # This should be launched directly from ui_menu by
@@ -68,6 +98,7 @@ fi
 
 echo "[INTERCEPT](INFO) The current working directory: $PWD"
 
+suspend_ui_menu
 intercept_command=""
 found_cdfile=false
 
@@ -142,6 +173,7 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
     link_ra_memory_cards
     launch_retroarch_from_StockUI
     exit_checkSaveState
+    resume_ui_menu
     exit 0
 
 fi
@@ -150,6 +182,6 @@ echo "[INTERCEPT](INFO) Launching $intercept_pcsx_path $intercept_command -cdfil
 end=$(date +%s%N)
 echo "[INTERCEPT](PROFILE) up to launching stock pcsx took: $(((end-start)/1000000))ms to execute"
 "$intercept_pcsx_path" $intercept_command -cdfile "$intercept_game_path"
-
+resume_ui_menu
 # Exit returning the pcsx exit code
 exit $?
