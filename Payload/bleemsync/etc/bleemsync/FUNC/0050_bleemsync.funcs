@@ -26,12 +26,12 @@ launch_retroarch(){
     umount "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" &> "/dev/null"
     export HOME="/home/root" && cd "/home/root"
     sync
-    launch_BootMenu
+    echo launch_BootMenu > "/tmp/launchfilecommand"
   else
     $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png"
     sleep 1
     echo "[BLEEMSYNC](FAIL) tried to launch retroarch and it's not installed! Opening Stock ui..."
-    launch_StockUI
+    echo launch_StockUI > "/tmp/launchfilecommand"
   fi
 }
 
@@ -43,18 +43,6 @@ launch_BootMenu(){
     $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path/"
   else
     $bleemsync_path/bin/boot_menu --image-folder "$images_path"
-  fi
-
-  command=""
-  [ -f "/tmp/launchfilecommand" ] && command=$(cat "/tmp/launchfilecommand") && rm -f "/tmp/launchfilecommand"
-  if [ "$command" = "retroarch" ]; then
-    echo "[BLEEMSYNC](INFO) RA selected from boot menu. Launching retroarch"
-    launch_retroarch
-  elif [ "$command" = "bleemsync" ]; then
-    echo "[BLEEMSYNC](INFO) BS selected from boot menu"
-    launch_StockUI
-  else
-    return 0
   fi
 }
 
@@ -316,9 +304,15 @@ execute_bleemsync_func(){
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
 
-  [ "$boot_target_stock_UI" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_StockUI
-  [ "$boot_target_stock_BM" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_BootMenu
-  [ "$boot_target_stock_RA" = "1" ] && [ "$booted" = "0" ] && booted=1 && launch_retroarch
+  boot_command="launch_StockUI"
+  [ "$boot_target_stock_BM" = "1" ] && boot_command="launch_BootMenu"
+  [ "$boot_target_stock_RA" = "1" ] && boot_command="launch_retroarch"
+  
+  while [ $boot_command != "quit" ]; do
+    $boot_command
+    [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
+    rm -f /tmp/launchfilecommand
+  done
 
 #-----------------------------------------------------------------------------#
   #Cleanup and shutdown (If active telnet session don't shutdown console.)
