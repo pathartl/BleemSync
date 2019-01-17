@@ -51,13 +51,10 @@ launch_StockUI(){
   echo 0 > /data/power/disable
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
-
-  if [ "$enable_intercept" = "1" ]; then
-    mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "/usr/sony/share/data/preferences/system.pre"
-    cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
-    chmod +x "/tmp/intercept"
-  fi
-
+ 
+  # Remove power file flags
+  rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
+ 
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
 }
 ###############################################################################
@@ -177,6 +174,11 @@ execute_bleemsync_func(){
   
   ln -s "$mountpoint/system/bios" "/var/volatile/datatmp/AppData/sony/pcsx/bios"
   ln -s "/usr/sony/bin/plugins" "/var/volatile/datatmp/AppData/sony/pcsx/plugins"
+  
+  # Force intercept to allow launching custom scripts from stock UI
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "/usr/sony/share/data/preferences/system.pre"
+  cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
+  chmod +x "/tmp/intercept"
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs symbolic linking took: $(((end-start)/1000000))ms to execute"

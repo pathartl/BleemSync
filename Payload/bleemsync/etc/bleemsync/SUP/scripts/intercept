@@ -21,6 +21,14 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
+### CHECK FOR LAUNCH SCRIPT ###################################################
+# If launch script exists run it instead of pcsx/RA
+if [ -f "/data/AppData/sony/title/launch.sh" ]; then
+  exec "/data/AppData/sony/title/launch.sh" 
+  # Shouldn't get to here
+  exit 1
+fi
+
 start=$(date +%s%N)
 ### LOAD CONFIGURATION ########################################################
 source "/var/volatile/bleemsync.cfg"
