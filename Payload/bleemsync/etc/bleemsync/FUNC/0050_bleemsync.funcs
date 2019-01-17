@@ -230,7 +230,7 @@ execute_bleemsync_func(){
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
   # Fix for last selected game issue. If not in place user may experience ui issue
-  sed -i "s/iUiuserSettingLastSelectGameCursorPos.*/iuiuserSettingLastSelectGameCursorPos=0/" "/var/volatile/datatmp/AppData/sony/ui/user.pre"
+  sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" "/var/volatile/datatmp/AppData/sony/ui/user.pre"
 
   # Reload and apply udev rules that were overmounted above
   # Allows both controllers to be detected through a USB hub
