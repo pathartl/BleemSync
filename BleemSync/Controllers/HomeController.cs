@@ -13,7 +13,6 @@ using BleemSync.Extensions.Infrastructure.Attributes;
 
 namespace BleemSync.Controllers
 {
-    [MenuSection(Name = "Home", Icon = "home", Position = 999999)]
     public class HomeController : Controller
     {
         private IGameManagerNodeRepository _gameRepository { get; set; }
@@ -27,10 +26,9 @@ namespace BleemSync.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Manage", "Games");
         }
 
-        [MenuItem(Name = "About")]
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";

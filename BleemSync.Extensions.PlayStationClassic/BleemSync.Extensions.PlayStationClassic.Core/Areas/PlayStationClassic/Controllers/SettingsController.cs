@@ -10,7 +10,8 @@ using System.Text;
 namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.Controllers
 {
     [Area("PlayStationClassic")]
-    [MenuSection(Icon = "theaters", Name = "PlayStation Classic")]
+    [MenuSection(Icon = "tv", Name = "PlayStation Classic")]
+    [Route("[area]/[controller]/[action]")]
     public class SettingsController : Controller
     {
         private IConfiguration _configuration { get; set; }
@@ -70,6 +71,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
         public ActionResult BleemSyncPreferences(PayloadConfig payloadConfig)
         {
             var submittedConfiguration = payloadConfig.ToConfiguration();
+
+            submittedConfiguration.SaveToFile(_configuration["PlayStationClassic:PayloadConfigPath"]);
 
             return View(payloadConfig);
         }

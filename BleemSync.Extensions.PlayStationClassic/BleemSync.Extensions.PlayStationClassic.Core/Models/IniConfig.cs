@@ -101,7 +101,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
                         break;
 
                     case "System.Boolean":
-                        configuration[sectionName][propertyName].BoolValue = Convert.ToBoolean(property.GetValue(this, null));
+                        var value = Convert.ToBoolean(property.GetValue(this, null));
+                        configuration[sectionName][propertyName].IntValue = value ? 1 : 0;
                         break;
 
                     default:
