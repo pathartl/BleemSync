@@ -27,7 +27,7 @@ launch_retroarch_from_StockUI(){
   start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
-  [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log" 
+  rm -f "$runtime_log_path/retroarch.log" 
   [ ! -f "$retroarch_path/retroarch" ] && break #FAIL
   if [ ! -f "$retroarch_path/system/scph102b.bin" ]; then
     cp -f "/gaadata/system/bios/romw.bin" "$retroarch_path/system/scph102b.bin"
@@ -73,7 +73,7 @@ exit_checkSaveState(){
     
   ra_last_game=`ls -t "${ra_savestate_path}/"*.auto | head -1`
 
-  if [ "$ra_last_game" == "" ]; then
+  if [ x"$ra_last_game" = x"" ]; then
     echo "[BLEEMSYNC](INFO) no auto save state exists"
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) RetroArch check for save state took: $(((end-start)/1000000))ms to execute"
@@ -83,7 +83,7 @@ exit_checkSaveState(){
   ra_last_game="${ra_last_game##*/}"          # Remove leading directories
   ra_last_game="${ra_last_game%.state.auto}"  # Remove trailing file extension .state.auto
 
-  if [ ! "$ra_last_game" == "$intercept_game_id" ]; then    
+  if [ ! "$ra_last_game" = "$intercept_game_id" ]; then    
     #  The last save state was for a different game, check if this disc belongs to the launching game
     #  If it does then a disc swap has occured, so update the game ids so the correct save state
     #  data is passed to ui_menu state is from a game which is different to the launched game"

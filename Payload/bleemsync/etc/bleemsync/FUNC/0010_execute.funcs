@@ -10,9 +10,9 @@ dump_emmc_func(){
 		echo 1 > /sys/class/leds/red/brightness
 		ok=1
 		mediafs="$(df -T | grep -Ee ' /media$' | awk -e '{ print $2 }')"
-		[ ! -d "$dump_path/emmc_RAW" ] && mkdir -p "$dump_path/emmc_RAW"
+		mkdir -p "$dump_path/emmc_RAW"
 		mount -o remount,ro /data && mount -o remount,ro /gaadata
-		if [ "$mediafs" == "vfat" ]; then
+		if [ "$mediafs" = "vfat" ]; then
 			if ! dd if=/dev/mmcblk0 bs=1M | gzip | split -a3 -b4294967295 - "$dump_path/emmc_RAW/mmcblk0.bin.gz."; then
 				ok=0
 			fi
@@ -41,10 +41,10 @@ dump_fs_func(){
 		echo 1 > /sys/class/leds/red/brightness
 		ok=1
 		mediafs="$(df -T | grep -Ee ' /media$' | awk -e '{ print $2 }')"
-		[ ! -d "$dump_path/emmc_FS" ] && mkdir -p "$dump_path/emmc_FS"
+		mkdir -p "$dump_path/emmc_FS"
 		mount -o remount,ro /data && mount -o remount,ro /gaadata
-		if [ "$mediafs" == "vfat" ]; then
-			if ! dd if=/dev/mmcblk0 bs=1M | gzip | split -a3 -b4294967295 - "$dump_path/emmc_FS/gaadata.bin.gz."; then
+		if [ "$mediafs" = "vfat" ]; then
+			if ! dd if=/dev/mapper/gaadata bs=1M | gzip | split -a3 -b4294967295 - "$dump_path/emmc_FS/gaadata.bin.gz."; then
 				ok=0
 			fi
 		else
@@ -52,11 +52,10 @@ dump_fs_func(){
 				ok=0
 			fi
 		fi
-		if ! dd if=/dev/mmcblk0p10 bs=1M > "$dump_path/emmc_FS/data.bin"; then
+		if ! dd if=/dev/disk/by-partlabel/USRDATA bs=1M > "$dump_path/emmc_FS/data.bin"; then
 			ok=0
 		fi
-		rootdevice="$(mount | grep ' on / ' | awk -e '{ print $1 }')"
-		if ! dd "if=$rootdevice" bs=1M > "$dump_path/emmc_FS/root.bin"; then
+		if ! dd if=/dev/disk/by-partlabel/ROOTFS1 bs=1M > "$dump_path/emmc_FS/root.bin"; then
 			ok=0
 		fi
 		if [ "$ok" = "1" ]; then
@@ -65,6 +64,7 @@ dump_fs_func(){
 		else
 			echo "[BLEEMSYNC](FAIL) dump_fs_func()"
 		fi
+		mount -o remount,rw /data
 		sync
 		echo 0 > /sys/class/leds/red/brightness
 	else 
@@ -79,9 +79,9 @@ dump_tar_func(){
 		echo 1 > /sys/class/leds/red/brightness
 		ok=1
 		mediafs="$(df -T | grep -Ee ' /media$' | awk -e '{ print $2 }')"
-		[ ! -d "$dump_path/emmc_TAR" ] && mkdir -p "$dump_path/emmc_TAR"
+		mkdir -p "$dump_path/emmc_TAR"
 		mount -o remount,ro /data && mount -o remount,ro /gaadata
-		if [ "$mediafs" == "vfat" ]; then
+		if [ "$mediafs" = "vfat" ]; then
 			if ! tar -czf - -C "/gaadata" . | split -a3 -b4294967295 - "$dump_path/emmc_TAR/gaadata.tar.gz."; then
 				ok=0
 			fi
@@ -93,9 +93,8 @@ dump_tar_func(){
 		if ! tar -czf - -C "/data" . > "$dump_path/emmc_TAR/data.tar.gz"; then
 			ok=0
 		fi
-		rootdevice="$(mount | grep ' on / ' | awk -e '{ print $1 }')"
 		mkdir -p "/tmp/root"
-		mount -o ro "$rootdevice" "/tmp/root"
+		mount -o ro /dev/disk/by-partlabel/ROOTFS1 "/tmp/root"
 		if ! tar -czf - -C "/tmp/root" . > "$dump_path/emmc_TAR/root.tar.gz"; then
 			ok=0
 		fi
@@ -121,7 +120,7 @@ dump_fstruct_func(){
 		echo 1 > /sys/class/leds/red/brightness
 		echo "Dumping file structure to: $dump_path/PSC_file_structure.txt"
 		echo "This might take awhile!"
-		[ ! -d "$dump_path" ] && mkdir -p "$dump_path"
+		mkdir -p "$dump_path"
 		ls -lhAR / &> "$dump_path/PSC_file_structure.txt"
 		[ -f "$dump_path/PSC_file_structure.txt" ] && touch "$runtime_flag_path/dumped_fstruct.flag"
 		echo 0 > /sys/class/leds/red/brightness
@@ -135,8 +134,8 @@ debug_run_func(){
 	#Misc debugging commands get dumped here.
 	echo "[BLEEMSYNC](Executing) debug_run_func()"
 	echo 1 > /sys/class/leds/red/brightness
-	[ ! -d "$dump_path" ] && mkdir -p "$dump_path"
-	touch "$dump_path/mount.log" && mount &> "$dump_path/mount.log"
+	mkdir -p "$dump_path"
+	mount &> "$dump_path/mount.log"
 	[ -d "$dump_path/DEBUG" ] && rm -rf "$dump_path/DEBUG"
 	[ ! -d "$dump_path/DEBUG" ] && mkdir -p "$dump_path/DEBUG"
 	cat "/proc/mtktz/mtktscpu" | head -1 &> "$dump_path/DEBUG/CPUTEMP.log"
