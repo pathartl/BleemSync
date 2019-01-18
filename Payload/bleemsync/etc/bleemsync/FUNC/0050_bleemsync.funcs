@@ -15,7 +15,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
 ###############################################################################
 # BleemSync Function Library - BleemSync
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
@@ -183,12 +182,12 @@ execute_bleemsync_func(){
 
   # Migrate GameData contents and copy default pcsx.cfg if not present
   for game in "${mountpoint}/games/"*/; do
-    if [ -d "${game}/GameData" ]; then
-      mv -f "${game}/GameData/"* "${game}/GameData/".[!.]* "${game}/"
-      rmdir "${game}/GameData"
+    if [ -d "${game}GameData" ]; then
+      mv -f "${game}GameData/"* "${game}GameData/".[!.]* "${game}"
+      rmdir "${game}GameData"
     fi
-    mkdir -p "${game}/.pcsx"
-    [ ! -f "${game}/.pcsx/pcsx.cfg" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}/.pcsx/pcsx.cfg"
+    mkdir -p "${game}.pcsx"
+    [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
   done
 
   end=$(date +%s%N)
@@ -235,7 +234,6 @@ execute_bleemsync_func(){
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
-
   boot_command="launch_StockUI"
   [ "$boot_target_stock_BM" = "1" ] && boot_command="launch_BootMenu"
   [ "$boot_target_stock_RA" = "1" ] && boot_command="launch_retroarch"
@@ -253,7 +251,6 @@ execute_bleemsync_func(){
   umount /gaadata/databases/regional.db
   umount /usr/sony/share/data/preferences/system.pre
   rm -r "${VOL_GAADATA}" "${VOL_DATAPCSX}" /var/volatile/bleemsync.cfg
-
 #-----------------------------------------------------------------------------#
   #Cleanup and shutdown (If active telnet session don't shutdown console.)
   if [ "$(who | wc -l)" = "1" ]; then
