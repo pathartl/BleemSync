@@ -127,18 +127,17 @@ execute_bleemsync_func(){
   if [ "$link_EMMC_and_USB" = "1" ]; then
     start=$(date +%s%N)
 
-    emmc_gaadata_count=$(ls -d1 /gaadata/*/ | grep '^[0-9]\+$' | wc -l)
-    media_gaadata_count=$(ls -d1 "${mountpoint}/games/"*/ | grep '^[0-9]\+$' | wc -l)
+    emmc_gaadata_count=$(ls -d1 /gaadata/*/ | grep '/[0-9]\+/$' | wc -l)
+    media_gaadata_count=$(ls -d1 "${mountpoint}/games/"*/ | grep '/[0-9]\+/$' | wc -l)
 
     "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
-    rm "/tmp/join.sql"
 
     echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
     for i in $(seq 1 $emmc_gaadata_count); do
       ln -s "/gaadata/$i/" "${VOL_GAADATA}/$(( media_gaadata_count + i ))"
       ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$(( media_gaadata_count + i ))"
       echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
+      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }') >> "/tmp/join.sql"
     done
     echo "COMMIT;" >> "/tmp/join.sql"
 
@@ -154,6 +153,9 @@ execute_bleemsync_func(){
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
+
+  # Overmount the stock DB now that we're done using it
+  mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
@@ -169,7 +171,7 @@ execute_bleemsync_func(){
       rmdir "${game}/GameData"
     fi
     mkdir -p "${game}/.pcsx"
-    [ ! -f "${game}/.pcsx" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}/.pcsx/pcsx.cfg"
+    [ ! -f "${game}/.pcsx/pcsx.cfg" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}/.pcsx/pcsx.cfg"
   done
 
   end=$(date +%s%N)
@@ -226,6 +228,14 @@ execute_bleemsync_func(){
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
     rm -f /tmp/launchfilecommand
   done
+
+  # Debug cleanup
+  umount /etc/udev/rules.d/20-joystick.rules
+  umount /usr/sony/bin/pcsx
+  if [ "$boot_disable_health" = "1" ]; then umount /usr/sony/bin/ui_menu; fi
+  umount /gaadata/databases/regional.db
+  umount /usr/sony/share/data/preferences/system.pre
+  rm -r "${VOL_GAADATA}" "${VOL_DATAPCSX}" /var/volatile/bleemsync.cfg
 
 #-----------------------------------------------------------------------------#
   #Cleanup and shutdown (If active telnet session don't shutdown console.)
