@@ -48,14 +48,17 @@ launch_BootMenu(){
 
 launch_StockUI(){
   echo "[BLEEMSYNC](INFO) launching stock ui"
-  echo 0 > /data/power/disable
-  cd "/data/AppData/sony/pcsx"
-  export PCSX_ESC_KEY=2
- 
   # Remove power file flags
   rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
- 
+  # Fix for last selected game issue. If not in place user may experience ui issue
+  sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
+
+  cd "/data/AppData/sony/pcsx"
+  export PCSX_ESC_KEY=2
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
+
+  # Reset last selected game in case user does not use BleemSync on next boot
+  sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
 }
 ###############################################################################
 
@@ -67,56 +70,12 @@ execute_bleemsync_func(){
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
-  #Run on console bleemsync (This will be replaced in 1.0)
-  if [ -f "$mountpoint/system/bleemsync/BleemSync" ]
-  then
-    cd "$mountpoint/system/bleemsync"
-    chmod +x "BleemSync"
-    ./BleemSync
-    cd "/home/root"
-  fi
-
-  end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) BleemSync DB processing took: $(((end-start)/1000000))ms to execute"
-#-----------------------------------------------------------------------------#
-  start=$(date +%s%N)
-
-  # Build external directory structure
-  mkdir -p "$mountpoint/system/bios"
-  mkdir -p "$mountpoint/system/preferences/system"
-  mkdir -p "$mountpoint/system/preferences/user"
-  mkdir -p "$mountpoint/system/preferences/autodimmer"
-  mkdir -p "$mountpoint/system/databases"
-  mkdir -p "$mountpoint/system/region"
-  mkdir -p "$mountpoint/system/ui"
-
-  # Copy the bios files
-  [ ! -f "$mountpoint/system/bios/romw.bin" ] && cp -fr "/gaadata/system/bios/"* "$mountpoint/system/bios"
-  # Copy the regional.pre
-  [ ! -f "$mountpoint/system/preferences/system/regional.pre" ] && cp -f "/gaadata/preferences/"* "$mountpoint/system/preferences/system"
-  # Copy out the user.pre
-  [ ! -f "$mountpoint/system/preferences/user/user.pre" ] && cp -f "/data/AppData/sony/ui/"* "$mountpoint/system/preferences/user"
-  # Copy out the auto dimming config
-  [ ! -f "$mountpoint/system/preferences/autodimmer/config.cnf" ] && cp -f "/data/AppData/sony/auto_dimmer/"* "$mountpoint/system/preferences/autodimmer"
-  # Copy out the region info
-  [ ! -f "$mountpoint/system/region/REGION" ] && cp -f "/gaadata/geninfo/"* "$mountpoint/system/region"
-  # Copy ui error log
-  [ ! -f "$mountpoint/system/ui/error.log" ] && cp -f "/data/sony/ui/"* "$mountpoint/system/ui"
-  sync
-
-  end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) BleemSync data processing took: $(((end-start)/1000000))ms to execute"
-#-----------------------------------------------------------------------------#
-  start=$(date +%s%N)
-
   # Unmount partitons and create tmpfs - Shut system down on failure
   MOUNT_FAIL=0
-  umount /data || MOUNT_FAIL=1
-  umount /gaadata || MOUNT_FAIL=1
   # Create gaadata and data folders in tmp then mount over original folders
-  mkdir -p "/var/volatile/gaadatatmp" "/var/volatile/datatmp"
-  mount -o bind "/var/volatile/gaadatatmp" "/gaadata" || MOUNT_FAIL=1
-  mount -o bind "/var/volatile/datatmp" "/data" || MOUNT_FAIL=1
+  VOL_GAADATA="/var/volatile/gaadatatmp"
+  VOL_DATAPCSX="/var/volatile/datatmp"
+  mkdir -p "${VOL_GAADATA}" "${VOL_DATAPCSX}"
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules" || MOUNT_FAIL=1
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
 
@@ -136,45 +95,26 @@ execute_bleemsync_func(){
   start=$(date +%s%N)
 
   # Create gaadata on tmpfs
-  mkdir -p "/var/volatile/gaadatatmp/system/"
   if [ "$link_EMMC_and_USB" = "1" ]; then
-    mkdir -p "/var/volatile/gaadatatmp/databases/"
-    cp -f "$mountpoint/system/databases/regional.db" "/var/volatile/gaadatatmp/databases/"
+    mkdir -p "${VOL_GAADATA}/databases/"
+    cp -f "$mountpoint/system/databases/regional.db" "${VOL_GAADATA}/databases/"
   else
-    ln -s "$mountpoint/system/databases" "/var/volatile/gaadatatmp/"
+    ln -s "$mountpoint/system/databases" "${VOL_GAADATA}"
   fi
-  ln -s "$mountpoint/system/region" "/var/volatile/gaadatatmp/geninfo"
-  ln -s "$mountpoint/system/bios" "/var/volatile/gaadatatmp/system/bios"
-  ln -s "$mountpoint/system/preferences/system" "/var/volatile/gaadatatmp/preferences"
+  ln -s /gaadata/geninfo "${VOL_GAADATA}"
+  ln -s /gaadata/preferences "${VOL_GAADATA}"
+  ln -s /gaadata/system "${VOL_GAADATA}"
 
   # Create data on tmpfs
-  mkdir -p "/var/volatile/datatmp/sony/sgmo" "/var/volatile/datatmp/AppData/sony"
-  # ln -s "/tmp/diag" "/tmp/datatmp/sony/sgmo/diag"
-  ln -s "/dev/shm/power" "/var/volatile/datatmp/power"
-  ln -s "$mountpoint/system/ui" "/var/volatile/datatmp/sony/ui"
-  ln -s "$mountpoint/system/preferences/user" "/var/volatile/datatmp/AppData/sony/ui"
-  ln -s "$mountpoint/system/preferences/autodimmer" "/var/volatile/datatmp/AppData/sony/auto_dimmer"
-  cp -fr "/usr/sony/share/recovery/AppData/sony/pcsx" "/var/volatile/datatmp/AppData/sony/pcsx"
+  ln -s /gaadata/system/bios "${VOL_DATAPCSX}"
+  ln -s /usr/sony/bin/plugins "${VOL_DATAPCSX}"
 
-  PrevIFS="$IFS"
-  IFS=$'\t\r\n'
-  i=1
-  for game in `ls -d -v -1 $mountpoint/games/**`
-  do
-    if [ -d "${game}" ]; then
-      game_dir="${game}"
-      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
-      ln -s "${game_dir}" /var/volatile/gaadatatmp/$i
-      rm -rf /var/volatile/datatmp/AppData/sony/pcsx/$i
-      ln -s "${game_dir}" /var/volatile/datatmp/AppData/sony/pcsx/$i
-      i=$((i+1))
-    fi
+  # Link games on /media
+  for game in "${mountpoint}/games/"*/; do
+    ln -s "${game}" "${VOL_GAADATA}"
+    ln -s "${game}" "${VOL_DATAPCSX}"
   done
-  IFS="$PrevIFS"
-  
-  ln -s "$mountpoint/system/bios" "/var/volatile/datatmp/AppData/sony/pcsx/bios"
-  ln -s "/usr/sony/bin/plugins" "/var/volatile/datatmp/AppData/sony/pcsx/plugins"
-  
+
   # Force intercept to allow launching custom scripts from stock UI
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "/usr/sony/share/data/preferences/system.pre"
   cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
@@ -186,69 +126,51 @@ execute_bleemsync_func(){
   # Unite EMMC and MEDIA games and databases
   if [ "$link_EMMC_and_USB" = "1" ]; then
     start=$(date +%s%N)
-    [ -d "/var/volatile/emmc_gaadata" ] && umount "/var/volatile/emmc_gaadata" && rm -fr "/var/volatile/emmc_gaadata"
-    [ -d "/var/volatile/emmc_data" ] && umount "/var/volatile/emmc_data" && rm -fr "/var/volatile/emmc_data"
-    mkdir -p "/var/volatile/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/var/volatile/emmc_gaadata/"
-    mkdir -p "/var/volatile/emmc_data" && mount "/dev/mmcblk0p10" "/var/volatile/emmc_data/"
 
-    emmc_gaadata_count=$(ls "/var/volatile/emmc_gaadata" | grep '^[0-9]\+$' | wc -l)
-    media_gaadata_count=$(ls "/var/volatile/gaadatatmp" | grep '^[0-9]\+$' | wc -l)
-    i=1
+    emmc_gaadata_count=$(ls -d1 /gaadata/*/ | grep '^[0-9]\+$' | wc -l)
+    media_gaadata_count=$(ls -d1 "${mountpoint}/games/"*/ | grep '^[0-9]\+$' | wc -l)
 
-    $bleemsync_path/bin/sqlite3 "/var/volatile/emmc_gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
-    [ -f "/tmp/join.sql" ] && rm -f "/tmp/join.sql" && touch "/tmp/join.sql"
+    "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
+    rm "/tmp/join.sql"
 
-    echo "BEGIN TRANSACTION;" >> "/tmp/join.sql"
-    while true; do
-      [ "$i" = "$(( emmc_gaadata_count + 1))" ] && break
-      ln -s "/var/volatile/emmc_gaadata/$i" "/var/volatile/gaadatatmp/$(( media_gaadata_count + i ))"
-      rm -rf "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
-      ln -s "/var/volatile/emmc_data/AppData/sony/pcsx/$i" "/var/volatile/datatmp/AppData/sony/pcsx/$(( media_gaadata_count + i ))"
+    echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
+    for i in $(seq 1 $emmc_gaadata_count); do
+      ln -s "/gaadata/$i/" "${VOL_GAADATA}/$(( media_gaadata_count + i ))"
+      ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$(( media_gaadata_count + i ))"
       echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
       echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
-      i=$(( i + 1 ))
     done
     echo "COMMIT;" >> "/tmp/join.sql"
 
     sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
 
-    $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
+    "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
     if [ "$link_alphabeticalise" = "1" ]; then
       echo "create table new as select * from GAME order by GAME_TITLE_STRING; drop table GAME; create table GAME as select * from new order by GAME_TITLE_STRING; drop table new" \
-      | $bleemsync_path/bin/sqlite3 "/var/volatile/gaadatatmp/databases/regional.db"
+      | "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db"
     fi
 
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
-  else
-    [ -d "/var/volatile/emmc_gaadata" ] && umount "/var/volatile/emmc_gaadata" && rm -fr "/var/volatile/emmc_gaadata"
-    [ -d "/var/volatile/emmc_data" ] && umount "/var/volatile/emmc_data" && rm -fr "/var/volatile/emmc_data"
-    mkdir -p "/var/volatile/emmc_gaadata" && mount -o ro "/dev/mapper/gaadata" "/var/volatile/emmc_gaadata/"
-    mkdir -p "/var/volatile/emmc_data" && mount "/dev/mmcblk0p10" "/var/volatile/emmc_data/"
   fi
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
-  # Fix for last selected game issue. If not in place user may experience ui issue
-  sed -i "s/iUiUserSettingLastSelectGameCursorPos.*/iUiUserSettingLastSelectGameCursorPos=0/" "/var/volatile/datatmp/AppData/sony/ui/user.pre"
 
   # Reload and apply udev rules that were overmounted above
   # Allows both controllers to be detected through a USB hub
   udevadm control --reload-rules
   udevadm trigger
 
-  # Default pcsx.cfg
-  for game in $mountpoint/games/*
-  do
-    if [ -d "${game}" ]; then
-      game_dir="${game}"
-      [ -d "${game_dir}/GameData" ] && game_dir="${game}/GameData"
-      [ ! -f "${game_dir}/.pcsx/pcsx.cfg" ] && mkdir -p "${game_dir}/.pcsx" && cp -f "$mountpoint/system/defaults/pcsx.cfg" "${game_dir}/.pcsx/pcsx.cfg"
-	  mkdir -p "${game_dir}/.pcsx/cfg" "${game_dir}/.pcsx/cheats" "${game_dir}/.pcsx/memcards" "${game_dir}/.pcsx/patches" "${game_dir}/.pcsx/plugins" "${game_dir}/.pcsx/screenshots" "${game_dir}/.pcsx/sstates"
+  # Migrate GameData contents and copy default pcsx.cfg if not present
+  for game in "${mountpoint}/games/"*/; do
+    if [ -d "${game}/GameData" ]; then
+      mv -f "${game}/GameData/"* "${game}/GameData/".[!.]* "${game}/"
+      rmdir "${game}/GameData"
     fi
+    mkdir -p "${game}/.pcsx"
+    [ ! -f "${game}/.pcsx" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}/.pcsx/pcsx.cfg"
   done
-
-  cd "/home/root"
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync general fixing took: $(((end-start)/1000000))ms to execute"
@@ -257,22 +179,18 @@ execute_bleemsync_func(){
   if [ "$boot_disable_health" = "1" ]; then
     start=$(date +%s%N)
     echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
-    PATCH_FAIL=0
     PATCH_DIR="/var/volatile/health_patch"
-    PATCH_BIN="$PATCH_DIR/patch.bin"
-    PATCH_TARGET="/usr/sony/bin/ui_menu"
-    PATCH_WORKING="$PATCH_DIR/ui_menu"
+    PATCH_TARGET=/usr/sony/bin/ui_menu
+    PATCH_WORKING="${PATCH_DIR}/ui_menu"
 
     # Perform patching
-    mkdir -p "$PATCH_DIR"
-    cp -f "$PATCH_TARGET" "$PATCH_WORKING"
-    echo -n -e '\xb8\x0c\x00\x06\x03\x58\xbe' > "$PATCH_BIN"
-    dd bs=1 if="$PATCH_BIN" skip=0 of="$PATCH_WORKING" seek=28084 count=3 conv=notrunc
-    dd bs=1 if="$PATCH_BIN" skip=3 of="$PATCH_WORKING" seek=28120 count=2 conv=notrunc
-    dd bs=1 if="$PATCH_BIN" skip=5 of="$PATCH_WORKING" seek=28712 count=2 conv=notrunc
-    rm -f "$PATCH_BIN"
-    mount -o bind "$PATCH_WORKING" "$PATCH_TARGET" || PATCH_FAIL=1
-    if [ "$PATCH_FAIL" = "0" ]; then
+    mkdir -p "${PATCH_DIR}"
+    cp "${PATCH_TARGET}" "${PATCH_WORKING}"
+    echo -ne '\xb8\x0c\x00' | dd bs=1 of="${PATCH_WORKING}" seek=28084 conv=notrunc
+    echo -ne '\x06\x03' | dd bs=1 of="${PATCH_WORKING}" seek=28120 conv=notrunc
+    echo -ne '\x58\xbe' | dd bs=1 of="${PATCH_WORKING}" seek=28712 conv=notrunc
+    mount -o bind "${PATCH_WORKING}" "${PATCH_TARGET}"
+    if [ "$?" -eq "0" ]; then
       echo "[BLEEMSYNC](INFO) patched out H+S statement"
     else
       echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
@@ -290,11 +208,10 @@ execute_bleemsync_func(){
   start=$(date +%s%N)
   #Cleanup before starting main user applications
   rm -rf "/tmp/systemd"*
-  rm -rf "/tmp/diag"
+  rm -rf "/tmp/diag/"*
   rm -rf "/tmp/"*".sql"
 
   killall -s KILL sdl_display &> /dev/null
-  booted=0
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
@@ -303,7 +220,7 @@ execute_bleemsync_func(){
   boot_command="launch_StockUI"
   [ "$boot_target_stock_BM" = "1" ] && boot_command="launch_BootMenu"
   [ "$boot_target_stock_RA" = "1" ] && boot_command="launch_retroarch"
-  
+
   while [ $boot_command != "quit" ]; do
     $boot_command
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
@@ -317,7 +234,6 @@ execute_bleemsync_func(){
       sleep 9999
     done
   else
-    rm -rf "/tmp/ra_cache"
     sync
     echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
     reboot
