@@ -1,4 +1,21 @@
 #!/bin/sh
+#
+#  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
 ###############################################################################
 # BleemSync Function Library - RetroArch
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
@@ -27,7 +44,7 @@ launch_retroarch_from_StockUI(){
   start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
-  rm -f "$runtime_log_path/retroarch.log" 
+  rm -f "$runtime_log_path/retroarch.log"
   [ ! -f "$retroarch_path/retroarch" ] && break #FAIL
   if [ ! -f "$retroarch_path/system/scph102b.bin" ]; then
     cp -f "/gaadata/system/bios/romw.bin" "$retroarch_path/system/scph102b.bin"
@@ -70,7 +87,7 @@ exit_checkSaveState(){
   # An auto save state is created automatically, but what if the game disc was changed since
   # retroarch was originally launched. Check that the last saved state matches the ID of the launching
   # game
-    
+
   ra_last_game=`ls -t "${ra_savestate_path}/"*.auto | head -1`
 
   if [ x"$ra_last_game" = x"" ]; then
@@ -83,7 +100,7 @@ exit_checkSaveState(){
   ra_last_game="${ra_last_game##*/}"          # Remove leading directories
   ra_last_game="${ra_last_game%.state.auto}"  # Remove trailing file extension .state.auto
 
-  if [ ! "$ra_last_game" = "$intercept_game_id" ]; then    
+  if [ ! "$ra_last_game" = "$intercept_game_id" ]; then
     #  The last save state was for a different game, check if this disc belongs to the launching game
     #  If it does then a disc swap has occured, so update the game ids so the correct save state
     #  data is passed to ui_menu state is from a game which is different to the launched game"
