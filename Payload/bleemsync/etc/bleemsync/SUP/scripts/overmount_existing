@@ -23,9 +23,8 @@
 
 IFS='\n'
 while read -r rel_file; do
-    rel_file="${rel_file#$1/}"
-    if [ -f "$2/${rel_file}" ]; then
-        echo "Binding $1/${rel_file} over $2/${rel_file}"
-        mount -o bind "$1/${rel_file}" "$2/${rel_file}"
-    fi
+  rel_file="${rel_file#$1/}"
+  if [ -f "$2/${rel_file}" ]; then
+    mount -o bind "$1/${rel_file}" "$2/${rel_file}"
+  fi
 done < <(find "$1" -type f)
