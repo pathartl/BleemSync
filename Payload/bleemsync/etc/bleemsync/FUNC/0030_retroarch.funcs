@@ -120,6 +120,9 @@ exit_checkSaveState(){
     #  Create filename.txt
     echo "$intercept_game_path" > /data/AppData/sony/pcsx/.pcsx/filename.txt
     echo "$intercept_game_id" >> /data/AppData/sony/pcsx/.pcsx/filename.txt
+    #  Create save state folders
+    mkdir -p "/data/AppData/sony/pcsx/.pcsx/sstates"
+    mkdir -p "/data/AppData/sony/pcsx/.pcsx/screenshots"
     #  Move save state files
     mv "${ra_savestate_path}/${intercept_game_id}.state.auto" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
     mv "${ra_savestate_path}/${intercept_game_id}.state.auto.png" "/data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png"
