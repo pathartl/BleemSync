@@ -12,7 +12,7 @@
     }
 </style>
 
-<column lg="9" md="8" xs="12">
+<column md="8" xs="12">
     <card title="Game Manager">
         <card-body>
             <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
@@ -37,7 +37,7 @@
     }
 }
 
-<column lg="3" md="4" xs="12">
+<column md="4" xs="12">
     <form id="add-game-form" class="game-manager-form"
           asp-action="AddGame"
           enctype="multipart/form-data"
@@ -47,6 +47,11 @@
         <card title="Add New Game">
             <card-body>
                 <input type="file" name="Files" class="game-upload" accept="@String.Join(",", fileExtensions)" multiple />
+                <div class="cover-dropzone">
+                    <input type="file" name="Cover" class="cover-upload" accept="image/*" style="display: none;" />
+                    <img class="cover-preview" src="http://fpoimg.com/226x226" />
+                </div>
+                <hidden asp-for="CoverUrl "/>
                 <textbox asp-for="Name" />
                 <textbox asp-for="SortName" />
                 <textarea asp-for="Description" />
@@ -62,6 +67,7 @@
     </form>
     <form id="edit-game-form" class="game-manager-form"
           asp-action="ModifyGame"
+          enctype="multipart/form-data"
           data-ajax="true"
           data-ajax-method="POST"
           data-ajax-success="GameUpdated">
@@ -69,6 +75,13 @@
             <card-body>
                 <hidden asp-for="Id" />
                 <hidden asp-for="ParentId" />
+
+                <div class="cover-dropzone">
+                    <input type="file" name="Cover" class="cover-upload" accept="image/*" style="display: none;" />
+                    <img class="cover-preview" src="http://fpoimg.com/226x226" />
+                </div>
+                <hidden asp-for="CoverUrl " />
+
                 <textbox asp-for="Name" />
                 <textbox asp-for="SortName" />
                 <textarea asp-for="Description" />

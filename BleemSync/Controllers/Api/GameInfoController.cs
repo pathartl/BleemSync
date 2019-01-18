@@ -33,5 +33,20 @@ namespace BleemSync.Controllers.Api
 
             return new JsonResult(game);
         }
+
+        [HttpGet("{system}/{fingerprint}")]
+        public ActionResult GetCoverByFingerprint(string system, string fingerprint)
+        {
+            var coverUrl = "";
+
+            switch (system)
+            {
+                case "PlayStation":
+                    coverUrl = _bleemSyncCentral.GetPlayStationCoverBySerial(fingerprint);
+                    break;
+            }
+
+            return Redirect(coverUrl);
+        }
     }
 }

@@ -24,6 +24,7 @@ namespace BleemSync.Controllers
     public class GamesController : Controller
     {
         private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
+        private IGameManagerFileRepository _gameManagerFileRepository { get; set; }
         private IStorage _storage { get; set; }
         private BleemSyncCentralService _bleemSyncCentral { get; set; }
         private IGameManagerService _gameManagerService { get; set; }
@@ -31,6 +32,7 @@ namespace BleemSync.Controllers
         public GamesController(IStorage storage, BleemSyncCentralService bleemSyncCentral, IGameManagerService gameManagerService)
         {
             _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
+            _gameManagerFileRepository = storage.GetRepository<IGameManagerFileRepository>();
             _storage = storage;
             _bleemSyncCentral = bleemSyncCentral;
             _gameManagerService = gameManagerService;
@@ -110,6 +112,14 @@ namespace BleemSync.Controllers
             return new JsonResult(game);
         }
 
+        [HttpGet("{id}")]
+        public ActionResult GetLocalCoverByGameId(int id)
+        {
+            var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == id && f.Name.EndsWith(".png")).First();
+
+            return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), coverFile.Path), "image/jpg");
+        }
+
         [HttpPost]
         public async Task<ActionResult> AddGame(GameUpload gameUpload)
         {
@@ -129,6 +139,36 @@ namespace BleemSync.Controllers
                         Path = filePath
                     });
                 }
+            }
+
+            if (gameUpload.CoverUrl != "")
+            {
+                var client = new WebClient();
+
+                var file = new GameManagerFile()
+                {
+                    Name = "cover.png",
+                    Path = Path.GetTempFileName()
+                };
+
+                client.DownloadFile($"{Request.Scheme}://{Request.Host.Value}{gameUpload.CoverUrl}", file.Path);
+
+                temporaryFiles.Add(file);
+            }
+            else if (gameUpload.Cover != null)
+            {
+                var file = new GameManagerFile()
+                {
+                    Name = gameUpload.Cover.FileName,
+                    Path = Path.GetTempFileName()
+                };
+
+                using (var stream = new FileStream(file.Path, FileMode.Create))
+                {
+                    await gameUpload.Cover.CopyToAsync(stream);
+                }
+
+                temporaryFiles.Add(file);
             }
 
             // Add game to the database
@@ -155,40 +195,59 @@ namespace BleemSync.Controllers
         }
 
         [HttpPost]
-        public ActionResult ModifyGame(GameManagerNode game, string UpdateAction)
+        public async Task<ActionResult> ModifyGame(GameUpload gameUpload, string UpdateAction)
         {
             ActionResult result = Json("");
 
             switch (UpdateAction)
             {
                 case "Delete":
-                    result = DeleteGame(game);
+                    result = DeleteGame(gameUpload);
                     break;
                 case "Update":
-                    result = UpdateGame(game);
+                    result = await UpdateGame(gameUpload);
                     break;
             }
 
             return result;
         }
 
-        private ActionResult UpdateGame(GameManagerNode game)
+        private async Task<ActionResult> UpdateGame(GameUpload gameUpload)
         {
-            game.Type = GameManagerNodeType.Game;
-            _gameManagerNodeRepository.Update(game);
+            var node = _gameManagerNodeRepository.Get(gameUpload.Id);
+
+            node.Name = gameUpload.Name;
+            node.SortName = gameUpload.SortName;
+            node.Description = gameUpload.Description;
+            node.ReleaseDate = gameUpload.ReleaseDate;
+            node.Players = gameUpload.Players;
+            node.Developer = gameUpload.Developer;
+            node.Publisher = gameUpload.Publisher;
+            node.Type = GameManagerNodeType.Game;
+
+            if (gameUpload.Cover != null)
+            {
+                var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == node.Id && f.Name.EndsWith(".png")).First();
+
+                using (var stream = new FileStream(coverFile.Path, FileMode.Create))
+                {
+                    await gameUpload.Cover.CopyToAsync(stream);
+                }
+            }
 
             _storage.Save();
 
-            _gameManagerService.UpdateGame(game);
+            _gameManagerService.UpdateGame(node);
 
             return Json("Game updated!");
         }
 
-        private ActionResult DeleteGame(GameManagerNode game)
+        private ActionResult DeleteGame(GameUpload gameUpload)
         {
-            _gameManagerNodeRepository.Delete(game);
+            var node = _gameManagerNodeRepository.Get(gameUpload.Id);
+            _gameManagerNodeRepository.Delete(node);
             _storage.Save();
-            _gameManagerService.DeleteGame(game);
+            _gameManagerService.DeleteGame(node);
 
             return Json("Game deleted!");
         }

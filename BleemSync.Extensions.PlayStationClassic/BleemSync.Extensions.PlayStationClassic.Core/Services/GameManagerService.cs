@@ -79,8 +79,17 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 }
             }
 
-            files.AddRange(additionalFiles);
             var cueFiles = files.Where(f => f.Name.EndsWith(".cue"));
+            var firstCueBasename = cueFiles.First().Name.Replace(".cue", "");
+            var coverFile = files.Where(f => f.Name == "cover.png").First();
+            var newCoverFileName = firstCueBasename + ".png";
+            var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
+
+            File.Move(coverFile.Path, newCoverFilePath);
+            coverFile.Path = newCoverFilePath;
+            coverFile.Name = newCoverFileName;
+
+            files.AddRange(additionalFiles);
 
             var discNum = 1;
             foreach (var cueFile in cueFiles)

@@ -97,14 +97,21 @@ onmessage = function (e) {
     }
 
     function GetGameInfoFromBinaryFiles(files) {
-        var fingerprint = "";
+        var game = {
+            Fingerprint: ''
+        };
 
         // Test PlayStation first, other parsers will go under here
-        fingerprint = GetPlayStationFingerprint(files[0]);
+        game.Fingerprint = GetPlayStationFingerprint(files[0]);
 
-        if (fingerprint != '') {
-            return GetGameInfoFromCentral(fingerprint, 'PlayStation');
+        if (game.Fingerprint != '') {
+            game.System = 'PlayStation'
         }
+
+        game = Object.assign(game, GetGameInfoFromCentral(game.Fingerprint, game.System));
+        game.CoverUrl = GetCentralCoverUrl(game.Fingerprint, game.System);
+
+        return game;
     }
 
     function GetPlayStationFingerprint(file) {
@@ -171,6 +178,10 @@ onmessage = function (e) {
         }
 
         return cleanSerial;
+    }
+
+    function GetCentralCoverUrl(fingerprint, system) {
+        return `/api/GameInfo/GetCoverByFingerprint/${system}/${fingerprint}`;
     }
 
     function GetGameInfoFromCentral(fingerprint, system) {

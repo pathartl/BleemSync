@@ -10,11 +10,13 @@ namespace BleemSync.Services
 {
     public class BleemSyncCentralService
     {
+        readonly string _baseUrl;
         readonly RestClient _client;
 
         public BleemSyncCentralService()
         {
-            _client = new RestClient("https://central.bleemsync.app/api");
+            _baseUrl = "https://central.bleemsync.app/api";
+            _client = new RestClient(_baseUrl);
         }
 
         public RestRequest Request(string endpoint)
@@ -28,6 +30,11 @@ namespace BleemSync.Services
             var game = JsonConvert.DeserializeObject<CentralGame>(result.Content);
 
             return game;
+        }
+
+        public string GetPlayStationCoverBySerial(string serial)
+        {
+            return $"{_baseUrl}/PlayStation/GetCoverBySerial/{serial}";
         }
     }
 }
