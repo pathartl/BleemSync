@@ -8,42 +8,39 @@
 ini_file="/media/bleemsync/etc/bleemsync/CFG/bleemsync_cfg.INI"
 cfg_file="/var/volatile/bleemsync.cfg"
 
-[ -f "$cfg_file" ] && rm -f "$cfg_file" && touch "$cfg_file"
-echo "#!/bin/sh" >> "$cfg_file"
-cat "$ini_file" | grep -v ";" | grep -v "\[" >> "$cfg_file"
+rm -f "$cfg_file"
+grep -v -e "^;" -e "^\[" "$ini_file" > "$cfg_file"
 
 if [ -f "$cfg_file" ]; then
-  . "$cfg_file"
+  source "$cfg_file"
 else
   echo "wtf" #Add a proper error at some point here...
 fi
 
-source "/media/bleemsync/etc/bleemsync/CFG/boot_sequence.cfg"
+source "${bleemsync_path}/etc/bleemsync/CFG/boot_sequence.cfg"
+
+# Set up logging
+if [ "$runtime_log" = "1" ]; then
+  error_log="$runtime_log_path/bleemsync.log"
+else
+  error_log="/dev/stdout"
+fi
 
 ### LOAD FUNCTION LIBRARIES ###################################################												  
 for funcs in /media/bleemsync/etc/bleemsync/FUNC/*.funcs; do source "$funcs"; done
 
 ### EXECUTE ###################################################################
 main(){
-  start=$(date +%s)
   for x in "${boot_sequence[@]}"; do
-    [ "$runtime_log" = "1" ] && echo "[BLEEMSYNC](BOOT) booting "$x"_func()" >> "$runtime_log_path/bleemsync.log" 2>&1
+    echo "[BLEEMSYNC](BOOT) booting "$x"_func()" >> "${error_log}"
     time1=$(date +%s%N)
-    if [ "$runtime_log" = "1" ]; then
-      if [ ! -z $(echo "$x" | grep "dump_") ] && [ "$force_redump" = "1" ]; then
-        $x"_func" --force >> "$runtime_log_path/bleemsync.log" 2>&1
-        continue
-      fi
-      $x"_func" >> "$runtime_log_path/bleemsync.log" 2>&1
+    if [ ! -z $(echo "$x" | grep "^dump_") ] && [ "$force_redump" = "1" ]; then
+      $x"_func" --force >> "${error_log}" 2>&1
     else
-      if [ ! -z $(echo "$x" | grep "dump_") ] && [ "$force_redump" = "1" ]; then
-        $x"_func" --force
-        continue
-      fi  
-      $x"_func" 
+      $x"_func" >> "${error_log}" 2>&1
     fi
     time2=$(date +%s%N)
-    [ "$runtime_log" = "1" ] && echo "[BLEEMSYNC](PROFILE) "$x"_func() took: $(((time1-time2)/1000000))ms to execute" >> "$runtime_log_path/bleemsync.log" 2>&1
+    echo "[BLEEMSYNC](PROFILE) "$x"_func() took: $(((time1-time2)/1000000))ms to execute" >> "${error_log}"
   done 
 }
 

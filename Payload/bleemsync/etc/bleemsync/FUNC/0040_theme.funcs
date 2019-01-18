@@ -1,17 +1,17 @@
 #!/bin/sh
 #
 #  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
-#  
+#
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
@@ -20,6 +20,10 @@
 # BleemSync Function Library - Stock UI Themes
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
+
+overmount_existing() {
+  "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing" "$@"
+}
 
 select_UI_theme(){
   echo "[BLEEMSYNC](Executing) select_UI_theme()"
@@ -33,22 +37,17 @@ select_UI_theme(){
 
   # Set random theme if setting is set
   if [ "$random_theme_onload" = "1" ]; then
-    cd "$themes_path"
-    selected_theme=$(ls -d * | sort --random-sort | head -1)
-    cd "/home/root"
+    selected_theme=$(ls -d1 "$themes_path/"*/ | sort --random-sort | head -1 | xargs basename)
   fi
-  
+
   # Lower-case the theme variable incase it causes and issue
   selected_theme="$(echo $selected_theme | tr 'A-Z' 'a-z')"
-  
+
   # Initial vars
   found_theme=0
   found_boot_files=0
-  found_font_files=0
-  found_image_files=0
   found_music_files=0
-  found_sound_files=0
-  
+
   if [ "$selected_theme" != "stock" ] && [ -d "$themes_path/$selected_theme" ]; then
     # Set found theme var for log
     found_theme=1
@@ -62,41 +61,15 @@ select_UI_theme(){
         # if [ ${boot_file: -4} == ".wav" ]; then sounds_path="$themes_path/$selected_theme/boot"; found_boot_files=1; fi
       done
       cd "/home/root"
-    fi 2> /dev/null 
-    # Check for the font folder
-    if [ -d "$themes_path/$selected_theme/font" ]; then
-      cd "$themes_path/$selected_theme/font"
-      for font_file in $(find -iname \*.ttf | sed -e 's,^\./,,'); do
-        mount -o bind "$themes_path/$selected_theme/font/$font_file" "/usr/sony/share/data/font/$font_file"
-        found_font_files=1
-      done
-      cd "/home/root"
-    fi 2> /dev/null 
-    # Check for the images folder
-    if [ -d "$themes_path/$selected_theme/images" ]; then
-      cd "$themes_path/$selected_theme/images"
-      for image_file in $(find -iname \*.png | sed -e 's,^\./,,'); do
-        mount -o bind "$themes_path/$selected_theme/images/$image_file" "/usr/sony/share/data/images/$image_file"
-        found_image_files=1
-      done
-      cd "/home/root"
-    fi 2> /dev/null 
+    fi 2> /dev/null
+
     # Check for the music folder
     if [ -d "$themes_path/$selected_theme/music" ] && [ "$override_theme_music" = "0" ]; then
-      cd "$themes_path/$selected_theme/music"
-      for music_file in $(find -iname \*.wav | sed -e 's,^\./,,'); do
-        if [ ${music_file: -4} == ".wav" ]; then mount -o bind "$themes_path/$selected_theme/music" "$sounds_path/music"; found_music_files=1; fi
-      done
-    fi 2> /dev/null 
-    # Check for the sounds folder
-    if [ -d "$themes_path/$selected_theme/sounds" ]; then
-      cd "$themes_path/$selected_theme/sounds"
-      for sound_file in $(find -iname \*.wav | sed -e 's,^\./,,'); do
-        mount -o bind "$themes_path/$selected_theme/sounds/$sound_file" "/usr/sony/share/data/sounds/$sound_file"
-        found_sound_files=1
-      done
-      cd "/home/root"
-    fi 2> /dev/null     
+      found_music_files=1
+      overmount_existing "$themes_path/$selected_theme/music" "$sounds_path/music"
+    fi
+
+    overmount_existing "$themes_path/$selected_theme" /usr/sony/share/data
   fi
   # log if stuff is found or not
   if [ "$found_theme" == "1" ]; then
@@ -109,25 +82,10 @@ select_UI_theme(){
   else
     echo "[BLEEMSYNC](INFO)(theme) mounting stock boot menu files"
   fi
-  if [ "$found_font_files" == "1" ]; then
-    echo "[BLEEMSYNC](INFO)(theme) mounting available font files"
-  else
-    echo "[BLEEMSYNC](INFO)(theme) mounting stock font files"
-  fi
-  if [ "$found_image_files" == "1" ]; then
-    echo "[BLEEMSYNC](INFO)(theme) mounting available image files"
-  else
-    echo "[BLEEMSYNC](INFO)(theme) mounting stock image files"
-  fi
   if [ "$found_music_files" == "1" ]; then
     echo "[BLEEMSYNC](INFO)(theme) mounting available music files"
   else
     echo "[BLEEMSYNC](INFO)(theme) mounting stock music files"
-  fi
-  if [ "$found_sound_files" == "1" ]; then
-    echo "[BLEEMSYNC](INFO)(theme) mounting available sound files"
-  else
-    echo "[BLEEMSYNC](INFO)(theme) mounting stock sound files"
   fi
   echo 0 > /sys/class/leds/red/brightness
   end=$(date +%s%N)

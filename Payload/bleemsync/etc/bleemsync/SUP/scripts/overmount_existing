@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
 #
@@ -17,23 +17,14 @@
 #
 
 ###############################################################################
-# BleemSync Function Library - Shared
+# Recursive Existing Files Overmount Script
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
-pretty_logo_func(){ #ASCII PORN
-	bin="$bleemsync_path/etc/bleemsync/SUP/scripts/show_logo"
-	chmod +x "$bin" && "$bin"
-}
-
-red_led_flash() {
-  SLEEP=1
-  while true; do
-    echo 0 > /sys/class/leds/green/brightness
-    echo 1 > /sys/class/leds/red/brightness
-    sleep $SLEEP
-    echo 0 > /sys/class/leds/green/brightness
-    echo 0 > /sys/class/leds/red/brightness
-    sleep $SLEEP
-  done
-}
+IFS='\n'
+while read -r rel_file; do
+  rel_file="${rel_file#$1/}"
+  if [ -f "$2/${rel_file}" ]; then
+    mount -o bind "$1/${rel_file}" "$2/${rel_file}"
+  fi
+done < <(find "$1" -type f)
