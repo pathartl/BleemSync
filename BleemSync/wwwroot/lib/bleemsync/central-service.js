@@ -21,7 +21,13 @@
 
         if (request.status === 200) {
             console.log(request.responseText);
-            return JSON.parse(request.responseText);
+            var game = JSON.parse(request.responseText);
+
+            if (game.Name == null && game.Title != null) game.Name = game.Title;
+            if (game.SortName == null && game.CommonTitle != null) game.SortName = game.CommonTitle;
+            if (game.ReleaseDate == null && game.DateReleased != null) game.ReleaseDate = game.DateReleased.split('T')[0];
+
+            return game;
         } else {
             throw new DOMException(`Could not scrape data for a game with the fingerprint of ${fingerprint} for the system ${system}.`);
         }
