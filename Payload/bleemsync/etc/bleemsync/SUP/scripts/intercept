@@ -168,9 +168,6 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
   echo "[INTERCEPT](INFO) RetroArch is enabled as the emulator"
   end=$(date +%s%N)
   echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
-  # Init some folders we're using for the intercept
-  mkdir -p /data/sony/AppData/pcsx/.pcsx/{memcards,screenshots,sstates}
-  # Do launch
   link_ra_memory_cards
   launch_retroarch_from_StockUI
   exit_checkSaveState
