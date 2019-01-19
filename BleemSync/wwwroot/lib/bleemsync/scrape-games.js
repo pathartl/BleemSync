@@ -7,6 +7,8 @@
 }
 
 onmessage = function (e) {
+    importScripts('central-service.js');
+
     let reader = new FileReaderSync();
     let files = e.data;
     let games = [];
@@ -78,7 +80,7 @@ onmessage = function (e) {
 
         if (fingerprint != '') {
             try {
-                let game = GetGameInfoFromCentral(fingerprint, 'PlayStation');
+                let game = BleemSyncCentral.GetGameInfoByFingerprint(fingerprint, 'PlayStation');
 
                 response.Valid = true;
                 response.Game = game;
@@ -108,8 +110,10 @@ onmessage = function (e) {
             game.System = 'PlayStation'
         }
 
-        game = Object.assign(game, GetGameInfoFromCentral(game.Fingerprint, game.System));
-        game.CoverUrl = GetCentralCoverUrl(game.Fingerprint, game.System);
+        let coverFile = BleemSyncCentral.GetCoverFileByFingerprint(game.Fingerprint, game.System);
+
+        game = Object.assign(game, BleemSyncCentral.GetGameInfoByFingerprint(game.Fingerprint, game.System));
+        game.Cover = reader.readAsDataURL(coverFile);
 
         return game;
     }
@@ -178,23 +182,5 @@ onmessage = function (e) {
         }
 
         return cleanSerial;
-    }
-
-    function GetCentralCoverUrl(fingerprint, system) {
-        return `/api/GameInfo/GetCoverByFingerprint/${system}/${fingerprint}`;
-    }
-
-    function GetGameInfoFromCentral(fingerprint, system) {
-        let request = new XMLHttpRequest();
-
-        request.open('GET', `/api/GameInfo/GetByFingerprint/${system}/${fingerprint}`, false);
-        request.send(null);
-
-        if (request.status === 200) {
-            console.log(request.responseText);
-            return JSON.parse(request.responseText);
-        } else {
-            throw new DOMException(`Could not scrape data for a game with the fingerprint of ${fingerprint} for the system ${system}.`);
-        }
     }
 };

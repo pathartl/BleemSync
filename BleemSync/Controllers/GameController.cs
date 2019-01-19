@@ -141,32 +141,15 @@ namespace BleemSync.Controllers
                 }
             }
 
-            if (gameUpload.CoverUrl != "")
+            if (gameUpload.Cover != null && gameUpload.Cover != "")
             {
-                var client = new WebClient();
-
                 var file = new GameManagerFile()
                 {
                     Name = "cover.png",
                     Path = Path.GetTempFileName()
                 };
 
-                client.DownloadFile($"{Request.Scheme}://{Request.Host.Value}{gameUpload.CoverUrl}", file.Path);
-
-                temporaryFiles.Add(file);
-            }
-            else if (gameUpload.Cover != null)
-            {
-                var file = new GameManagerFile()
-                {
-                    Name = gameUpload.Cover.FileName,
-                    Path = Path.GetTempFileName()
-                };
-
-                using (var stream = new FileStream(file.Path, FileMode.Create))
-                {
-                    await gameUpload.Cover.CopyToAsync(stream);
-                }
+                System.IO.File.WriteAllBytes(file.Path, Convert.FromBase64String(gameUpload.Cover.Split(",")[1]));
 
                 temporaryFiles.Add(file);
             }
@@ -231,7 +214,7 @@ namespace BleemSync.Controllers
 
                 using (var stream = new FileStream(coverFile.Path, FileMode.Create))
                 {
-                    await gameUpload.Cover.CopyToAsync(stream);
+                    //await gameUpload.Cover.CopyToAsync(stream);
                 }
             }
 

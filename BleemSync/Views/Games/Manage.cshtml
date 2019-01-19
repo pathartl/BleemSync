@@ -48,10 +48,9 @@
             <card-body>
                 <input type="file" name="Files" class="game-upload" accept="@String.Join(",", fileExtensions)" multiple />
                 <div class="cover-dropzone">
-                    <input type="file" name="Cover" class="cover-upload" accept="image/*" style="display: none;" />
+                    <input type="hidden" name="Cover" class="cover-upload" />
                     <img class="cover-preview" src="http://fpoimg.com/226x226" />
                 </div>
-                <hidden asp-for="CoverUrl "/>
                 <textbox asp-for="Name" />
                 <textbox asp-for="SortName" />
                 <textarea asp-for="Description" />
@@ -80,7 +79,6 @@
                     <input type="file" name="Cover" class="cover-upload" accept="image/*" style="display: none;" />
                     <img class="cover-preview" src="http://fpoimg.com/226x226" />
                 </div>
-                <hidden asp-for="CoverUrl " />
 
                 <textbox asp-for="Name" />
                 <textbox asp-for="SortName" />

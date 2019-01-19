@@ -142,7 +142,7 @@
                 if (response.data[0].Valid) {
                     this.LoadAddGameForm(response.data[0].Game);
                     var d = new Date();
-                    this._addGameForm.find('.cover-preview').attr('src', response.data[0].Game.CoverUrl);
+                    this._addGameForm.find('.cover-preview').attr('src', response.data[0].Game.Cover);
                 } else {
                     for (let error of response.data) {
                         AlertService.Error(error.Message);
