@@ -55,6 +55,7 @@ launch_retroarch_from_StockUI(){
       rm -fr "$ra_savestate_path"
   fi
   mkdir -p "$ra_savestate_path"
+  link_ra_savestates
   export HOME="$retroarch_path"
   #  Check if this is a Save State load
   if [ "$intercept_save_state" = true ]; then
@@ -75,6 +76,7 @@ launch_retroarch_from_StockUI(){
   echo "[BLEEMSYNC](PROFILE) RetroArch launch_retroarch_from_StockUI function took: $(((end-start)/1000000))ms to execute (up to launching RetroArch executable)"
   $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
+  save_ra_savestates
   rm -fr "/tmp/ra_cache"
 }
 
@@ -120,6 +122,9 @@ exit_checkSaveState(){
     #  Create filename.txt
     echo "$intercept_game_path" > /data/AppData/sony/pcsx/.pcsx/filename.txt
     echo "$intercept_game_id" >> /data/AppData/sony/pcsx/.pcsx/filename.txt
+    #  Create save state folders
+    mkdir -p "/data/AppData/sony/pcsx/.pcsx/sstates"
+    mkdir -p "/data/AppData/sony/pcsx/.pcsx/screenshots"
     #  Move save state files
     mv "${ra_savestate_path}/${intercept_game_id}.state.auto" "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000"
     mv "${ra_savestate_path}/${intercept_game_id}.state.auto.png" "/data/AppData/sony/pcsx/.pcsx/screenshots/${intercept_game_id}.png"
@@ -165,6 +170,27 @@ link_ra_memory_cards(){
   fi
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) RetroArch link memory cards took: $(((end-start)/1000000))ms to execute"
+}
+
+link_ra_savestates(){
+  # This function will link relevant RetroArch save states into the temporary save state location
+  # which will enable the additional multiple save slot functionality RetroArch provides when
+  # launched from the Stock UI
+  start=$(date +%s%N)
+  echo "[BLEEMSYNC](INFO) linking other RetroArch save states into temporary location"
+  find "${retroarch_path}/savestates/" -name "${intercept_game_id}.state*" -a ! -name "${intercept_game_id}.state.*" -maxdepth 1 -type f -exec ln -sf "{}" "$ra_savestate_path" +
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) link_ra_save_states took: $(((end-start)/1000000))ms to execute"
+}
+
+save_ra_savestates(){
+  # This function will move any save states, other than auto save states, that may have been created
+  # during this session back into the main RetroArch save state folder
+  start=$(date +%s%N)
+  echo "[BLEEMSYNC](INFO) moving other RetroArch save states back to the main RetroArch location"
+  find "$ra_savestate_path" -name "*.state*" -a ! -name "*state.*" -maxdepth 1 -type f -exec mv "{}" "${retroarch_path}/savestates/" +
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) save_ra_savestates took: $(((end-start)/1000000))ms to execute"
 }
 
 ###############################################################################
