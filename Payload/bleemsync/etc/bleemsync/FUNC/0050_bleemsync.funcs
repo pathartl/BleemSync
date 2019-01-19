@@ -56,9 +56,9 @@ launch_BootMenu(){
   echo 2 > /data/power/disable
   rm -f "/tmp/launchfilecommand"
   if [ "$boot_menu_music" = "1" ]; then
-    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path/"
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path/" --theme-folder "$themes_path/$selected_theme/boot"
   else
-    $bleemsync_path/bin/boot_menu --image-folder "$images_path"
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --theme-folder "$themes_path/$selected_theme/boot"
   fi
 }
 

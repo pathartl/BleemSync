@@ -44,23 +44,11 @@ select_UI_theme(){
 
   # Initial vars
   found_theme=0
-  found_boot_files=0
   found_music_files=0
 
   if [ "$selected_theme" != "stock" ] && [ -d "$themes_path/$selected_theme" ]; then
     # Set found theme var for log
     found_theme=1
-    # Check for the boot folder
-    if [ -d "$themes_path/$selected_theme/boot" ]; then
-      cd "$themes_path/$selected_theme/boot"
-      for boot_file in $(find -iname \*.png -o -iname \*.wav | sed -e 's,^\./,,'); do
-        if [ ${boot_file: -4} == ".png" ]; then mount -o bind "$themes_path/$selected_theme/boot/$boot_file" "$images_path/$boot_file"; found_boot_files=1; fi
-        if [ ${boot_file: -4} == ".wav" ]; then mount -o bind "$themes_path/$selected_theme/boot/$boot_file" "$sounds_path/$boot_file"; found_boot_files=1; fi
-        # if [ ${boot_file: -4} == ".png" ]; then images_path="$themes_path/$selected_theme/boot"; found_boot_files=1; fi
-        # if [ ${boot_file: -4} == ".wav" ]; then sounds_path="$themes_path/$selected_theme/boot"; found_boot_files=1; fi
-      done
-      cd "/home/root"
-    fi 2> /dev/null
 
     # Check for the music folder
     if [ -d "$themes_path/$selected_theme/music" ] && [ "$override_theme_music" = "0" ]; then
@@ -75,11 +63,6 @@ select_UI_theme(){
     echo "[BLEEMSYNC](INFO)(theme) set theme to '$selected_theme' theme"
   else
     echo "[BLEEMSYNC](INFO)(theme) set theme to stock theme"
-  fi
-  if [ "$found_boot_files" == "1" ]; then
-    echo "[BLEEMSYNC](INFO)(theme) mounting available boot files"
-  else
-    echo "[BLEEMSYNC](INFO)(theme) mounting stock boot menu files"
   fi
   if [ "$found_music_files" == "1" ]; then
     echo "[BLEEMSYNC](INFO)(theme) mounting available music files"
