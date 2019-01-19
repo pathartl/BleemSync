@@ -208,14 +208,11 @@ namespace BleemSync.Controllers
             node.Publisher = gameUpload.Publisher;
             node.Type = GameManagerNodeType.Game;
 
-            if (gameUpload.Cover != null)
+            if (gameUpload.Cover != null && gameUpload.Cover != "")
             {
                 var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == node.Id && f.Name.EndsWith(".png")).First();
 
-                using (var stream = new FileStream(coverFile.Path, FileMode.Create))
-                {
-                    //await gameUpload.Cover.CopyToAsync(stream);
-                }
+                System.IO.File.WriteAllBytes(coverFile.Path, Convert.FromBase64String(gameUpload.Cover.Split(",")[1]));
             }
 
             _storage.Save();

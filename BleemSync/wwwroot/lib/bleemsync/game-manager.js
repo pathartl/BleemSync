@@ -160,8 +160,14 @@
             var input = $(e.target).find('input');
             var preview = $(e.target).find('.cover-preview');
 
-            input.get(0).files = files;
-            preview.attr('src', _url.createObjectURL(files[0]));
+            let reader = new FileReader();
+
+            reader.addEventListener('load', () => {
+                input.val(reader.result)
+                preview.attr('src', reader.result);
+            });
+
+            reader.readAsDataURL(files[0]);
         }
     }
 

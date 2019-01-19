@@ -76,7 +76,7 @@
                 <hidden asp-for="ParentId" />
 
                 <div class="cover-dropzone">
-                    <input type="file" name="Cover" class="cover-upload" accept="image/*" style="display: none;" />
+                    <input type="hidden" name="Cover" class="cover-upload" />
                     <img class="cover-preview" src="http://fpoimg.com/226x226" />
                 </div>
 
@@ -99,6 +99,7 @@
 
 @section Scripts {
     <script src="~/lib/jstree/jstree.min.js"></script>
+    <script src="~/lib/bleemsync/central-service.js"></script>
     <script src="~/lib/bleemsync/playstation-utilities.js"></script>
     <script src="~/lib/bleemsync/game-manager.js"></script>
     <script>
