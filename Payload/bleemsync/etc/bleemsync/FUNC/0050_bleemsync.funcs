@@ -183,8 +183,9 @@ execute_bleemsync_func(){
   # Migrate GameData contents and copy default pcsx.cfg if not present
   for game in "${mountpoint}/games/"*/; do
     if [ -d "${game}GameData" ]; then
-      mv -f "${game}GameData/"* "${game}GameData/".[!.]* "${game}"
-      rmdir "${game}GameData"
+      mv "${game}GameData/"* "${game}"
+      cp -rf "${game}GameData/".[!.]* "${game}"
+      rm -r "${game}GameData"
     fi
     mkdir -p "${game}.pcsx"
     [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
