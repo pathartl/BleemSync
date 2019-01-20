@@ -151,7 +151,6 @@ execute_bleemsync_func(){
   # Create gaadata on tmpfs
   if [ "$link_EMMC_and_USB" = "1" ]; then
     mkdir -p "${VOL_GAADATA}/databases/"
-    cp -f "$bleemsync_path/opt/bleemsync_ui/ui_menu.db" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db"
     cp -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" "${VOL_GAADATA}/databases/"
   else
     ln -s "$bleemsync_path/etc/bleemsync/SYS/databases" "${VOL_GAADATA}"
@@ -229,7 +228,7 @@ execute_bleemsync_func(){
       fi
 
     else
-      echo "[BLEEMSYNC](ERROR) BleemSync EMMC + USB dyna link is enabled by database is not one from Bleemsync UI"
+      echo "[BLEEMSYNC](ERROR) BleemSync EMMC + USB dyna link is enabled but database is not one from Bleemsync UI"
     fi
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
