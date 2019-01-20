@@ -24,6 +24,8 @@
 launch_retroarch(){
   echo "[BLEEMSYNC](INFO) launching retroarch"
   if [ -f "$bleemsync_path/opt/retroarch/retroarch" ]; then
+    # Kill bleemsync UI
+    killall -s KILL BleemSync &> /dev/null
     killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
     [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
     if [ ! -f "$bleemsync_path/opt/retroarch/system/scph102b.bin" ]; then
@@ -55,6 +57,10 @@ launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
   rm -f "/tmp/launchfilecommand"
+  if [ "$(ps | grep -v grep | grep BleemSync)" ]; then
+    rm -f "$runtime_log_path/bleemsync_ui.log"
+    chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
+  fi
   if [ "$boot_menu_music" = "1" ]; then
     $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path/" --theme-folder "$themes_path/$selected_theme/boot"
   else
@@ -64,6 +70,8 @@ launch_BootMenu(){
 
 launch_StockUI(){
   echo "[BLEEMSYNC](INFO) launching stock ui"
+  # Kill bleemsync UI
+  killall -s KILL BleemSync &> /dev/null
   # Remove power file flags
   rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
   # Fix for last selected game issue. If not in place user may experience ui issue
@@ -107,6 +115,19 @@ execute_bleemsync_func(){
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs mounting took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+
+  #This needs some serious cleaning in future revisions...
+  bleemsync_ui_app="$bleemsync_path/opt/bleemsync_ui/BleemSync"
+  rm -f "$runtime_log_path/bleemsync_ui.log"
+  chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
+
+  #urgh
+  sleep 4 
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync UI startup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
