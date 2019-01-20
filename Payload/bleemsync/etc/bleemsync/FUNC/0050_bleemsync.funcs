@@ -292,7 +292,7 @@ execute_bleemsync_func(){
   #Cleanup before starting main user applications
   rm -rf "/tmp/systemd"*
   rm -rf "/tmp/diag/"*
-  #rm -rf "/tmp/"*".sql"
+  rm -rf "/tmp/"*".sql"
 
   killall -s KILL sdl_display &> /dev/null
 
