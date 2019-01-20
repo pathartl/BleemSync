@@ -37,9 +37,6 @@ namespace BleemSync
                 options.MigrationsAssembly = typeof(DesignTimeStorageContextFactory).GetTypeInfo().Assembly.FullName;
             });
 
-            DesignTimeStorageContextFactory.Initialize(services.BuildServiceProvider());
-            DesignTimeStorageContextFactory.StorageContext.Database.Migrate();
-
             services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 1474560000;
@@ -57,22 +54,19 @@ namespace BleemSync
                 var factory = x.GetRequiredService<IUrlHelperFactory>();
                 return factory.GetUrlHelper(actionContext);
             });
+
+            var sp = services.BuildServiceProvider();
+            DesignTimeStorageContextFactory.Initialize(sp);
+            DesignTimeStorageContextFactory.StorageContext.Database.Migrate();
+
+            // Import games from older version
+            ImportInitialGames(sp);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                //app.UseHsts();
-            }
-
-            //app.UseHttpsRedirection();
+            app.UseDeveloperExceptionPage();
             app.UseStaticFiles();
 
             app.UseExtCore();
@@ -86,6 +80,21 @@ namespace BleemSync
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        void ImportInitialGames(ServiceProvider sp)
+        {
+            var dbContext = DesignTimeStorageContextFactory.StorageContext;
+            if (dbContext == null) return;
+            var deviceGameManager = sp.GetService<BleemSync.Services.Abstractions.IGameManagerService>();
+            if (deviceGameManager == null) return;
+            var countTask = dbContext.Set<BleemSync.Data.Entities.GameManagerNode>().CountAsync();
+            countTask.Wait();
+            if (countTask.Result == 0)
+            {
+                dbContext.AddRange(deviceGameManager.GetGames());
+                dbContext.SaveChanges();
+            }
         }
     }
 }

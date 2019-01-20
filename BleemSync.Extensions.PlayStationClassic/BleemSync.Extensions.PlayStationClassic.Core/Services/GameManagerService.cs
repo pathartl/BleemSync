@@ -5,6 +5,7 @@ using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
 using ExtCore.Data.Abstractions;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _storage = storage;
             _configuration = configuration;
 
-            _baseGamesDirectory = Path.Combine(configuration["PlayStationClassic:GamesDirectory"].Split('/'));
+            _baseGamesDirectory = configuration["PlayStationClassic:GamesDirectory"];
         }
 
         public void AddGame(GameManagerNode node)
@@ -67,7 +68,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 var destination = Path.Combine(outputDirectory, file.Name);
 
                 SystemMove(source, destination);
-                file.Path = destination;
+                file.Path = Path.GetFullPath(destination);
 
                 var fileInfo = new FileInfo(destination);
 
@@ -86,7 +87,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
 
             SystemMove(coverFile.Path, newCoverFilePath);
-            coverFile.Path = newCoverFilePath;
+            coverFile.Path = Path.GetFullPath(newCoverFilePath);
             coverFile.Name = newCoverFileName;
 
             files.AddRange(additionalFiles);
@@ -194,6 +195,39 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             _context.Games.Remove(game);
             _context.SaveChanges();
+        }
+
+        public IEnumerable<GameManagerNode> GetGames()
+        {
+            List<GameManagerNode> nodes = new List<GameManagerNode>();
+            foreach (var game in _context.Games)
+            {
+                var node = new GameManagerNode
+                {
+                    Id = game.Id,
+                    Name = game.Title,
+                    SortName = game.Title,
+                    ReleaseDate = new DateTime(game.Year, 1, 1),
+                    Players = game.Players,
+                    Publisher = game.Publisher,
+                    Type = GameManagerNodeType.Game
+                };
+
+                // For files, iterate what we have on disk instead of looking in the database
+                foreach (var path in Directory.GetFiles(Path.Combine(_baseGamesDirectory, game.Id.ToString())))
+                {
+                    node.Files.Add(new GameManagerFile
+                    {
+                        Name = Path.GetFileName(path),
+                        Path = Path.GetFullPath(path),
+                        Node = node
+                    });
+                }
+
+                nodes.Add(node);
+            }
+
+            return nodes;
         }
     }
 }
