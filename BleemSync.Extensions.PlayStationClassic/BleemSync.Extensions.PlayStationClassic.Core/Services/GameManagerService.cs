@@ -66,7 +66,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 var source = file.Path;
                 var destination = Path.Combine(outputDirectory, file.Name);
 
-                File.Move(source, destination);
+                SystemMove(source, destination);
                 file.Path = destination;
 
                 var fileInfo = new FileInfo(destination);
@@ -85,7 +85,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             var newCoverFileName = firstCueBasename + ".png";
             var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
 
-            File.Move(coverFile.Path, newCoverFilePath);
+            SystemMove(coverFile.Path, newCoverFilePath);
             coverFile.Path = newCoverFilePath;
             coverFile.Name = newCoverFileName;
 
@@ -107,6 +107,14 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             }
 
             _context.SaveChanges();
+        }
+
+        // HACK: File.Move() seems to cause a copy. Try to mv with shell and see if it's faster.
+        static int SystemMove(string from, string to)
+        {
+            var proc = System.Diagnostics.Process.Start("mv", $"\"{from}\" \"{to}\"");
+            proc.WaitForExit();
+            return proc.ExitCode;
         }
 
         private GameManagerFile CreateCueSheet(FileInfo sourceFileInfo, GameManagerFile sourceFile)
