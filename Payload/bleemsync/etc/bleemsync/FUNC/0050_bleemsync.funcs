@@ -151,6 +151,7 @@ execute_bleemsync_func(){
   # Create gaadata on tmpfs
   if [ "$link_EMMC_and_USB" = "1" ]; then
     mkdir -p "${VOL_GAADATA}/databases/"
+    cp -f "$bleemsync_path/opt/bleemsync_ui/ui_menu.db" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db"
     cp -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" "${VOL_GAADATA}/databases/"
   else
     ln -s "$bleemsync_path/etc/bleemsync/SYS/databases" "${VOL_GAADATA}"
@@ -191,29 +192,45 @@ execute_bleemsync_func(){
   if [ "$link_EMMC_and_USB" = "1" ]; then
     start=$(date +%s%N)
 
-    emmc_gaadata_count=$(ls -d1 /gaadata/*/ | grep '/[0-9]\+/$' | wc -l)
-    media_gaadata_count=$(ls -d1 "${mountpoint}/games/"*/ | grep '/[0-9]\+/$' | wc -l)
+    # Check this is a BleemSync UI database
+    sql_tmp_db=`"$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES" ".quit"`
+    if [ ! "$sql_tmp_db" = "" ]; then
+      emmc_gaadata_count=$(ls -d1 /gaadata/*/ | grep '/[0-9]\+/$' | wc -l)
+      media_gaadata_count=`"$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "SELECT seq FROM sqlite_sequence WHERE sqlite_sequence.name='MENU_ENTRIES'" ".quit"`
+      echo "[BLEEMSYNC](INFO) EMMC Count $emmc_gaadata_count Media Count $media_gaadata_count"
 
-    "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
+      # Some fields in the stock database contain the "," character which makes it awkward to split the SQL dump (which is delimited by ",")
+      # Copy the stock database and strip this values from it
+      cp "/gaadata/databases/regional.db" "/tmp/regional.db"
+      "$bleemsync_path/bin/sqlite3" "/tmp/regional.db" -cmd "UPDATE GAME SET PUBLISHER_NAME = REPLACE(PUBLISHER_NAME, ',', '')" ".quit"
+      "$bleemsync_path/bin/sqlite3" "/tmp/regional.db" -cmd "UPDATE GAME SET GAME_TITLE_STRING = REPLACE(GAME_TITLE_STRING, ',', '')" ".quit"
+      "$bleemsync_path/bin/sqlite3" "/tmp/regional.db" -cmd ".output /tmp/emmc.sql" ".dump" ".quit"
 
-    echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
-    for i in $(seq 1 $emmc_gaadata_count); do
-      ln -s "/gaadata/$i/" "${VOL_GAADATA}/$(( media_gaadata_count + i ))"
-      ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$(( media_gaadata_count + i ))"
-      echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }') >> "/tmp/join.sql"
-    done
-    echo "COMMIT;" >> "/tmp/join.sql"
+      echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
+      for i in $(seq 1 $emmc_gaadata_count); do
+        if [ -d "/gaadata/$i" ] && [ -d "/data/AppData/sony/pcsx/$i" ]; then
+          ln -s "/gaadata/$i/" "${VOL_GAADATA}/$(( media_gaadata_count + i ))"
+          ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$(( media_gaadata_count + i ))"
+          # BleemSync database contains additional fields in the GAME table which need to be accounted for
+          sql_tmp_link_id=`grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print $8 }'`
+          sql_tmp_link_id="${sql_tmp_link_id%)*}"
+          echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO MENU_ENTRIES VALUES("newindex","$2","$3","$4","$5","$6","$7"," }')"${sql_tmp_link_id},9999);" >> "/tmp/join.sql"
+          # BleemSync DISC database has an additional ID field, when this is imported it will produce NOT UNIQUE errors for additional discs of stock games
+          # This is inconsequential because additional disc entries have no actual use beyond telling ui_menu to display the disc swap help screen
+          echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","newindex","$2","$3 }') >> "/tmp/join.sql"
+        fi
+      done
+      echo "COMMIT;" >> "/tmp/join.sql"
 
-    sed -i -e 's/;,/;/g' "/tmp/join.sql" #Required cleanup because of potential dirty characters in SONY stock SQLite DB
+      "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
 
-    "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
+      if [ "$link_alphabeticalise" = "1" ]; then
+        "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "DROP VIEW GAME" "CREATE VIEW GAME AS SELECT * FROM MENU_ENTRIES ORDER BY GAME_TITLE_STRING" ".quit"
+      fi
 
-    if [ "$link_alphabeticalise" = "1" ]; then
-      echo "create table new as select * from GAME order by GAME_TITLE_STRING; drop table GAME; create table GAME as select * from new order by GAME_TITLE_STRING; drop table new" \
-      | "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db"
+    else
+      echo "[BLEEMSYNC](ERROR) BleemSync EMMC + USB dyna link is enabled by database is not one from Bleemsync UI"
     fi
-
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
@@ -276,7 +293,7 @@ execute_bleemsync_func(){
   #Cleanup before starting main user applications
   rm -rf "/tmp/systemd"*
   rm -rf "/tmp/diag/"*
-  rm -rf "/tmp/"*".sql"
+  #rm -rf "/tmp/"*".sql"
 
   killall -s KILL sdl_display &> /dev/null
 
