@@ -117,7 +117,9 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         // HACK: File.Move() seems to cause a copy. Try to mv with shell and see if it's faster.
         static void SystemMove(string from, string to, bool overwrite)
         {
-            // TODO: figure out if behavior when destination exists is correct
+            if (overwrite && File.Exists(to)) throw new IOException("Destination file exists.");
+            from = from.Replace("\"", "\\\"");
+            to = to.Replace("\"", "\\\"");
             var proc = System.Diagnostics.Process.Start("mv", $"{(overwrite ? "-f " : string.Empty)}\"{from}\" \"{to}\"");
             proc.WaitForExit();
             if (proc.ExitCode != 0) throw new IOException($"mv returned {proc.ExitCode}");
