@@ -58,7 +58,7 @@ launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
   rm -f "/tmp/launchfilecommand"
-  if [ "$(ps | grep -v grep | grep BleemSync)" ]; then
+  if [ ! "$(ps | grep -v grep | grep BleemSync)" ]; then
     rm -f "$runtime_log_path/bleemsync_ui.log"
     cd "$bleemsync_path/opt/bleemsync_ui/"
     chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
