@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="106.5.4" />
-    <PackageReference Include="sharpconfig" Version="3.2.8" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
   </ItemGroup>
 

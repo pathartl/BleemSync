@@ -1,7 +1,4 @@
 ﻿using ExtCore.Data.Entities.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BleemSync.Data.Entities
 {

@@ -1,5 +1,3 @@
-using System;
-
 namespace BleemSync.Models
 {
     public class ErrorViewModel

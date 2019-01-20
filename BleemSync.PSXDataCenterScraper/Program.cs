@@ -1,12 +1,5 @@
-﻿using HtmlAgilityPack;
-using Fizzler.Systems.HtmlAgilityPack;
-using System;
-using System.IO;
-using System.Net;
-using System.Linq;
-using System.Collections.Generic;
+﻿using System.IO;
 using BleemSync.Central.Data;
-using BleemSync.Central.Data.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

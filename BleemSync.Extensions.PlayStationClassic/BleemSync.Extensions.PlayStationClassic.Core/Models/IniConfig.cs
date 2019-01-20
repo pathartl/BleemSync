@@ -1,10 +1,8 @@
 ﻿using BleemSync.Extensions.PlayStationClassic.Core.Attributes;
 using SharpConfig;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 {
@@ -18,7 +16,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
             foreach (var property in derivedType.GetProperties())
             {
-                var useDefault = true;
                 var attributes = property.GetCustomAttributes(true);
                 var propertyName = property.Name;
                 var sectionName = "";
@@ -52,7 +49,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
                         default:
                             throw new NotImplementedException($"Type \"{property.PropertyType.FullName}\" not supported by the INI parser.");
-                            break;
                     }
                 }
                 else
@@ -76,7 +72,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
             foreach (var property in derivedType.GetProperties())
             {
-                var useDefault = true;
                 var attributes = property.GetCustomAttributes(true);
                 var propertyName = property.Name;
                 var sectionName = "";
@@ -107,7 +102,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
                     default:
                         throw new NotImplementedException($"Type \"{property.PropertyType.FullName}\" not supported by the INI parser.");
-                        break;
                 }
             }
 

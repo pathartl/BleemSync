@@ -8,14 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using BleemSync.Services;
 using BleemSync.Data.Entities;
 using System.Net;
-using System.Net.Mime;
 using System.IO;
 using BleemSync.Services.Abstractions;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace BleemSync.Controllers
 {
@@ -23,19 +20,19 @@ namespace BleemSync.Controllers
     [Route("[controller]/[action]")]
     public class GamesController : Controller
     {
-        private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
-        private IGameManagerFileRepository _gameManagerFileRepository { get; set; }
-        private IStorage _storage { get; set; }
-        private BleemSyncCentralService _bleemSyncCentral { get; set; }
-        private IGameManagerService _gameManagerService { get; set; }
+        private readonly IGameManagerNodeRepository _gameManagerNodeRepository;
+        private readonly IGameManagerFileRepository _gameManagerFileRepository;
+        private readonly IStorage _storage;
+        private readonly IGameManagerService _gameManagerService;
+        private readonly IConfiguration _configuration;
 
-        public GamesController(IStorage storage, BleemSyncCentralService bleemSyncCentral, IGameManagerService gameManagerService)
+        public GamesController(IStorage storage, IGameManagerService gameManagerService, IConfiguration configuration)
         {
             _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
             _gameManagerFileRepository = storage.GetRepository<IGameManagerFileRepository>();
             _storage = storage;
-            _bleemSyncCentral = bleemSyncCentral;
             _gameManagerService = gameManagerService;
+            _configuration = configuration;
         }
 
         [MenuItem(Name = "Manage")]
@@ -87,23 +84,6 @@ namespace BleemSync.Controllers
             _gameManagerService.UpdateGames(dbNodes);
         }
 
-        [HttpGet("{serial}")]
-        public ActionResult GetBySerial(string serial)
-        {
-            Game game;
-            try
-            {
-                var bscGame = _bleemSyncCentral.GetPlayStationGameBySerial(serial);
-                game = new Game(bscGame);
-            }
-            catch
-            {
-                game = new Game();
-            }
-
-            return new JsonResult(game);
-        }
-
         [HttpGet("{id}")]
         public ActionResult GetById(int id)
         {
@@ -128,7 +108,7 @@ namespace BleemSync.Controllers
             foreach (var file in gameUpload.Files)
             {
                 long size = file.Length;
-                var filePath = Path.GetTempFileName();
+                var filePath = Path.Combine(_configuration["TemporaryPath"], file.FileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
@@ -178,7 +158,7 @@ namespace BleemSync.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> ModifyGame(GameUpload gameUpload, string UpdateAction)
+        public ActionResult ModifyGame(GameUpload gameUpload, string UpdateAction)
         {
             ActionResult result = Json("");
 
@@ -188,14 +168,14 @@ namespace BleemSync.Controllers
                     result = DeleteGame(gameUpload);
                     break;
                 case "Update":
-                    result = await UpdateGame(gameUpload);
+                    result = UpdateGame(gameUpload);
                     break;
             }
 
             return result;
         }
 
-        private async Task<ActionResult> UpdateGame(GameUpload gameUpload)
+        private ActionResult UpdateGame(GameUpload gameUpload)
         {
             var node = _gameManagerNodeRepository.Get(gameUpload.Id);
 

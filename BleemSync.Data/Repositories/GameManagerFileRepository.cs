@@ -1,10 +1,8 @@
 ﻿using BleemSync.Data.Abstractions;
 using BleemSync.Data.Entities;
 using ExtCore.Data.EntityFramework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 namespace BleemSync.Data.Repositories

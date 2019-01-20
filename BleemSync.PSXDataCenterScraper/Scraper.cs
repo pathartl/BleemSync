@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 
 namespace BleemSync.PSXDataCenterScraper
 {
@@ -42,7 +41,7 @@ namespace BleemSync.PSXDataCenterScraper
                     _context.Add(game);
                     _context.SaveChanges();
                 }
-                catch (Exception e) {
+                catch {
                     Console.WriteLine($"Could not scrape {link}");
                 }
             }

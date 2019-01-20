@@ -76,7 +76,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
                                 default:
                                     throw new InvalidDataException($"Preference {preferencePropertyAttribute.Name} is not formatted correctly. It must either start with 'i', 'b', 'd', or 's'.");
-                                    break;
                             }
                         }
                     }
@@ -155,7 +154,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
                             default:
                                 throw new NotImplementedException("A preference property must be a string, int, double, or boolean.");
-                                break;
                         }
                     }
                 }

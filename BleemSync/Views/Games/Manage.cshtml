@@ -23,20 +23,6 @@
     </card>
 </column>
 
-@{ 
-    var imageTypeEnumType = typeof(GameImageType);
-    var values = Enum.GetValues(imageTypeEnumType);
-
-    List<string> fileExtensions = new List<string>();
-
-    foreach (var value in values)
-    {
-        var member = imageTypeEnumType.GetMembers().Where(m => m.Name == value.ToString()).First();
-        var attribute = (FileExtensionsAttribute)member.GetCustomAttributes(typeof(FileExtensionsAttribute), false).First();
-        fileExtensions.AddRange(attribute.Extensions.Split(",").Select(e => "." + e));
-    }
-}
-
 <column md="4" xs="12">
     <form id="add-game-form" class="game-manager-form"
           asp-action="AddGame"
@@ -46,7 +32,7 @@
           data-ajax-success="GameAdded">
         <card title="Add New Game">
             <card-body>
-                <input type="file" name="Files" class="game-upload" accept="@String.Join(",", fileExtensions)" multiple />
+                <input type="file" name="Files" class="game-upload" accept=".bin,.cue,.pbp" multiple />
                 <div class="cover-dropzone">
                     <input type="hidden" name="Cover" class="cover-upload" />
                     <img class="cover-preview" src="http://fpoimg.com/226x226" />

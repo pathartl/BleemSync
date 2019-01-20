@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BleemSync.Services.ViewModels
+﻿namespace BleemSync.Services.ViewModels
 {
     public class CentralCover
     {

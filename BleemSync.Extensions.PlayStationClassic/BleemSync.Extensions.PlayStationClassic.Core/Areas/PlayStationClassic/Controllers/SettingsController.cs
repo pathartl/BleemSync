@@ -3,9 +3,6 @@ using BleemSync.Extensions.PlayStationClassic.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SharpConfig;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.Controllers
 {

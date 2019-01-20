@@ -2,14 +2,9 @@
 using BleemSync.Extensions.Infrastructure.ViewModels;
 using ExtCore.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BleemSync.Views.Shared.Components.Sidebar
 {
@@ -71,10 +66,7 @@ namespace BleemSync.Views.Shared.Components.Sidebar
                             menuItems.Add(sectionMenuItem);
                         }
                     }
-                    catch (Exception e)
-                    {
-
-                    }
+                    catch { }
                 }
             }
 

@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BleemSync.Models;
-using BleemSync.Services;
 using BleemSync.Data.Abstractions;
 using ExtCore.Data.Abstractions;
-using BleemSync.Data.Entities;
-using BleemSync.Extensions.Infrastructure.Attributes;
 
 namespace BleemSync.Controllers
 {

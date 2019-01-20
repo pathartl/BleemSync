@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using BleemSync.Extensions.PlayStationClassic.Core.Attributes;
+﻿using BleemSync.Extensions.PlayStationClassic.Core.Attributes;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 {
