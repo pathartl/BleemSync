@@ -164,7 +164,7 @@ execute_bleemsync_func(){
   ln -s /usr/sony/bin/plugins "${VOL_DATAPCSX}"
 
   # Link games on /media
-  for game in "${mountpoint}/games/"*/; do
+  for game in "$bleemsync_games_path/"*/; do
     ln -s "${game}" "${VOL_GAADATA}"
     ln -s "${game}" "${VOL_DATAPCSX}"
   done
