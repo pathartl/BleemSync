@@ -109,12 +109,18 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.SaveChanges();
         }
 
-        // HACK: File.Move() seems to cause a copy. Try to mv with shell and see if it's faster.
-        static int SystemMove(string from, string to)
+        static void SystemMove(string from, string to)
         {
-            var proc = System.Diagnostics.Process.Start("mv", $"\"{from}\" \"{to}\"");
+            SystemMove(from, to, false);
+        }
+
+        // HACK: File.Move() seems to cause a copy. Try to mv with shell and see if it's faster.
+        static void SystemMove(string from, string to, bool overwrite)
+        {
+            // TODO: figure out if behavior when destination exists is correct
+            var proc = System.Diagnostics.Process.Start("mv", $"{(overwrite ? "-f " : string.Empty)}\"{from}\" \"{to}\"");
             proc.WaitForExit();
-            return proc.ExitCode;
+            if (proc.ExitCode != 0) throw new IOException($"mv returned {proc.ExitCode}");
         }
 
         private GameManagerFile CreateCueSheet(FileInfo sourceFileInfo, GameManagerFile sourceFile)
