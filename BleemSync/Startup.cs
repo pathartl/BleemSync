@@ -8,6 +8,7 @@ using ExtCore.WebApplication.Extensions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using ExtCore.Data.EntityFramework;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using BleemSync.Data;
@@ -37,6 +38,7 @@ namespace BleemSync
             });
 
             DesignTimeStorageContextFactory.Initialize(services.BuildServiceProvider());
+            DesignTimeStorageContextFactory.StorageContext.Database.Migrate();
 
             services.Configure<FormOptions>(options =>
             {
@@ -60,7 +62,17 @@ namespace BleemSync
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseDeveloperExceptionPage();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                //app.UseHsts();
+            }
+
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseExtCore();
