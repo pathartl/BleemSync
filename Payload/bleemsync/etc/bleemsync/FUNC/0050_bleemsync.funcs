@@ -58,6 +58,7 @@ launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
   echo 2 > /data/power/disable
   rm -f "/tmp/launchfilecommand"
+  [ -d "$bleemsync_path/opt/bleemsync_ui/temp" ] && rm -r "$bleemsync_path/opt/bleemsync_ui/temp"
   if [ ! "$(ps | grep -v grep | grep BleemSync)" ]; then
     rm -f "$runtime_log_path/bleemsync_ui.log"
     cd "$bleemsync_path/opt/bleemsync_ui/"
@@ -119,6 +120,18 @@ execute_bleemsync_func(){
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs mounting took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
+  old_system_dir="$mountpoint/system"
+  [ -d "$mountpoint/System" ] && old_system_dir="$mountpoint/System"
+  if [ -d "$old_system_dir" ]; then
+    echo "[BLEEMSYNC](<1.0) Migrating System folder"
+    start=$(date +%s%N)
+    mkdir -p "$bleemsync_path/etc/bleemsync/SYS"
+    cp -rf "$old_system_dir/"* "$bleemsync_path/etc/bleemsync/SYS/"
+    rm -r "$old_system_dir"
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](<1.0) Migration complete: $(((end-start)/1000000))ms to execute"
+  fi
+#-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
   #This needs some serious cleaning in future revisions...
@@ -138,9 +151,9 @@ execute_bleemsync_func(){
   # Create gaadata on tmpfs
   if [ "$link_EMMC_and_USB" = "1" ]; then
     mkdir -p "${VOL_GAADATA}/databases/"
-    cp -f "$mountpoint/system/databases/regional.db" "${VOL_GAADATA}/databases/"
+    cp -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" "${VOL_GAADATA}/databases/"
   else
-    ln -s "$mountpoint/system/databases" "${VOL_GAADATA}"
+    ln -s "$bleemsync_path/etc/bleemsync/SYS/databases" "${VOL_GAADATA}"
   fi
   ln -s /gaadata/geninfo "${VOL_GAADATA}"
   ln -s /gaadata/preferences "${VOL_GAADATA}"
@@ -223,7 +236,7 @@ execute_bleemsync_func(){
       rm -r "${game}GameData"
     fi
     mkdir -p "${game}.pcsx"
-    [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$mountpoint/system/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
+    [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
   done
 
   end=$(date +%s%N)
