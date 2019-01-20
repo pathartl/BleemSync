@@ -209,7 +209,7 @@ execute_bleemsync_func(){
       ln -s "/gaadata/$i/" "${VOL_GAADATA}/$(( media_gaadata_count + i ))"
       ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$(( media_gaadata_count + i ))"
       echo $(grep "GAME VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO GAME VALUES("newindex","$2","$3","$4","$5","$6","$7","$8","$9 }') >> "/tmp/join.sql"
-      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES("newindex","$2","$3 }') >> "/tmp/join.sql"
+      echo $(grep "DISC VALUES($i," "/tmp/emmc.sql" | awk -v newindex=$(( media_gaadata_count + i )) -F "," '{ print "INSERT INTO DISC VALUES(null,"newindex","$2","$3 }') >> "/tmp/join.sql"
     done
     echo "COMMIT;" >> "/tmp/join.sql"
 
