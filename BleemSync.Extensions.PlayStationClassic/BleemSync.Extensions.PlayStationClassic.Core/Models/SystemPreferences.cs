@@ -8,11 +8,11 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
         public SystemPreferences() { }
         public SystemPreferences(string configString) : base(configString) { }
 
-        [DefaultValue(12.3000002)]
+        [DefaultValue(12.3)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuMainRadiUs")]
         public double LauncherMenuMainRadius { get; set; }
 
-        [DefaultValue(12.3000002)]
+        [DefaultValue(12.3)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuOptionRadiUs")]
         public double LauncherMenuOptionRadius { get; set; }
 
@@ -20,7 +20,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuMainXDegrees")]
         public double LauncherMenuMainXDegrees { get; set; }
 
-        [DefaultValue(4.4000001)]
+        [DefaultValue(4.4)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuOptionXDegrees")]
         public double LauncherMenuOptionXDegrees { get; set; }
 
@@ -36,35 +36,35 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
         [PreferenceProperty(Name = "dUiSystemSettingPerspectiveZfar")]
         public double PerspectiveZFar { get; set; }
 
-        [DefaultValue(6.19999981)]
+        [DefaultValue(6.2)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuMainYOffset")]
         public double LauncherMenuMainYOffset { get; set; }
 
-        [DefaultValue(-31.6000004)]
+        [DefaultValue(-31.6)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuMainZOffset")]
         public double LauncherMenuMainZOffset { get; set; }
 
-        [DefaultValue(6.30000019)]
+        [DefaultValue(6.3)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuOptionYOffset")]
         public double LauncherMenuOptionYOffset { get; set; }
 
-        [DefaultValue(-33.5999985)]
+        [DefaultValue(-33.6)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuOptionZOffset")]
         public double LauncherMenuOptionZOffset { get; set; }
 
-        [DefaultValue(-0.400000006)]
+        [DefaultValue(-0.4)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuSelectIconMainYOffset")]
         public double LauncherMenuSelectIconMainYOffset { get; set; }
 
-        [DefaultValue(-8.39999962)]
+        [DefaultValue(-8.4)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuSelectIconMainZOffset")]
         public double LauncherMenuSelectIconMainZOffset { get; set; }
 
-        [DefaultValue(-0.200000003)]
+        [DefaultValue(-0.2)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuSelectIconOptionYOffset")]
         public double LauncherMenuSelectIconOptionYOffset { get; set; }
 
-        [DefaultValue(-8.39999962)]
+        [DefaultValue(-8.4)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuSelectIconOptionZOffset")]
         public double LauncherMenuSelectIconOptionZOffset { get; set; }
 
@@ -72,7 +72,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
         [PreferenceProperty(Name = "iUiSystemSettingLauncherMenudUration")]
         public int LauncherMenuDuration { get; set; }
 
-        [DefaultValue(1.89999998)]
+        [DefaultValue(1.9)]
         [PreferenceProperty(Name = "dUiSystemSettingLauncherMenuIconScale")]
         public double LauncherMenuIconScale { get; set; }
 
@@ -90,6 +90,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
         [DefaultValue("/data/AppData/sony/pcsx/")]
         [PreferenceProperty(Name = "sPcsxDataOriginPath")]
+        [ReadOnly(true)]
         public string DataOriginPath { get; set; }
 
         [DefaultValue("/data/AppData/sony/title")]
@@ -98,6 +99,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
 
         [DefaultValue("/gaadata/")]
         [PreferenceProperty(Name = "sPcsxGameImageOriginPath")]
+        [ReadOnly(true)]
         public string GameImageOriginPath { get; set; }
 
         [DefaultValue("/data/AppData/sony/pcsx/")]
