@@ -166,6 +166,22 @@ echo "[INTERCEPT](PROFILE) extracting arguments took: $(((end_arg-start_arg)/100
 
 if [ "$launch_ra_from_stock_UI" = "1" ]; then
   echo "[INTERCEPT](INFO) RetroArch is enabled as the emulator"
+  # Swap stock multi disc game path to an .m3u for better disc swap support in RetroArch
+  case "$intercept_game_id" in
+    SCUS-94163|SLPM-86114|SLPS-01057|SLPS-01230|SLUS-00594)
+      if [ "$intercept_game_ext" = "cue" ] && [ "$intercept_save_state" = false ] ; then
+        echo "[INTERCEPT](INFO) This is a stock multi disc game with no .m3u. An .m3u is needed for the best multi disc experience within RetroArch"
+        if [ -f "$bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u" ]; then
+          intercept_game_path="$bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u"
+          intercept_game_ext="m3u"
+          echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
+          echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
+        else
+          echo "[INTERCEPT](ERROR) an .m3u does not exist at $bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u"
+        fi 
+      fi
+      ;;
+  esac
   end=$(date +%s%N)
   echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
   link_ra_memory_cards
