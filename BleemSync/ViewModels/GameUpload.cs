@@ -7,7 +7,7 @@ namespace BleemSync.ViewModels
     public class GameUpload : Game
     {
         [Display(Name = "Upload Game")]
-        public IEnumerable<IFormFile> Files { get; set; }
+        //public IEnumerable<IFormFile> Files { get; set; }
         public string Cover { get; set; }
 
         public GameUpload()

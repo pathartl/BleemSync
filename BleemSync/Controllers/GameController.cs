@@ -101,23 +101,20 @@ namespace BleemSync.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddGame(GameUpload gameUpload)
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        public async Task<ActionResult> AddGame()
         {
             var temporaryFiles = new List<GameManagerFile>();
+            var formModel = await Request.StreamFile(_configuration["TemporaryPath"], temporaryFiles);
 
-            foreach (var file in gameUpload.Files)
+            GameUpload gameUpload = new GameUpload();
+            var bindingSuccessful = await TryUpdateModelAsync(gameUpload, prefix: "", valueProvider: formModel);
+            if (!bindingSuccessful)
             {
-                long size = file.Length;
-                var filePath = Path.Combine(_configuration["TemporaryPath"], file.FileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (!ModelState.IsValid)
                 {
-                    await file.CopyToAsync(stream);
-                    temporaryFiles.Add(new GameManagerFile()
-                    {
-                        Name = file.FileName,
-                        Path = filePath
-                    });
+                    return BadRequest(ModelState);
                 }
             }
 
