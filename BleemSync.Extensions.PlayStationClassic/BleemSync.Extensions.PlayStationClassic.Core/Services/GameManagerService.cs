@@ -152,9 +152,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             managerFile.Path = sourceFile.Path;
             managerFile.NodeId = sourceFile.NodeId;
 
-            _gameManagerFileRepository.Create(managerFile);
-            _storage.Save();
-
             return managerFile;
         }
 
