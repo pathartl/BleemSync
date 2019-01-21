@@ -10,6 +10,7 @@
         this._coverDropZone = $('.cover-dropzone');
         this._coverInput = $('input[name="Cover"]');
         this._coverPreview = $('.cover-preview');
+        this._deleteGameButton = $('#edit-game-form button[value="Delete"]');
 
         this.Init();
     }
@@ -17,14 +18,39 @@
     Init() {
         $.getJSON('/Games/GetTree', (data) => this.InitTree(data));
 
-        this._uploadInput.change(() => this.ParseUploader());
+        this._uploadInput.change(() => {
+            let hasBin = false
+            let hasCue = false;
+            const files = this._uploadInput[0].files;
+            for (let i = 0; i < files.length; ++i) {
+                let f = files[i].name.toLowerCase();
+                if (f.endsWith('.cue'))
+                    hasCue = true;
+                else if (f.endsWith('.bin'))
+                    hasBin = true;
+            };
+            if (hasBin && !hasCue)
+                AlertService.Error("You've selected .bin files but not .cue files. You should select both kinds of files.");
+            else if (hasCue && !hasBin)
+                AlertService.Error("You've selected .cue files but not .bin files. You should select both kinds of files.");
+
+            this.ParseUploader();
+        });
 
         this._addGameForm.on('GameAdded', () => {
             this.OnGameAdded();
         });
 
+        this._addGameForm.on('XHRError', (xhr) => {
+            this.OnXHRError(xhr.responseText);
+        });
+
         this._editGameForm.on('GameUpdated', () => {
             this.OnGameUpdated();
+        });
+
+        this._editGameForm.on('XHRError', (xhr) => {
+            this.OnXHRError(xhr.responseText);
         });
 
         this.LoadAddGameForm();
@@ -36,6 +62,12 @@
         this._addGameButton.on('click', (e) => {
             e.preventDefault();
             this.LoadAddGameForm();
+        });
+
+        this._deleteGameButton.on('click', (e) => {
+            if (!confirm("Are you sure you want to delete the game? This will " +
+                "also remove the virtual memory card and save state associated with the game."))
+                e.preventDefault();
         });
 
         this._coverDropZone.on('drop', (e) => {
@@ -131,7 +163,6 @@
     }
 
     ParseUploader() {
-        AlertService.Clear();
         var uploader = this._uploadInput.get(0);
         var worker = new Worker('/lib/bleemsync/scrape-games.js');
 
@@ -186,4 +217,15 @@
         this._forms.hide();
     }
 
+    OnXHRError(response) {
+        this._progressBar.modal('hide');
+        this.TreeReload();
+        let message;
+        try {
+            message = JSON.parse(response);
+        } catch {
+            message = "Check the logs for more details.";
+        }
+        AlertService.Error("Uh oh, something went wrong. " + message);
+    }
 }
