@@ -278,7 +278,29 @@ execute_bleemsync_func(){
   chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
 
   #urgh
-  sleep 4 
+  sleep 4
+
+  if [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
+    echo "[BLEEMSYNC](INFO) UI database does not exist. Waiting for automatic creation during UI startup"
+    SECONDS=0
+    db_timeout=45
+    while [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]
+    do
+      sleep 1s
+      if [ $SECONDS -gt $db_timeout ]; then
+        echo "[BLEEMSYNC](ERROR) database has not been created after waiting $db_timeout seconds."
+        #display error message
+        echo 0 > /sys/class/leds/green/brightness
+        echo 1 > /sys/class/leds/red/brightness
+        $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png"
+        sleep 1
+        sync
+        reboot
+        exit 1
+      fi
+    done
+    echo "[BLEEMSYNC](INFO) database generated in $SECONDS seconds."
+  fi
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync UI startup took: $(((end-start)/1000000))ms to execute"
