@@ -140,7 +140,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             sb.AppendLine("  TRACK 01 MODE2/2352");
             sb.AppendLine("    INDEX 01 00:00:00");
 
-            var cueSheetFileName = sourceFile.Name.Replace(sourceFileInfo.Extension, "") + ".cue";
+            var cueSheetFileName = Path.ChangeExtension(sourceFile.Name, ".cue");
 
             File.WriteAllText(
                 Path.Combine(
