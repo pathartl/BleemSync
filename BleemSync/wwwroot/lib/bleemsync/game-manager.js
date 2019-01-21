@@ -10,6 +10,7 @@
         this._coverDropZone = $('.cover-dropzone');
         this._coverInput = $('input[name="Cover"]');
         this._coverPreview = $('.cover-preview');
+        this._deleteGameButton = $('#edit-game-form button[value="Delete"]');
 
         this.Init();
     }
@@ -61,6 +62,12 @@
         this._addGameButton.on('click', (e) => {
             e.preventDefault();
             this.LoadAddGameForm();
+        });
+
+        this._deleteGameButton.on('click', (e) => {
+            if (!confirm("Are you sure you want to delete the game? This will " +
+                "also remove the virtual memory card and save state associated with the game."))
+                e.preventDefault();
         });
 
         this._coverDropZone.on('drop', (e) => {
