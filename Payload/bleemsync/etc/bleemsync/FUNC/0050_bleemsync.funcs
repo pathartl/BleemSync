@@ -148,7 +148,7 @@ setup_StockUI() {
 
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs symbolic linking took: $(((end-start)/1000000))ms to execute"
-
+#-----------------------------------------------------------------------------#
   # RetroArch - copy appropriate playlist for stock games
   # TODO - this should be dynamically generated when we support replacing games on the internal
   # Perhaps two playlists. "PlayStation Classic - Internal" and "PlayStation Classic - External"
@@ -228,7 +228,7 @@ execute_bleemsync_func(){
     mkdir -p "$bleemsync_path/etc/bleemsync/SYS"
     cp -rf "$old_system_dir/"* "$bleemsync_path/etc/bleemsync/SYS/"
     rm -r "$old_system_dir"
-    if [ -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db"]; then
+    if [ -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
       "$bleemsync_path/bin/sqlite3" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" < \
         "$bleemsync_path/etc/bleemsync/SUP/scripts/migrate_pre10_db.sql"
     fi
