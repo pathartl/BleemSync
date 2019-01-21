@@ -58,6 +58,7 @@ namespace BleemSync.UI
 
             var input = _generator.GenerateCheckBox(ViewContext, For.ModelExplorer, For.Name, value, checkboxAttributes);
             var label = _generator.GenerateLabel(ViewContext, For.ModelExplorer, For.Name, "", labelAttributes);
+            var hidden = _generator.GenerateHiddenForCheckbox(ViewContext, For.ModelExplorer, For.Name);
 
             // Strip end tag from label
             var labelStart = "";
@@ -81,6 +82,7 @@ namespace BleemSync.UI
             {
                 writer.Write(inputPre);
                 input.WriteTo(writer, System.Text.Encodings.Web.HtmlEncoder.Default);
+                hidden.WriteTo(writer, System.Text.Encodings.Web.HtmlEncoder.Default);
                 writer.Write(inputPost);
                 textboxOutput = writer.ToString();
             }
