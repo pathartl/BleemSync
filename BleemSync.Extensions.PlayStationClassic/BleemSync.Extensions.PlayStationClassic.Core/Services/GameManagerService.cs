@@ -229,5 +229,12 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             return nodes;
         }
+
+        public void Sync()
+        {
+            // Assuming everything's going OK, we can tell power_manage to reboot,
+            // and any additional setup needed will be done on next boot
+            File.WriteAllText("/dev/shm/power/control", "reboot");
+        }
     }
 }

@@ -2,9 +2,7 @@
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @model IEnumerable<MenuItem>
 
-<div class="pmd-sidebar-overlay"></div>
-
-<aside id="sidebar" class="pmd-sidebar sidebar-default pmd-sidebar-left bg-fill-darkblue sidebar-with-icons pmd-sidebar-left-fixed is-slidepush pmd-sidebar-open" role="navigation">
+<aside id="sidebar" class="pmd-sidebar sidebar-default bg-fill-darkblue sidebar-with-icons" role="navigation">
     <ul class="nav pmd-sidebar-nav">
         @foreach (var menuItem in Model.OrderBy(mi => mi.Position))
         {

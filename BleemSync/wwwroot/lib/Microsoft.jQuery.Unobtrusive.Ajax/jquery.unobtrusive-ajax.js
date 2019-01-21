@@ -110,11 +110,13 @@
             },
             success: function (data, status, xhr) {
                 asyncOnSuccess(element, data, xhr.getResponseHeader("Content-Type") || "text/html");
-                $(element).trigger(element.getAttribute('data-ajax-success'));
+                let triggerName = element.getAttribute('data-ajax-success');
+                if (triggerName) $(element).trigger(triggerName);
                 // getFunction(element.getAttribute("data-ajax-success"), ["data", "status", "xhr"]).apply(element, arguments);
             },
             error: function (xhr, status, error) {
-                $(element).trigger(element.getAttribute('data-ajax-failure'), [xhr, status, error]);
+                let triggerName = element.getAttribute('data-ajax-failure');
+                if (triggerName) $(element).trigger(triggerName, [xhr, status, error]);
                 //getFunction(element.getAttribute("data-ajax-failure"), ["xhr", "status", "error"]).apply(element, arguments);
             }
         });

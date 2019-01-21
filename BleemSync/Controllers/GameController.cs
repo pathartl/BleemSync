@@ -95,9 +95,12 @@ namespace BleemSync.Controllers
         [HttpGet("{id}")]
         public ActionResult GetLocalCoverByGameId(int id)
         {
-            var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == id && f.Name.EndsWith(".png")).First();
+            var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == id && f.Name.EndsWith(".png")).FirstOrDefault();
 
-            return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), coverFile.Path), "image/jpg");
+            if (coverFile != null)
+                return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), coverFile.Path), "image/jpg");
+            else
+                return NoContent();
         }
 
         [HttpPost]
@@ -207,6 +210,13 @@ namespace BleemSync.Controllers
             _gameManagerService.DeleteGame(node);
 
             return Json("Game deleted!");
+        }
+
+        [HttpPost]
+        public IActionResult Sync()
+        {
+            _gameManagerService.Sync();
+            return Json("Syncing");
         }
     }
 }
