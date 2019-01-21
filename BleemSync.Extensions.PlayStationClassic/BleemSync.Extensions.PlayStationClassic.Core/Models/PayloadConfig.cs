@@ -43,7 +43,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
         [IniProperty(Name = "launch_ra_from_stock_UI")]
         [IniSection(Name = "exe_booleans")]
         [DefaultValue(false)]
-        [Display(Name = "If TRUE then RetroArch is the emulator for Stock UI")]
+        [Display(Name = "If TRUE then RetroArch is the emulator for Stock UI " +
+            "(save states are not compatible between different emulator versions!)")]
         public bool LaunchRetroArchFromStockUi { get; set; }
 
         [IniProperty(Name = "boot_splash")]
