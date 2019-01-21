@@ -85,7 +85,8 @@ launch_StockUI(){
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
-
+  rm -f "/data/power/prepare_suspend"
+  
   # Reset last selected game in case user does not use BleemSync on next boot
   sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
   umount /usr/sony/bin/pcsx
@@ -337,7 +338,7 @@ execute_bleemsync_func(){
   if [ `cat /sys/class/drm/card0-HDMI-A-1/status` = "disconnected" ]; then
     boot_command="launch_BootMenu"
   fi
-  
+
   while [ $boot_command != "quit" ]; do
     $boot_command
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
