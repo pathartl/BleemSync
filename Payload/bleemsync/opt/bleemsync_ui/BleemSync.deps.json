@@ -3115,6 +3115,7 @@
           "BleemSync.Extensions.PlayStationClassic.Data": "0.4.0",
           "BleemSync.Services": "0.4.0",
           "ExtCore.Mvc.Infrastructure": "3.3.0",
+          "Microsoft.AspNetCore.Mvc": "2.1.1",
           "sharpconfig": "3.2.8"
         },
         "compile": {
@@ -7368,6 +7369,7 @@
           "BleemSync.Extensions.PlayStationClassic.Data": "0.4.0",
           "BleemSync.Services": "0.4.0",
           "ExtCore.Mvc.Infrastructure": "3.3.0",
+          "Microsoft.AspNetCore.Mvc": "2.1.1",
           "sharpconfig": "3.2.8"
         },
         "runtime": {
