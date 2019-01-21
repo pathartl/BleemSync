@@ -131,6 +131,14 @@ execute_bleemsync_func(){
     end=$(date +%s%N)
     echo "[BLEEMSYNC](<1.0) Migration complete: $(((end-start)/1000000))ms to execute"
   fi
+
+  # Copy over default files if not exist
+  mkdir -p "$bleemsync_path/etc/bleemsync/SYS/defaults"
+  [ ! -f "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" ] && \
+    cp /gaadata/1/pcsx.cfg "$bleemsync_path/etc/bleemsync/SYS/defaults"
+  [ ! -f "$bleemsync_path/etc/bleemsync/CFG/system.pre" ] && \
+    cp "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "$bleemsync_path/etc/bleemsync/CFG"
+
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
@@ -170,7 +178,7 @@ execute_bleemsync_func(){
   done
 
   # Force intercept to allow launching custom scripts from stock UI
-  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "/usr/sony/share/data/preferences/system.pre"
+  mount -o bind "$bleemsync_path/etc/bleemsync/CFG/system.pre" "/usr/sony/share/data/preferences/system.pre"
   cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
   chmod +x "/tmp/intercept"
 
@@ -226,7 +234,6 @@ execute_bleemsync_func(){
       if [ "$link_alphabeticalise" = "1" ]; then
         "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "DROP VIEW GAME" "CREATE VIEW GAME AS SELECT * FROM MENU_ENTRIES ORDER BY GAME_TITLE_STRING" ".quit"
       fi
-
     else
       echo "[BLEEMSYNC](ERROR) BleemSync EMMC + USB dyna link is enabled but database is not one from Bleemsync UI"
     fi
@@ -250,6 +257,7 @@ execute_bleemsync_func(){
       mv "${game}GameData/"* "${game}"
       cp -rf "${game}GameData/".[!.]* "${game}"
       rm -r "${game}GameData"
+      rm -f "${game}pcsx.cfg"
     fi
     mkdir -p "${game}.pcsx"
     [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
