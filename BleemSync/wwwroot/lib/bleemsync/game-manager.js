@@ -17,7 +17,24 @@
     Init() {
         $.getJSON('/Games/GetTree', (data) => this.InitTree(data));
 
-        this._uploadInput.change(() => this.ParseUploader());
+        this._uploadInput.change(() => {
+            let hasBin = false
+            let hasCue = false;
+            const files = this._uploadInput[0].files;
+            for (let i = 0; i < files.length; ++i) {
+                let f = files[i].name.toLowerCase();
+                if (f.endsWith('.cue'))
+                    hasCue = true;
+                else if (f.endsWith('.bin'))
+                    hasBin = true;
+            };
+            if (hasBin && !hasCue)
+                AlertService.Error("You've selected .bin files but not .cue files. You should select both kinds of files.");
+            else if (hasCue && !hasBin)
+                AlertService.Error("You've selected .cue files but not .bin files. You should select both kinds of files.");
+
+            this.ParseUploader();
+        });
 
         this._addGameForm.on('GameAdded', () => {
             this.OnGameAdded();
@@ -139,7 +156,6 @@
     }
 
     ParseUploader() {
-        AlertService.Clear();
         var uploader = this._uploadInput.get(0);
         var worker = new Worker('/lib/bleemsync/scrape-games.js');
 
