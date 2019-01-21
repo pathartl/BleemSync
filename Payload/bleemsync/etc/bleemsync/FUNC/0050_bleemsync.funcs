@@ -25,7 +25,7 @@ launch_retroarch(){
   echo "[BLEEMSYNC](INFO) launching retroarch"
   if [ -f "$bleemsync_path/opt/retroarch/retroarch" ]; then
     # Kill bleemsync UI
-    killall -s KILL BleemSync &> /dev/null
+    killall -s TERM BleemSync &> /dev/null
     cd "/home/root"
     killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
     [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
@@ -74,7 +74,7 @@ launch_BootMenu(){
 launch_StockUI(){
   echo "[BLEEMSYNC](INFO) launching stock ui"
   # Kill bleemsync UI
-  killall -s KILL BleemSync &> /dev/null
+  killall -s TERM BleemSync &> /dev/null
   cd "/home/root"
   # Remove power file flags
   rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
