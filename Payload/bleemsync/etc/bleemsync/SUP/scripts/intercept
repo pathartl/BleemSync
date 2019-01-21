@@ -48,6 +48,7 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
   "m3u"
   "pbp"
   "img"
+  "iso"
   "mdf"
   "toc"
   "cbn"
