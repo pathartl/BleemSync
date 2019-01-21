@@ -206,6 +206,12 @@ setup_StockUI() {
 
   # Overmount the stock DB now that we're done using it
   mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
+#---------
+  # Ensure .pcsx/pcsx.cfg is present
+  for game in "${mountpoint}/games/"*/; do
+    mkdir -p "${game}.pcsx"
+    [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
+  done
 }
 ###############################################################################
 
@@ -247,8 +253,6 @@ execute_bleemsync_func(){
       rm -r "${game}GameData"
       rm -f "${game}pcsx.cfg"
     fi
-    mkdir -p "${game}.pcsx"
-    [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
   done
 
   end=$(date +%s%N)
