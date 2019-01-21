@@ -31,6 +31,7 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
 BleemSync-*.zip
 Publish/
 BleemSync.Payload/System/BleemSync/
@@ -38,3 +39,8 @@ BleemSync.Payload/System/BleemSync/
 Payload/system/bleemsync/
 Payload/system/defaults/cover.png
 Payload/system/defaults/pcsx.cfg
+
+BleemSync/BleemSync.db
+System/Databases/regional.db
+BleemSync/Games/
+BleemSync/ui_menu.db

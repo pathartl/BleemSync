@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BleemSync</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/propeller/css/propeller.min.css" />
+    <link rel="stylesheet" href="~/lib/propeller/css/propeller-admin.css" />
+    <link rel="stylesheet" href="~/lib/material-icons/material-icons.css" />
+    <link rel="stylesheet" href="~/lib/bleemsync/custom.css" />
+</head>
+<body class="container-fluid">
+    @RenderBody()
+
+    <script src="~/lib/jquery/jquery-3.3.1.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/lib/propeller/js/propeller.min.js"></script>
+    <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="~/lib/datatables/dataTables.select.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

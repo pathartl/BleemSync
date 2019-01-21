@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BleemSync</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/propeller/css/propeller.min.css" />
+    <link rel="stylesheet" href="~/lib/propeller/css/propeller-admin.css" />
+    <link rel="stylesheet" href="~/lib/material-icons/material-icons.css" />
+    <link rel="stylesheet" href="~/lib/bleemsync/custom.css" />
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top pmd-navbar pmd-z-depth">
+        <a href="javascript:void(0);" data-target="sidebar" data-placement="left" data-position="slidepush" class="btn btn-sm pmd-btn-fab pmd-btn-flat pmd-ripple-effect pull-left pmd-sidebar-toggle">
+            <i class="material-icons md-light">menu</i>
+        </a>
+        <a href="/" class="navbar-brand"><img src="~/img/logo.png" alt="BleemSync Logo" style="width: 96px;" /></a>
+    </nav>
+
+    @await Component.InvokeAsync("Sidebar")
+
+    <div class="container-fluid body-content">
+        @RenderBody()
+    </div>
+
+    <div class="pmd-alert-container center top"></div>
+
+    <script src="~/lib/jquery/jquery-3.3.1.min.js"></script>
+    <script src="~/lib/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/lib/bleemsync/form-helpers.js"></script>
+    <script src="~/lib/bleemsync/alerts.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/lib/propeller/js/propeller.min.js"></script>
+    <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="~/lib/datatables/dataTables.select.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

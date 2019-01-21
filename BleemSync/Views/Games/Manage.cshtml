@@ -1,0 +1,94 @@
+﻿@model BleemSync.ViewModels.GameUpload
+@using System.ComponentModel.DataAnnotations;
+@addTagHelper *, BleemSync.UI
+
+<partial name="ProgressBar" />
+
+<link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
+
+<style>
+    .game-manager-form {
+        display: none;
+    }
+</style>
+
+<column md="8" xs="12">
+    <card title="Game Manager">
+        <card-body>
+            <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
+        </card-body>
+        <card-actions>
+            <button text="Add New Game" class="add-game-button" onclick="" />
+        </card-actions>
+    </card>
+</column>
+
+<column md="4" xs="12">
+    <form id="add-game-form" class="game-manager-form"
+          asp-action="AddGame"
+          enctype="multipart/form-data"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-success="GameAdded">
+        <card title="Add New Game">
+            <card-body>
+                <input type="file" name="Files" class="game-upload" accept=".bin,.cue,.pbp" multiple />
+                <div class="cover-dropzone">
+                    <input type="hidden" name="Cover" class="cover-upload" />
+                    <img class="cover-preview" src="http://fpoimg.com/226x226" />
+                </div>
+                <textbox asp-for="Name" />
+                <textbox asp-for="SortName" />
+                <textarea asp-for="Description" />
+                <textbox asp-for="ReleaseDate" />
+                <textbox asp-for="Players" />
+                <textbox asp-for="Developer" />
+                <textbox asp-for="Publisher" />
+            </card-body>
+            <card-actions>
+                <button type="submit" text="Add Game" />
+            </card-actions>
+        </card>
+    </form>
+    <form id="edit-game-form" class="game-manager-form"
+          asp-action="ModifyGame"
+          enctype="multipart/form-data"
+          data-ajax="true"
+          data-ajax-method="POST"
+          data-ajax-success="GameUpdated">
+        <card title="Edit Game">
+            <card-body>
+                <hidden asp-for="Id" />
+                <hidden asp-for="ParentId" />
+
+                <div class="cover-dropzone">
+                    <input type="hidden" name="Cover" class="cover-upload" />
+                    <img class="cover-preview" src="http://fpoimg.com/226x226" />
+                </div>
+
+                <textbox asp-for="Name" />
+                <textbox asp-for="SortName" />
+                <textarea asp-for="Description" />
+                <textbox asp-for="ReleaseDate" />
+                <textbox asp-for="Players" />
+                <textbox asp-for="Developer" />
+                <textbox asp-for="Publisher" />
+            </card-body>
+            <card-actions>
+                <button type="submit" text="Update Game" value="Update" name="UpdateAction" />
+                <button type="submit" danger text="Delete Game" value="Delete" name="UpdateAction" />
+            </card-actions>
+        </card>
+    </form>
+</column>
+
+
+@section Scripts {
+    <script src="~/lib/jstree/jstree.min.js"></script>
+    <script src="~/lib/bleemsync/central-service.js"></script>
+    <script src="~/lib/bleemsync/playstation-utilities.js"></script>
+    <script src="~/lib/bleemsync/game-manager.js"></script>
+    <script>
+        var gameManager = new GameManager();
+    </script>
+}

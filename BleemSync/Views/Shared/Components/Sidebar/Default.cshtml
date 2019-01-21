@@ -1,0 +1,46 @@
+﻿@using BleemSync.Extensions.Infrastructure.ViewModels
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<MenuItem>
+
+<div class="pmd-sidebar-overlay"></div>
+
+<aside id="sidebar" class="pmd-sidebar sidebar-default pmd-sidebar-left bg-fill-darkblue sidebar-with-icons pmd-sidebar-left-fixed is-slidepush pmd-sidebar-open" role="navigation">
+    <ul class="nav pmd-sidebar-nav">
+        @foreach (var menuItem in Model.OrderBy(mi => mi.Position))
+        {
+            if (menuItem.Children != null && menuItem.Children.Count() > 0)
+            {
+                <li class="dropdown pmd-dropdown">
+                    <a aria-expanded="false" data-toggle="dropdown" class="btn-user dropdown-toggle media" data-sidebar="true" href="javascript:void(0);">
+                        <i class="media-left media-middle">
+                            <i class="material-icons">@menuItem.Icon</i>
+                        </i>
+                        <span class="media-body">@menuItem.Name</span>
+                        <div class="media-right media-bottom"><i class="div-more-vert div"></i></div>
+                    </a>
+
+                    <div class="pmd-dropdown-menu-container">
+                        <div class="pmd-dropdown-menu-bg"></div>
+                        <ul class="dropdown-menu pm-ini">
+                            @foreach (var subMenuItem in menuItem.Children.OrderBy(smi => smi.Position))
+                            {
+                                <li><a href="@subMenuItem.Url">@subMenuItem.Name</a></li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <a class="pmd-ripple-effect" href="@menuItem.Url">
+                        <i class="media-left media-middle">
+                            <i class="material-icons">@menuItem.Icon</i>
+                        </i>
+                        <span class="media-body">@menuItem.Name</span>
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</aside>
