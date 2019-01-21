@@ -113,8 +113,9 @@
                 $(element).trigger(element.getAttribute('data-ajax-success'));
                 // getFunction(element.getAttribute("data-ajax-success"), ["data", "status", "xhr"]).apply(element, arguments);
             },
-            error: function () {
-                getFunction(element.getAttribute("data-ajax-failure"), ["xhr", "status", "error"]).apply(element, arguments);
+            error: function (xhr, status, error) {
+                $(element).trigger(element.getAttribute('data-ajax-failure'), [xhr, status, error]);
+                //getFunction(element.getAttribute("data-ajax-failure"), ["xhr", "status", "error"]).apply(element, arguments);
             }
         });
 

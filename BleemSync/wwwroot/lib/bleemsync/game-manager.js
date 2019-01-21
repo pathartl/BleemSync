@@ -23,8 +23,16 @@
             this.OnGameAdded();
         });
 
+        this._addGameForm.on('XHRError', (xhr) => {
+            this.OnXHRError(xhr.responseText);
+        });
+
         this._editGameForm.on('GameUpdated', () => {
             this.OnGameUpdated();
+        });
+
+        this._editGameForm.on('XHRError', (xhr) => {
+            this.OnXHRError(xhr.responseText);
         });
 
         this.LoadAddGameForm();
@@ -186,4 +194,15 @@
         this._forms.hide();
     }
 
+    OnXHRError(response) {
+        this._progressBar.modal('hide');
+        this.TreeReload();
+        let message;
+        try {
+            message = JSON.parse(response);
+        } catch {
+            message = "Check the logs for more details.";
+        }
+        AlertService.Error("Uh oh, something went wrong. " + message);
+    }
 }
