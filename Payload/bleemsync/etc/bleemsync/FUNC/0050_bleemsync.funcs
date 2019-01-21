@@ -350,16 +350,9 @@ execute_bleemsync_func(){
   umount /etc/udev/rules.d/20-joystick.rules
   if [ "$boot_disable_health" = "1" ]; then umount /usr/sony/bin/ui_menu; fi
 #-----------------------------------------------------------------------------#
-  #Cleanup and shutdown (If active telnet session don't shutdown console.)
-  if [ "$(who | wc -l)" = "1" ]; then
-    while true; do
-      sleep 9999
-    done
-  else
-    sync
-    echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
-    reboot
-  fi
+  sync
+  echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
+  reboot
   exit 0
 }
 ###############################################################################
