@@ -80,15 +80,20 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 }
             }
 
-            var cueFiles = files.Where(f => f.Name.EndsWith(".cue"));
-            var firstCueBasename = cueFiles.First().Name.Replace(".cue", "");
-            var coverFile = files.Where(f => f.Name == "cover.png").First();
-            var newCoverFileName = firstCueBasename + ".png";
-            var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
+            var cueFiles = files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
+            var firstDiscFile = cueFiles.Select(f => f.Name).FirstOrDefault();
+            if (firstDiscFile == null) firstDiscFile = files.First().Name;
+            var baseName = Path.GetFileNameWithoutExtension(firstDiscFile);
+            var coverFile = files.Where(f => f.Name == "cover.png").FirstOrDefault();
+            if (coverFile != null)
+            {
+                var newCoverFileName = baseName + ".png";
+                var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
 
-            SystemMove(coverFile.Path, newCoverFilePath);
-            coverFile.Path = Path.GetFullPath(newCoverFilePath);
-            coverFile.Name = newCoverFileName;
+                SystemMove(coverFile.Path, newCoverFilePath);
+                coverFile.Path = Path.GetFullPath(newCoverFilePath);
+                coverFile.Name = newCoverFileName;
+            }
 
             files.AddRange(additionalFiles);
 
