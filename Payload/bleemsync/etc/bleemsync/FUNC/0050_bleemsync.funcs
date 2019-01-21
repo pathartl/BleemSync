@@ -242,6 +242,14 @@ execute_bleemsync_func(){
     cp /gaadata/1/pcsx.cfg "$bleemsync_path/etc/bleemsync/SYS/defaults"
   [ ! -f "$bleemsync_path/etc/bleemsync/CFG/system.pre" ] && \
     cp "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "$bleemsync_path/etc/bleemsync/CFG"
+  
+  # Check if this is a new install
+  if [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
+    echo "[BLEEMSYNC](INFO) $bleemsync_path/etc/bleemsync/SYS/databases/regional.db does NOT EXIST"
+    echo "[BLEEMSYNC](INFO) This may be a new install. Creating databases folder"
+    mkdir -p "$bleemsync_path/etc/bleemsync/SYS/databases"
+  fi
+    
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
