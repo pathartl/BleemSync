@@ -215,18 +215,23 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                     Type = GameManagerNodeType.Game
                 };
 
-                // For files, iterate what we have on disk instead of looking in the database
-                foreach (var path in Directory.GetFiles(Path.Combine(_baseGamesDirectory, game.Id.ToString())))
+                string gameDir = Path.Combine(_baseGamesDirectory, game.Id.ToString());
+                // If user for some reason doesn't have the game files, don't return game
+                if (Directory.Exists(gameDir))
                 {
-                    node.Files.Add(new GameManagerFile
+                    // For files, iterate what we have on disk instead of looking in the database
+                    foreach (var path in Directory.GetFiles(gameDir))
                     {
-                        Name = Path.GetFileName(path),
-                        Path = Path.GetFullPath(path),
-                        Node = node
-                    });
-                }
+                        node.Files.Add(new GameManagerFile
+                        {
+                            Name = Path.GetFileName(path),
+                            Path = Path.GetFullPath(path),
+                            Node = node
+                        });
+                    }
 
-                nodes.Add(node);
+                    nodes.Add(node);
+                }
             }
 
             return nodes;
