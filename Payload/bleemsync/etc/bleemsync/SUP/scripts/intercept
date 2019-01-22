@@ -185,10 +185,12 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
   esac
   end=$(date +%s%N)
   echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
+  echo -n 2 > /data/power/disable
   link_ra_memory_cards
   launch_retroarch_from_StockUI
   exit_checkSaveState
   resume_ui_menu
+  echo -n 1 > /data/power/disable
   exit 0
 fi
 
