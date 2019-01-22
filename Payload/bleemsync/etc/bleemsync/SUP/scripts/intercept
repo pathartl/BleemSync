@@ -99,6 +99,8 @@ fi
 echo "[INTERCEPT](INFO) The current working directory: $PWD"
 
 suspend_ui_menu
+# auto_dimmer causes audio glitching in RetroArch
+killall -s TERM auto_dimmer &> /dev/null
 intercept_command=""
 found_cdfile=false
 
