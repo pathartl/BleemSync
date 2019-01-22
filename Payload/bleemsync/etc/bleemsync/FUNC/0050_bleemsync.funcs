@@ -47,9 +47,10 @@ launch_retroarch(){
     sync
     echo launch_BootMenu > "/tmp/launchfilecommand"
   else
-    $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png"
+    $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
     sleep 1
     echo "[BLEEMSYNC](FAIL) tried to launch retroarch and it's not installed! Opening Stock ui..."
+    killall -s KILL sdl_display &> "/dev/null"
     echo launch_StockUI > "/tmp/launchfilecommand"
   fi
 }
@@ -110,8 +111,9 @@ setup_StockUI() {
     #display error message
     echo 0 > /sys/class/leds/green/brightness
     echo 1 > /sys/class/leds/red/brightness
-    $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png"
+    $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
     sleep 1
+    sync
     reboot
     exit 1
   fi
@@ -296,7 +298,7 @@ execute_bleemsync_func(){
         #display error message
         echo 0 > /sys/class/leds/green/brightness
         echo 1 > /sys/class/leds/red/brightness
-        $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png"
+        $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
         sleep 1
         sync
         reboot
