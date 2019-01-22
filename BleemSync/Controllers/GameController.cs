@@ -129,9 +129,13 @@ namespace BleemSync.Controllers
                     Path = Path.GetTempFileName()
                 };
 
-                System.IO.File.WriteAllBytes(file.Path, Convert.FromBase64String(gameUpload.Cover.Split(",")[1]));
+                var splitted = gameUpload.Cover.Split(",");
+                if (splitted.Length > 1)
+                {
+                    System.IO.File.WriteAllBytes(file.Path, Convert.FromBase64String(splitted[1]));
 
-                temporaryFiles.Add(file);
+                    temporaryFiles.Add(file);
+                }
             }
 
             // Add game to the database
