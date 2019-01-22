@@ -29,10 +29,11 @@
           enctype="multipart/form-data"
           data-ajax="true"
           data-ajax-method="POST"
-          data-ajax-success="GameAdded">
+          data-ajax-success="GameAdded"
+          data-ajax-failure="XHRError">
         <card title="Add New Game">
             <card-body>
-                <input type="file" name="Files" class="game-upload" accept=".bin,.cue,.pbp" multiple />
+                <input type="file" name="Files" class="game-upload" accept=".bin,.cue,.pbp,.img,.iso,.mdf,.toc,.cbn,.sbi,.otf" multiple />
                 <div class="cover-dropzone">
                     <input type="hidden" name="Cover" class="cover-upload" />
                     <img class="cover-preview" src="http://fpoimg.com/226x226" />
@@ -55,7 +56,8 @@
           enctype="multipart/form-data"
           data-ajax="true"
           data-ajax-method="POST"
-          data-ajax-success="GameUpdated">
+          data-ajax-success="GameUpdated"
+          data-ajax-failure="XHRError">
         <card title="Edit Game">
             <card-body>
                 <hidden asp-for="Id" />

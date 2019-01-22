@@ -80,15 +80,20 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 }
             }
 
-            var cueFiles = files.Where(f => f.Name.EndsWith(".cue"));
-            var firstCueBasename = cueFiles.First().Name.Replace(".cue", "");
-            var coverFile = files.Where(f => f.Name == "cover.png").First();
-            var newCoverFileName = firstCueBasename + ".png";
-            var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
+            var cueFiles = files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
+            var firstDiscFile = cueFiles.Select(f => f.Name).FirstOrDefault();
+            if (firstDiscFile == null) firstDiscFile = files.First().Name;
+            var baseName = Path.GetFileNameWithoutExtension(firstDiscFile);
+            var coverFile = files.Where(f => f.Name == "cover.png").FirstOrDefault();
+            if (coverFile != null)
+            {
+                var newCoverFileName = baseName + ".png";
+                var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
 
-            SystemMove(coverFile.Path, newCoverFilePath);
-            coverFile.Path = Path.GetFullPath(newCoverFilePath);
-            coverFile.Name = newCoverFileName;
+                SystemMove(coverFile.Path, newCoverFilePath);
+                coverFile.Path = Path.GetFullPath(newCoverFilePath);
+                coverFile.Name = newCoverFileName;
+            }
 
             files.AddRange(additionalFiles);
 
@@ -135,7 +140,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             sb.AppendLine("  TRACK 01 MODE2/2352");
             sb.AppendLine("    INDEX 01 00:00:00");
 
-            var cueSheetFileName = sourceFile.Name.Replace(sourceFileInfo.Extension, "") + ".cue";
+            var cueSheetFileName = Path.ChangeExtension(sourceFile.Name, ".cue");
 
             File.WriteAllText(
                 Path.Combine(
@@ -145,10 +150,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             managerFile.Name = cueSheetFileName;
             managerFile.Path = sourceFile.Path;
-            managerFile.NodeId = sourceFile.Id;
-
-            _gameManagerFileRepository.Create(managerFile);
-            _storage.Save();
+            managerFile.NodeId = sourceFile.NodeId;
 
             return managerFile;
         }
@@ -189,7 +191,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         {
             // Delete files first
             var gameDirectory = Path.Combine(_baseGamesDirectory, node.Id.ToString());
-            Directory.Delete(gameDirectory, true);
+            if (Directory.Exists(gameDirectory)) Directory.Delete(gameDirectory, true);
 
             var game = _context.Games.Find(node.Id);
 
@@ -213,21 +215,33 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                     Type = GameManagerNodeType.Game
                 };
 
-                // For files, iterate what we have on disk instead of looking in the database
-                foreach (var path in Directory.GetFiles(Path.Combine(_baseGamesDirectory, game.Id.ToString())))
+                string gameDir = Path.Combine(_baseGamesDirectory, game.Id.ToString());
+                // If user for some reason doesn't have the game files, don't return game
+                if (Directory.Exists(gameDir))
                 {
-                    node.Files.Add(new GameManagerFile
+                    // For files, iterate what we have on disk instead of looking in the database
+                    foreach (var path in Directory.GetFiles(gameDir))
                     {
-                        Name = Path.GetFileName(path),
-                        Path = Path.GetFullPath(path),
-                        Node = node
-                    });
-                }
+                        node.Files.Add(new GameManagerFile
+                        {
+                            Name = Path.GetFileName(path),
+                            Path = Path.GetFullPath(path),
+                            Node = node
+                        });
+                    }
 
-                nodes.Add(node);
+                    nodes.Add(node);
+                }
             }
 
             return nodes;
+        }
+
+        public void Sync()
+        {
+            // Assuming everything's going OK, we can tell power_manage to reboot,
+            // and any additional setup needed will be done on next boot
+            File.WriteAllText("/dev/shm/power/control", "reboot");
         }
     }
 }
