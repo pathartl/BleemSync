@@ -137,10 +137,16 @@ setup_StockUI() {
   ln -s /usr/sony/bin/plugins "${VOL_DATAPCSX}"
 
   # Link games on /media
-  for game in "${mountpoint}/games/"*/; do
-    ln -s "${game}" "${VOL_GAADATA}"
-    ln -s "${game}" "${VOL_DATAPCSX}"
+  media_game_ids=(`"$bleemsync_path/bin/sqlite3" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES" ".quit"`)
+  for game in "${media_game_ids[@]}"; do
+    ln -s "${mountpoint}/games/${game}/" "${VOL_GAADATA}"
+    ln -s "${mountpoint}/games/${game}/" "${VOL_DATAPCSX}"
   done
+
+  if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne $media_game_ids ]; then
+    echo "[BLEEMSYNC](WARN) You have more folders in ${mountpoint}/games/ than are in the BleemSync database." 
+    echo "[BLEEMSYNC](WARN) Do not manually add games to this folder. Remove any manually created folders and add them via the BleemSync web interface."
+  fi
 
   # Force intercept to allow launching custom scripts from stock UI
   mount -o bind "$bleemsync_path/etc/bleemsync/CFG/system.pre" "/usr/sony/share/data/preferences/system.pre"
