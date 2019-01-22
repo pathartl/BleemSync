@@ -218,7 +218,6 @@ setup_StockUI() {
   # Overmount the stock DB now that we're done using it
   mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
 #-----------------------------------------------------------------------------#
-  
 }
 ###############################################################################
 
