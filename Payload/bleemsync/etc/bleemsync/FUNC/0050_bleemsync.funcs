@@ -141,6 +141,9 @@ setup_StockUI() {
   for game in "${media_game_ids[@]}"; do
     ln -s "${mountpoint}/games/${game}/" "${VOL_GAADATA}"
     ln -s "${mountpoint}/games/${game}/" "${VOL_DATAPCSX}"
+    # Ensure .pcsx/pcsx.cfg is present
+    mkdir -p "${mountpoint}/games/${game}/.pcsx"
+    [ ! -f "${mountpoint}/games/${game}/.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${mountpoint}/games/${game}/.pcsx/pcsx.cfg"
   done
 
   if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne $media_game_ids ]; then
@@ -215,11 +218,7 @@ setup_StockUI() {
   # Overmount the stock DB now that we're done using it
   mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
 #-----------------------------------------------------------------------------#
-  # Ensure .pcsx/pcsx.cfg is present
-  for game in "${mountpoint}/games/"*/; do
-    mkdir -p "${game}.pcsx"
-    [ ! -f "${game}.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${game}.pcsx/pcsx.cfg"
-  done
+  
 }
 ###############################################################################
 
