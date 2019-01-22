@@ -191,7 +191,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         {
             // Delete files first
             var gameDirectory = Path.Combine(_baseGamesDirectory, node.Id.ToString());
-            Directory.Delete(gameDirectory, true);
+            if (Directory.Exists(gameDirectory)) Directory.Delete(gameDirectory, true);
 
             var game = _context.Games.Find(node.Id);
 
