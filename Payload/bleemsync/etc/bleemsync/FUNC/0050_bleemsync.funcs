@@ -148,9 +148,9 @@ setup_StockUI() {
     [ ! -f "${mountpoint}/games/${game}/.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${mountpoint}/games/${game}/.pcsx/pcsx.cfg"
   done
 
-  if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne $media_game_ids ]; then
-    echo "[BLEEMSYNC](WARN) You have more folders in ${mountpoint}/games/ than are in the BleemSync database." 
-    echo "[BLEEMSYNC](WARN) Do not manually add games to this folder. Remove any manually created folders and add them via the BleemSync web interface."
+  if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne ${#media_game_ids[@]} ]; then
+    echo "[BLEEMSYNC](WARN) You have folders in ${mountpoint}/games/ that are not in the BleemSync database." 
+    echo "[BLEEMSYNC](WARN) Do not manually add or remove games in this folder. Remove any manually created folders and add them via the BleemSync web interface."
   fi
 
   # Force intercept to allow launching custom scripts from stock UI
