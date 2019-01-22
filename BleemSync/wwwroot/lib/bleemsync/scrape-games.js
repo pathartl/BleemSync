@@ -81,7 +81,7 @@ onmessage = function (e) {
         if (fingerprint != '') {
             try {
                 let game = BleemSyncCentral.GetGameInfoByFingerprint(fingerprint, 'PlayStation');
-                let coverFile = BleemSyncCentral.GetCoverFileByFingerprint(game.Fingerprint, game.System);
+                let coverFile = BleemSyncCentral.GetCoverFileByFingerprint(fingerprint, 'PlayStation');
                 game.Cover = reader.readAsDataURL(coverFile);
 
                 response.Valid = true;
