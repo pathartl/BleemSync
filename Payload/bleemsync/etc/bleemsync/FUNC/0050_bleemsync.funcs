@@ -380,6 +380,8 @@ execute_bleemsync_func(){
 #-----------------------------------------------------------------------------#
   sync
   echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
+  killall -s TERM BleemSync &> "/dev/null"
+  killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
   reboot
   exit 0
 }
