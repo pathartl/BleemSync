@@ -28,6 +28,7 @@ select_UI_theme(){
   echo "[BLEEMSYNC](Executing) select_UI_theme()"
   echo 1 > /sys/class/leds/red/brightness
   start=$(date +%s%N)
+  chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing"
   # Check for upper-case folder names and lower-case them
   for theme_folder in $( ls $themes_path/ | grep [A-Z] ); do
     mv -f "$themes_path/$theme_folder" "$themes_path/_$theme_folder"

@@ -36,7 +36,7 @@ launch_retroarch(){
     fi
     mkdir -p "/tmp/ra_cache"
     custom_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/xmb/custom"
-    [ ! -f "$custom_theme_path/font.tff" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.tff"
+    [ ! -f "$custom_theme_path/font.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.ttf"
     [ ! -f "$custom_theme_path/png/bg.png" ] && cp -f "/usr/sony/share/data/images/GR/JP_US_BG.png" "$custom_theme_path/png/bg.png"
     chmod +x "$bleemsync_path/opt/retroarch/retroarch"
     export HOME="$bleemsync_path/opt/retroarch"
@@ -148,9 +148,9 @@ setup_StockUI() {
     [ ! -f "${mountpoint}/games/${game}/.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${mountpoint}/games/${game}/.pcsx/pcsx.cfg"
   done
 
-  if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne $media_game_ids ]; then
-    echo "[BLEEMSYNC](WARN) You have more folders in ${mountpoint}/games/ than are in the BleemSync database." 
-    echo "[BLEEMSYNC](WARN) Do not manually add games to this folder. Remove any manually created folders and add them via the BleemSync web interface."
+  if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne ${#media_game_ids[@]} ]; then
+    echo "[BLEEMSYNC](WARN) You have folders in ${mountpoint}/games/ that are not in the BleemSync database." 
+    echo "[BLEEMSYNC](WARN) Do not manually add or remove games in this folder. Remove any manually created folders and add them via the BleemSync web interface."
   fi
 
   # Force intercept to allow launching custom scripts from stock UI
