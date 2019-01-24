@@ -102,8 +102,8 @@ setup_StockUI() {
   # Unmount partitons and create tmpfs - Shut system down on failure
   MOUNT_FAIL=0
   # Create gaadata and data folders in tmp then mount over original folders
-  VOL_GAADATA="/var/volatile/gaadatatmp"
-  VOL_DATAPCSX="/var/volatile/datatmp"
+  export VOL_GAADATA="/var/volatile/gaadatatmp"
+  export VOL_DATAPCSX="/var/volatile/datatmp"
   mkdir -p "${VOL_GAADATA}" "${VOL_DATAPCSX}"
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
 
@@ -316,6 +316,10 @@ execute_bleemsync_func(){
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules"
   udevadm control --reload-rules
   udevadm trigger
+
+  # Mount replacement copyright script
+  chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/credits"
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/credits" /usr/sony/bin/showCopyright.sh
 #-----------------------------------------------------------------------------#
   #Patch out health check if toggled.
   if [ "$boot_disable_health" = "1" ]; then
