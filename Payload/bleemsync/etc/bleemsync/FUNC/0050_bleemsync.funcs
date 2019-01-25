@@ -165,7 +165,7 @@ setup_StockUI() {
   # TODO - this should be dynamically generated when we support replacing games on the internal
   # Perhaps two playlists. "PlayStation Classic - Internal" and "PlayStation Classic - External"
   mkdir -p "$retroarch_path/.config/retroarch/playlists"
-  if [ `cat /gaadata/geninfo/REGION` = "JP" ]; then
+  if [ `cat /gaadata/geninfo/REGION` = "J" ]; then
     cp "$bleemsync_path/etc/bleemsync/SUP/retroarch/psc_jpn.lpl" "$retroarch_path/.config/retroarch/playlists/PlayStation Classic - Internal.lpl"
   else
     cp "$bleemsync_path/etc/bleemsync/SUP/retroarch/psc_row.lpl" "$retroarch_path/.config/retroarch/playlists/PlayStation Classic - Internal.lpl"
