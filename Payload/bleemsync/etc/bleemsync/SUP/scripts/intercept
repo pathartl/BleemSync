@@ -1,0 +1,205 @@
+#!/bin/sh
+#
+#  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+###############################################################################
+# PlayStation Classic Stock UI to Emulator Intercept Script
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+### CHECK FOR LAUNCH SCRIPT ###################################################
+# If launch script exists run it instead of pcsx/RA
+if [ -f "/data/AppData/sony/title/launch.sh" ]; then
+  echo "[INTERCEPT](INFO) launch.sh exists"
+  exec "/data/AppData/sony/title/launch.sh" 
+  # Shouldn't get to here
+  exit 1
+fi
+
+start=$(date +%s%N)
+### LOAD CONFIGURATION ########################################################
+source "/var/volatile/bleemsync.cfg"
+
+### LOAD FUNCTION LIBRARIES ###################################################
+source "/media/bleemsync/etc/bleemsync/FUNC/0030_retroarch.funcs"
+
+### INTERCEPT VARIABLES #######################################################
+intercept_pcsx_path="/usr/sony/bin/pcsx"
+intercept_game_path=""
+intercept_game_dir=""
+intercept_game_id=""
+intercept_game_ext=""
+intercept_game_alternative_path=""
+intercept_save_state=false
+intercept_file_formats=(    # alternative PCSX ReARMed game formats
+  "m3u"
+  "pbp"
+  "img"
+  "iso"
+  "mdf"
+  "toc"
+  "cbn"
+)
+ui_menu_pid=""
+
+### INTERCEPT FUNCTIONS #######################################################
+suspend_ui_menu() {
+  start_suspend=$(date +%s%N)
+  ui_menu_pid=`ps|grep ui_menu|grep -v grep|awk '{print $1}'`
+  if [ `echo "$ui_menu_pid" | wc -l` -ne 1 ]; then
+    echo "[INTERCEPT](ERROR) unable to suspend ui_menu"
+    echo "[INTERCEPT](ERROR) ui_menu is either not running, or more than one instance is running"
+    echo "[INTERCEPT](ERROR) ui_menu_pid: ${ui_menu_pid}"
+    ui_menu_pid=""
+  else
+    echo "[INTERCEPT](INFO) suspending ui_menu (PID ${ui_menu_pid})"
+    kill -STOP "$ui_menu_pid"
+  fi
+  end_suspend=$(date +%s%N)
+  echo "[INTERCEPT](PROFILE) suspending ui_menu took: $(((end_suspend-start_suspend)/1000000))ms to execute"
+}
+
+resume_ui_menu() {
+  start_suspend=$(date +%s%N)
+  if [ ! "$ui_menu_pid" = "" ]; then
+    echo "[INTERCEPT](INFO) resuming ui_menu (PID ${ui_menu_pid})"
+    kill -CONT "$ui_menu_pid"
+    ui_menu_pid=""
+  fi
+  end_suspend=$(date +%s%N)
+  echo "[INTERCEPT](PROFILE) resuming ui_menu took: $(((end_suspend-start_suspend)/1000000))ms to execute"
+}
+
+### START INTERCEPT SCRIPT ####################################################
+# This should be launched directly from ui_menu by
+# substituing the sPcsxExecPath in /usr/sony/share/data/preferences/system.pre
+# with the path to this script
+###############################################################################
+echo "[INTERCEPT](INFO) Starting PS Classic Intercept"
+if [ "$#" -ge 1 ]; then
+  echo "[INTERCEPT](INFO) There are $# parameters:"
+  echo "[INTERCEPT](INFO) $*"
+else
+  echo "[INTERCEPT](INFO) There are no parameters"
+fi
+
+echo "[INTERCEPT](INFO) The current working directory: $PWD"
+
+suspend_ui_menu
+# auto_dimmer causes audio glitching in RetroArch
+killall -s TERM auto_dimmer &> /dev/null
+intercept_command=""
+found_cdfile=false
+
+# Loop through each argument to pull out information relating to which game is being loaded
+# and whether this is a Save State load
+start_arg=$(date +%s%N)
+for arg in "$@"
+do
+
+  if [ "$found_cdfile" = true ]; then
+
+    intercept_game_path="$arg"
+    echo "[INTERCEPT](INFO) Game full path: ${intercept_game_path}"
+    intercept_game_dir="${arg%/*}/"
+    echo "[INTERCEPT](INFO) Game directory: ${intercept_game_dir}"
+    intercept_game_id="${arg##*/}"
+    intercept_game_id="${intercept_game_id%.*}"
+    echo "[INTERCEPT](INFO) Game ID: $intercept_game_id"
+    intercept_game_ext="${arg##*.}"
+    echo "[INTERCEPT](INFO) Game extension: $intercept_game_ext"
+
+    # Check if the game exists in an alternative format
+    # The game path always has .cue appened to the BASENAME field of the DISC table in regional.db
+    # EXCEPT when the game is launched from a Save State. In this case the Game Path is determined from
+    # the first line of filename.txt.res in the games PCSX data directory (ie. /data/AppData/sony/pcsx/1/.pcsx/filename.txt.res)
+    if [ "$intercept_save_state" = false ]; then
+
+      start_alt=$(date +%s%N)
+      for f in "${intercept_file_formats[@]}"; do
+        intercept_game_alternative_path="${arg%.cue}.${f}"
+        if [ -f "$intercept_game_alternative_path" ]; then
+          echo "[INTERCEPT](INFO) Alternative game format exists (${f}), this will be used instead of the .cue"
+          arg="$intercept_game_alternative_path"
+          intercept_game_path="$arg"
+          intercept_game_ext="${f}"
+          echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
+          echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
+          break
+        fi
+      done
+      end_alt=$(date +%s%N)
+      echo "[INTERCEPT](PROFILE) finding alternative game formats took: $(((end_alt-start_alt)/1000000))ms to execute"
+    fi
+    found_cdfile=false
+    continue
+  fi
+
+  case $arg in
+    -cdfile)
+      found_cdfile=true
+      continue
+      ;;
+
+     -load)
+      echo "[INTERCEPT](INFO) This is a Save State load"
+      intercept_save_state=true
+      ;;
+  esac
+
+  #   Build the new parameters for PCSX
+  intercept_command="${intercept_command} ${arg}"
+done
+end_arg=$(date +%s%N)
+echo "[INTERCEPT](PROFILE) extracting arguments took: $(((end_arg-start_arg)/1000000))ms to execute"
+
+
+if [ "$launch_ra_from_stock_UI" = "1" ]; then
+  echo "[INTERCEPT](INFO) RetroArch is enabled as the emulator"
+  # Swap stock multi disc game path to an .m3u for better disc swap support in RetroArch
+  case "$intercept_game_id" in
+    SCUS-94163|SLPM-86114|SLPS-01057|SLPS-01230|SLUS-00594)
+      if [ "$intercept_game_ext" = "cue" ] && [ "$intercept_save_state" = false ] ; then
+        echo "[INTERCEPT](INFO) This is a stock multi disc game with no .m3u. An .m3u is needed for the best multi disc experience within RetroArch"
+        if [ -f "$bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u" ]; then
+          intercept_game_path="$bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u"
+          intercept_game_ext="m3u"
+          echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
+          echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
+        else
+          echo "[INTERCEPT](ERROR) an .m3u does not exist at $bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u"
+        fi 
+      fi
+      ;;
+  esac
+  end=$(date +%s%N)
+  echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
+  echo -n 2 > /data/power/disable
+  link_ra_memory_cards
+  launch_retroarch_from_StockUI
+  exit_checkSaveState
+  resume_ui_menu
+  echo -n 1 > /data/power/disable
+  exit 0
+fi
+
+echo "[INTERCEPT](INFO) Launching $intercept_pcsx_path $intercept_command -cdfile $intercept_game_path"
+end=$(date +%s%N)
+echo "[INTERCEPT](PROFILE) up to launching stock pcsx took: $(((end-start)/1000000))ms to execute"
+"$intercept_pcsx_path" $intercept_command -cdfile "$intercept_game_path"
+resume_ui_menu
+# Exit returning the pcsx exit code
+exit $?

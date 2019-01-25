@@ -1,0 +1,38 @@
+{
+  "name": "Microsoft.jQuery.Unobtrusive.Ajax",
+  "version": "3.2.3",
+  "authors": [
+    "Microsoft"
+  ],
+  "description": "jQuery plugin that unobtrusively sets up jQuery Ajax",
+  "main": "jquery.unobtrusive-ajax.js",
+  "keywords": [
+    "jquery",
+    "asp.net",
+    "mvc",
+    "ajax",
+    "unobtrusive"
+  ],
+  "license": "Apache",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": ">=1.8"
+  },
+  "homepage": "https://github.com/whyleee/Microsoft.jQuery.Unobtrusive.Ajax",
+  "_release": "3.2.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "3.2.3",
+    "commit": "a5b5caf864b11f1a3d137b8c491fbb58f8b9248d"
+  },
+  "_source": "https://github.com/whyleee/Microsoft.jQuery.Unobtrusive.Ajax.git",
+  "_target": "^3.2.3",
+  "_originalSource": "Microsoft.jQuery.Unobtrusive.Ajax",
+  "_direct": true
+}

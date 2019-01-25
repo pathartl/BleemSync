@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+#  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+###############################################################################
+# BleemSync Bootstapper executor v0.7
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+### LOAD CONFIGURATION ########################################################
+ini_file="/media/bleemsync/etc/bleemsync/CFG/bleemsync_cfg.INI"
+cfg_file="/var/volatile/bleemsync.cfg"
+
+rm -f "$cfg_file"
+grep -v -e "^;" -e "^\[" "$ini_file" > "$cfg_file"
+
+if [ -f "$cfg_file" ]; then
+  source "$cfg_file"
+else
+  echo "wtf" #Add a proper error at some point here...
+fi
+
+source "${bleemsync_path}/etc/bleemsync/CFG/boot_sequence.cfg"
+
+# Set up logging
+if [ "$runtime_log" = "1" ]; then
+  error_log="$runtime_log_path/bleemsync.log"
+else
+  error_log="/dev/stdout"
+fi
+
+### LOAD FUNCTION LIBRARIES ###################################################												  
+for funcs in /media/bleemsync/etc/bleemsync/FUNC/*.funcs; do source "$funcs"; done
+
+### EXECUTE ###################################################################
+main(){
+  for x in "${boot_sequence[@]}"; do
+    echo "[BLEEMSYNC](BOOT) booting "$x"_func()" >> "${error_log}"
+    time1=$(date +%s%N)
+    if [ ! -z $(echo "$x" | grep "^dump_") ] && [ "$force_redump" = "1" ]; then
+      $x"_func" --force >> "${error_log}" 2>&1
+    else
+      $x"_func" >> "${error_log}" 2>&1
+    fi
+    time2=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) "$x"_func() took: $(((time1-time2)/1000000))ms to execute" >> "${error_log}"
+  done 
+}
+
+###############################################################################
+main #Do stuff and things
+
+#If we get here... Panic and Reboot
+sync
+reboot
+exit 1

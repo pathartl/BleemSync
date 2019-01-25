@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BleemSync.Central.Services;
 using BleemSync.Central.Data;
@@ -42,6 +40,14 @@ namespace BleemSync.Central.Controllers
 
         [HttpGet("{serial}")]
         public ActionResult GetBySerial(string serial)
+        {
+            var game = _service.GetGameBySerialNumber(serial);
+
+            return new JsonResult(game);
+        }
+
+        [HttpGet("{serial}")]
+        public ActionResult GetByFingerprint(string serial)
         {
             var game = _service.GetGameBySerialNumber(serial);
 

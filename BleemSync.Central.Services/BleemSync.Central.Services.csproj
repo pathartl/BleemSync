@@ -4,9 +4,14 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>BleemSync.Central.Services</RootNamespace>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\BleemSync.Central.Data\BleemSync.Central.Data.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+  </ItemGroup>
+
 
 </Project>

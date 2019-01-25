@@ -1,0 +1,2 @@
+pcsx_rearmed_region = "NTSC"
+pcsx_rearmed_show_bios_bootlogo = "enabled"

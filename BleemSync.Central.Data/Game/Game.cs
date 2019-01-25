@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace BleemSync.Central.Data.Models
 {
@@ -11,6 +10,7 @@ namespace BleemSync.Central.Data.Models
     {
         [Key]
         public int Id { get; set; }
+	      public String RelativePath { get; set; }
         public string Title { get; set; }
         public string CommonTitle { get; set; }
         public string Region { get; set; }

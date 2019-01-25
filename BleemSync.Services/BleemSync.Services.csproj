@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="106.5.4" />
-    <PackageReference Include="sharpconfig" Version="3.2.8" />
+    <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
   </ItemGroup>
+
 
 </Project>

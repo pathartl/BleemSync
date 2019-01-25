@@ -1,0 +1,166 @@
+#!/bin/sh
+#
+#  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+###############################################################################
+# BleemSync Function Library - Execution
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+dump_emmc_func(){
+  echo "[BLEEMSYNC](Executing) dump_emmc_func()"
+  if [ ! -f "$runtime_flag_path/dumped_emmc.flag" ] || [ "$1" = "--force" ]; then
+    echo 1 > /sys/class/leds/red/brightness
+    ok=1
+    mediafs="$(df -T | grep -Ee ' /media$' | awk -e '{ print $2 }')"
+    mkdir -p "$dump_path/emmc_RAW"
+    mount -o remount,ro /data && mount -o remount,ro /gaadata
+    if [ "$mediafs" = "vfat" ]; then
+      if ! dd if=/dev/mmcblk0 bs=1M | gzip | split -a3 -b4294967295 - "$dump_path/emmc_RAW/mmcblk0.bin.gz."; then
+        ok=0
+      fi
+    else
+      if ! dd if=/dev/mmcblk0 bs=1M | gzip > "$dump_path/emmc_RAW/mmcblk0.bin.gz"; then
+        ok=0
+      fi
+    fi
+    if [ "$ok" = "1" ]; then
+      touch "$runtime_flag_path/dumped_emmc.flag"
+      echo "[BLEEMSYNC](SUCCESS) dump_emmc_func()"
+    else
+      echo "[BLEEMSYNC](FAIL) dump_emmc_func()"
+    fi
+    sync
+    echo 0 > /sys/class/leds/red/brightness
+  else
+    echo "[BLEEMSYNC](INFO) Skipping as dump flag already present"
+  fi
+  echo "[BLEEMSYNC](Executed) dump_emmc_func()"
+}
+
+dump_fs_func(){
+  echo "[BLEEMSYNC](Executing) dump_fs_func()"
+  if [ ! -f "$runtime_flag_path/dumped_fs.flag" ] || [ "$1" = "--force" ]; then
+    echo 1 > /sys/class/leds/red/brightness
+    ok=1
+    mediafs="$(df -T | grep -Ee ' /media$' | awk -e '{ print $2 }')"
+    mkdir -p "$dump_path/emmc_FS"
+    mount -o remount,ro /data && mount -o remount,ro /gaadata
+    if [ "$mediafs" = "vfat" ]; then
+      if ! dd if=/dev/mapper/gaadata bs=1M | gzip | split -a3 -b4294967295 - "$dump_path/emmc_FS/gaadata.bin.gz."; then
+        ok=0
+      fi
+    else
+      if ! dd if=/dev/mapper/gaadata bs=1M > "$dump_path/emmc_FS/gaadata.bin"; then
+        ok=0
+      fi
+    fi
+    if ! dd if=/dev/disk/by-partlabel/USRDATA bs=1M > "$dump_path/emmc_FS/data.bin"; then
+      ok=0
+    fi
+    if ! dd if=/dev/disk/by-partlabel/ROOTFS1 bs=1M > "$dump_path/emmc_FS/root.bin"; then
+      ok=0
+    fi
+    if [ "$ok" = "1" ]; then
+      touch "$runtime_flag_path/dumped_fs.flag"
+      echo "[BLEEMSYNC](SUCCESS) dump_fs_func()"
+    else
+      echo "[BLEEMSYNC](FAIL) dump_fs_func()"
+    fi
+    mount -o remount,rw /data
+    sync
+    echo 0 > /sys/class/leds/red/brightness
+  else
+    echo "[BLEEMSYNC](INFO) Skipping as dump flag already present"
+  fi
+  echo "[BLEEMSYNC](Executed) dump_fs_func()"
+}
+
+dump_tar_func(){
+  echo "[BLEEMSYNC](Executing) dump_tar_func()"
+  if [ ! -f "$runtime_flag_path/dumped_tar.flag" ] || [ "$1" = "--force" ]; then
+    echo 1 > /sys/class/leds/red/brightness
+    ok=1
+    mediafs="$(df -T | grep -Ee ' /media$' | awk -e '{ print $2 }')"
+    mkdir -p "$dump_path/emmc_TAR"
+    mount -o remount,ro /data && mount -o remount,ro /gaadata
+    if [ "$mediafs" = "vfat" ]; then
+      if ! tar -czf - -C "/gaadata" . | split -a3 -b4294967295 - "$dump_path/emmc_TAR/gaadata.tar.gz."; then
+        ok=0
+      fi
+    else
+      if ! tar -czf - -C "/gaadata" . > "$dump_path/emmc_TAR/gaadata.tar.gz"; then
+        ok=0
+      fi
+    fi
+    if ! tar -czf - -C "/data" . > "$dump_path/emmc_TAR/data.tar.gz"; then
+      ok=0
+    fi
+    mkdir -p "/tmp/root"
+    mount -o ro /dev/disk/by-partlabel/ROOTFS1 "/tmp/root"
+    if ! tar -czf - -C "/tmp/root" . > "$dump_path/emmc_TAR/root.tar.gz"; then
+      ok=0
+    fi
+    umount "/tmp/root"
+    rmdir "/tmp/root"
+    if [ "$ok" = "1" ]; then
+      touch "$runtime_flag_path/dumped_tar.flag"
+      echo "[BLEEMSYNC](SUCCESS) dump_tar_func()"
+    else
+      echo "[BLEEMSYNC](FAIL) dump_tar_func()"
+    fi
+    sync
+    echo 0 > /sys/class/leds/red/brightness
+  else
+    echo "[BLEEMSYNC](INFO) Skipping as dump flag already present"
+  fi
+  echo "[BLEEMSYNC](Executed) dump_tar_func()"
+}
+
+dump_fstruct_func(){
+  echo "[BLEEMSYNC](Executing) dump_file_structure()"
+  if [ ! -f "$runtime_flag_path/dumped_fstruct.flag" ] || [ "$1" = "--force" ]; then
+    echo 1 > /sys/class/leds/red/brightness
+    echo "Dumping file structure to: $dump_path/PSC_file_structure.txt"
+    echo "This might take awhile!"
+    mkdir -p "$dump_path"
+    ls -lhAR / &> "$dump_path/PSC_file_structure.txt"
+    [ -f "$dump_path/PSC_file_structure.txt" ] && touch "$runtime_flag_path/dumped_fstruct.flag"
+    echo 0 > /sys/class/leds/red/brightness
+  else
+    echo "[BLEEMSYNC](INFO) Skipping as dump flag already present"
+  fi
+  echo "[BLEEMSYNC](Executed) dump_file_structure()"
+}
+
+debug_run_func(){
+  #Misc debugging commands get dumped here.
+  echo "[BLEEMSYNC](Executing) debug_run_func()"
+  echo 1 > /sys/class/leds/red/brightness
+  mkdir -p "$dump_path"
+  mount &> "$dump_path/mount.log"
+  [ -d "$dump_path/DEBUG" ] && rm -rf "$dump_path/DEBUG"
+  [ ! -d "$dump_path/DEBUG" ] && mkdir -p "$dump_path/DEBUG"
+  cat "/proc/mtktz/mtktscpu" | head -1 &> "$dump_path/DEBUG/CPUTEMP.log"
+  cat "/proc/mtktz/mtktspmic" | head -1 &> "$dump_path/DEBUG/PMICTEMP.log"
+  cat "/proc/mtktz/mtktsAP" | head -1 &> "$dump_path/DEBUG/APTEMP.log"
+  cat "/proc/mtktz/mtktscpu" | tail -1 | grep "Tfake" | sed 's/.*/Tfake/' &> "$dump_path/DEBUG/CPUTEMPFAKE.log"
+  cat "/proc/mtktz/mtktspmic" | tail -1 | grep "Tfake" | sed 's/.*/Tfake/' &> "$dump_path/DEBUG/PMICTEMPFAKE.log"
+  cat "/proc/mtktz/mtktsAP" | tail -1 | grep "Tfake" | sed 's/.*/Tfake/' &> "$dump_path/DEBUG/APTEMPFAKE.log"
+  /usr/share/misc/sony/cpu_mode &> "$dump_path/DEBUG/cpu_mode.log"
+  echo 0 > /sys/class/leds/red/brightness
+  echo "[BLEEMSYNC](Executed) debug_run_func()"
+}

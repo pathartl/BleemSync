@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+#  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+###############################################################################
+# BleemSync Function Library - Stock UI Themes
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+overmount_existing() {
+  "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing" "$@"
+}
+
+select_UI_theme(){
+  echo "[BLEEMSYNC](Executing) select_UI_theme()"
+  echo 1 > /sys/class/leds/red/brightness
+  start=$(date +%s%N)
+  chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing"
+  # Check for upper-case folder names and lower-case them
+  for theme_folder in $( ls $themes_path/ | grep [A-Z] ); do
+    mv -f "$themes_path/$theme_folder" "$themes_path/_$theme_folder"
+    mv -f "$themes_path/_$theme_folder" "$(echo $themes_path/$theme_folder | tr 'A-Z' 'a-z')"
+  done
+
+  # Set random theme if setting is set
+  if [ "$random_theme_onload" = "1" ]; then
+    selected_theme=$(ls -d1 "$themes_path/"*/ | sort --random-sort | head -1 | xargs basename)
+  fi
+
+  # Lower-case the theme variable incase it causes and issue
+  selected_theme="$(echo $selected_theme | tr 'A-Z' 'a-z')"
+
+  # Initial vars
+  found_theme=0
+  found_music_files=0
+
+  if [ "$selected_theme" != "stock" ] && [ -d "$themes_path/$selected_theme" ]; then
+    # Set found theme var for log
+    found_theme=1
+
+    # Check for the music folder
+    if [ -d "$themes_path/$selected_theme/music" ] && [ "$override_theme_music" = "0" ]; then
+      found_music_files=1
+      overmount_existing "$themes_path/$selected_theme/music" "$sounds_path/music"
+    fi
+
+    overmount_existing "$themes_path/$selected_theme" /usr/sony/share/data
+  fi
+  # log if stuff is found or not
+  if [ "$found_theme" == "1" ]; then
+    echo "[BLEEMSYNC](INFO)(theme) set theme to '$selected_theme' theme"
+  else
+    echo "[BLEEMSYNC](INFO)(theme) set theme to stock theme"
+  fi
+  if [ "$found_music_files" == "1" ]; then
+    echo "[BLEEMSYNC](INFO)(theme) mounting available music files"
+  else
+    echo "[BLEEMSYNC](INFO)(theme) mounting stock music files"
+  fi
+  echo 0 > /sys/class/leds/red/brightness
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) select_UI_theme() took: $(((end-start)/1000000))ms to execute"
+  echo "[BLEEMSYNC](INFO) completed select_UI_theme()"
+}

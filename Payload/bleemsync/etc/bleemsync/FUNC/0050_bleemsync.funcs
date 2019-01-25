@@ -1,0 +1,388 @@
+#!/bin/sh
+#
+#  Copyright 2019 ModMyClassic (https://modmyclassic.com/license)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+###############################################################################
+# BleemSync Function Library - BleemSync
+# ModMyClassic.com / https://discordapp.com/invite/8gygsrw
+###############################################################################
+
+### LOCAL FUNCTIONS ###########################################################
+launch_retroarch(){
+  echo "[BLEEMSYNC](INFO) launching retroarch"
+  if [ -f "$bleemsync_path/opt/retroarch/retroarch" ]; then
+    # Kill bleemsync UI
+    killall -s TERM BleemSync &> /dev/null
+    cd "/home/root"
+    killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
+    [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
+    if [ ! -f "$bleemsync_path/opt/retroarch/system/scph102b.bin" ]; then
+      mkdir -p "$bleemsync_path/opt/retroarch/system"
+      cp -f "/gaadata/system/bios/romw.bin" "$bleemsync_path/opt/retroarch/system/scph102b.bin"
+      echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
+    fi
+    mkdir -p "/tmp/ra_cache"
+    custom_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/xmb/custom"
+    [ ! -f "$custom_theme_path/font.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.ttf"
+    [ ! -f "$custom_theme_path/png/bg.png" ] && cp -f "/usr/sony/share/data/images/GR/JP_US_BG.png" "$custom_theme_path/png/bg.png"
+    chmod +x "$bleemsync_path/opt/retroarch/retroarch"
+    export HOME="$bleemsync_path/opt/retroarch"
+    $bleemsync_path/opt/retroarch/retroarch -v &> "$runtime_log_path/retroarch.log"
+    rm -rf "/tmp/ra_cache"
+    umount "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" &> "/dev/null"
+    export HOME="/home/root" && cd "/home/root"
+    sync
+    echo launch_BootMenu > "/tmp/launchfilecommand"
+  else
+    $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
+    sleep 1
+    echo "[BLEEMSYNC](FAIL) tried to launch retroarch and it's not installed! Opening Stock ui..."
+    killall -s KILL sdl_display &> "/dev/null"
+    echo launch_StockUI > "/tmp/launchfilecommand"
+  fi
+}
+
+launch_BootMenu(){
+  echo "[BLEEMSYNC](INFO) launching BootMenu"
+  echo 2 > /data/power/disable
+  rm -f "/tmp/launchfilecommand"
+  [ -d "$bleemsync_path/opt/bleemsync_ui/temp" ] && rm -r "$bleemsync_path/opt/bleemsync_ui/temp"
+  if [ ! "$(ps | grep -v grep | grep BleemSync)" ]; then
+    rm -f "$runtime_log_path/bleemsync_ui.log"
+    cd "$bleemsync_path/opt/bleemsync_ui/"
+    chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
+  fi
+  if [ "$boot_menu_music" = "1" ]; then
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path/" --theme-folder "$themes_path/$selected_theme/boot"
+  else
+    $bleemsync_path/bin/boot_menu --image-folder "$images_path" --theme-folder "$themes_path/$selected_theme/boot"
+  fi
+}
+
+launch_StockUI(){
+  echo "[BLEEMSYNC](INFO) launching stock ui"
+  # Kill bleemsync UI
+  killall -s TERM BleemSync &> /dev/null
+  setup_StockUI
+  cd "/home/root"
+  # Remove power file flags
+  rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
+  # Fix for last selected game issue. If not in place user may experience ui issue
+  sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
+
+  cd "/data/AppData/sony/pcsx"
+  export PCSX_ESC_KEY=2
+  /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
+  rm -f "/data/power/prepare_suspend"
+  
+  # Reset last selected game in case user does not use BleemSync on next boot
+  sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
+  umount /usr/sony/bin/pcsx
+  umount /gaadata/databases/regional.db
+  umount /usr/sony/share/data/preferences/system.pre
+  rm -r "${VOL_GAADATA}" "${VOL_DATAPCSX}" /var/volatile/bleemsync.cfg
+}
+
+setup_StockUI() {
+  start=$(date +%s%N)
+
+  # Unmount partitons and create tmpfs - Shut system down on failure
+  MOUNT_FAIL=0
+  # Create gaadata and data folders in tmp then mount over original folders
+  VOL_GAADATA="/var/volatile/gaadatatmp"
+  VOL_DATAPCSX="/var/volatile/datatmp"
+  mkdir -p "${VOL_GAADATA}" "${VOL_DATAPCSX}"
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
+
+  if [ "$MOUNT_FAIL" = "1" ]; then
+    #display error message
+    echo 0 > /sys/class/leds/green/brightness
+    echo 1 > /sys/class/leds/red/brightness
+    $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
+    sleep 1
+    sync
+    reboot
+    exit 1
+  fi
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs mounting took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+
+  # Create gaadata on tmpfs
+  if [ "$link_EMMC_and_USB" = "1" ]; then
+    mkdir -p "${VOL_GAADATA}/databases/"
+    cp -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" "${VOL_GAADATA}/databases/"
+  else
+    ln -s "$bleemsync_path/etc/bleemsync/SYS/databases" "${VOL_GAADATA}"
+  fi
+  ln -s /gaadata/geninfo "${VOL_GAADATA}"
+  ln -s /gaadata/preferences "${VOL_GAADATA}"
+  ln -s /gaadata/system "${VOL_GAADATA}"
+
+  # Create data on tmpfs
+  ln -s /gaadata/system/bios "${VOL_DATAPCSX}"
+  ln -s /usr/sony/bin/plugins "${VOL_DATAPCSX}"
+
+  # Link games on /media
+  media_game_ids=(`"$bleemsync_path/bin/sqlite3" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES" ".quit"`)
+  for game in "${media_game_ids[@]}"; do
+    ln -s "${mountpoint}/games/${game}/" "${VOL_GAADATA}"
+    ln -s "${mountpoint}/games/${game}/" "${VOL_DATAPCSX}"
+    # Ensure .pcsx/pcsx.cfg is present
+    mkdir -p "${mountpoint}/games/${game}/.pcsx"
+    [ ! -f "${mountpoint}/games/${game}/.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${mountpoint}/games/${game}/.pcsx/pcsx.cfg"
+  done
+
+  if [ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne ${#media_game_ids[@]} ]; then
+    echo "[BLEEMSYNC](WARN) You have folders in ${mountpoint}/games/ that are not in the BleemSync database." 
+    echo "[BLEEMSYNC](WARN) Do not manually add or remove games in this folder. Remove any manually created folders and add them via the BleemSync web interface."
+  fi
+
+  # Force intercept to allow launching custom scripts from stock UI
+  mount -o bind "$bleemsync_path/etc/bleemsync/CFG/system.pre" "/usr/sony/share/data/preferences/system.pre"
+  cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
+  chmod +x "/tmp/intercept"
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs symbolic linking took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  # RetroArch - copy appropriate playlist for stock games
+  # TODO - this should be dynamically generated when we support replacing games on the internal
+  # Perhaps two playlists. "PlayStation Classic - Internal" and "PlayStation Classic - External"
+  mkdir -p "$retroarch_path/.config/retroarch/playlists"
+  if [ `cat /gaadata/geninfo/REGION` = "JP" ]; then
+    cp "$bleemsync_path/etc/bleemsync/SUP/retroarch/psc_jpn.lpl" "$retroarch_path/.config/retroarch/playlists/PlayStation Classic - Internal.lpl"
+  else
+    cp "$bleemsync_path/etc/bleemsync/SUP/retroarch/psc_row.lpl" "$retroarch_path/.config/retroarch/playlists/PlayStation Classic - Internal.lpl"
+  fi
+#-----------------------------------------------------------------------------#
+  # Unite EMMC and MEDIA games and databases
+  if [ "$link_EMMC_and_USB" = "1" ]; then
+    start=$(date +%s%N)
+
+    emmc_gaadata_count=`"$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd "SELECT GAME_ID FROM GAME ORDER BY GAME_ID DESC LIMIT 1" ".quit"`
+    media_gaadata_count=`"$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES ORDER BY GAME_ID DESC LIMIT 1" ".quit"`
+    [ -z "$media_gaadata_count" ] && media_gaadata_count=0
+    echo "[BLEEMSYNC](INFO) EMMC Count $emmc_gaadata_count Media Count $media_gaadata_count"
+
+    # Some fields in the stock database contain the "," character which makes it awkward to split the SQL dump (which is delimited by ",")
+    # Copy the stock database and strip this values from it
+    "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc_games.csv" \
+      ".mode quote" "select * from GAME;" ".output /tmp/emmc_discs.csv" "select * from DISC;" ".quit"
+
+    echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
+    for i in $(seq 1 $emmc_gaadata_count); do
+      if [ -d "/gaadata/$i" -a -d "/data/AppData/sony/pcsx/$i" ]; then
+        new_id=$(( media_gaadata_count + i ))
+        ln -s "/gaadata/$i/" "${VOL_GAADATA}/$new_id"
+        ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$new_id"
+        link_orig=$(grep "^$i," /tmp/emmc_games.csv | awk -F ',' '{print $NF}')
+        link_new="${link_orig%\'}"
+        link_new="${link_new#\'}"
+        [ -n "$link_new" ] && link_new=$(( media_gaadata_count + link_new ))
+        replacement=`grep "^$i," /tmp/emmc_games.csv | awk -F ',' "{ OFS=\",\"; \\\$1=\"$new_id\"; \\$NF=\"\"; print}"`
+        # BleemSync database contains additional fields in the GAME table which need to be accounted for
+        echo "INSERT INTO MENU_ENTRIES VALUES($replacement'$link_new',9999);" >> "/tmp/join.sql"
+        # BleemSync DISC database has an additional ID field, when this is imported it will produce NOT UNIQUE errors for additional discs of stock games
+        # This is inconsequential because additional disc entries have no actual use beyond telling ui_menu to display the disc swap help screen
+        while IFS='' read -r disc; do
+          echo "INSERT INTO DISC VALUES(NULL,$disc);" >> "/tmp/join.sql"
+        done <<< "$(grep "^$i," /tmp/emmc_discs.csv | sed "s/^$i,/$new_id,/g")"
+      fi
+    done
+    echo "COMMIT;" >> "/tmp/join.sql"
+
+    "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
+
+    if [ "$link_alphabeticalise" = "1" ]; then
+      "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "DROP VIEW GAME" "CREATE VIEW GAME AS SELECT * FROM MENU_ENTRIES ORDER BY GAME_TITLE_STRING" ".quit"
+    fi
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
+  fi
+  rm -rf "/tmp/"*".sql" "/tmp/"*".csv"
+
+  # Overmount the stock DB now that we're done using it
+  mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
+#-----------------------------------------------------------------------------#
+}
+###############################################################################
+
+### MAIN BLEEMSYNC FUNCTION ###################################################
+execute_bleemsync_func(){
+  echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
+  echo 1 > /sys/class/leds/red/brightness
+#-----------------------------------------------------------------------------#
+  old_system_dir="$mountpoint/system"
+  [ -d "$mountpoint/System" ] && old_system_dir="$mountpoint/System"
+  if [ -d "$old_system_dir" ]; then
+    echo "[BLEEMSYNC](<1.0) Migrating System folder"
+    start=$(date +%s%N)
+    mkdir -p "$bleemsync_path/etc/bleemsync/SYS"
+    cp -rf "$old_system_dir/"* "$bleemsync_path/etc/bleemsync/SYS/"
+    rm -r "$old_system_dir"
+    if [ -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
+      "$bleemsync_path/bin/sqlite3" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" < \
+        "$bleemsync_path/etc/bleemsync/SUP/scripts/migrate_pre10_db.sql"
+    fi
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](<1.0) Migration complete: $(((end-start)/1000000))ms to execute"
+  fi
+
+  # Copy over default files if not exist
+  mkdir -p "$bleemsync_path/etc/bleemsync/SYS/defaults"
+  [ ! -f "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" ] && \
+    cp /gaadata/1/pcsx.cfg "$bleemsync_path/etc/bleemsync/SYS/defaults"
+  [ ! -f "$bleemsync_path/etc/bleemsync/CFG/system.pre" ] && \
+    cp "$bleemsync_path/etc/bleemsync/SUP/scripts/system.pre" "$bleemsync_path/etc/bleemsync/CFG"
+  
+  # Check if this is a new install
+  if [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
+    echo "[BLEEMSYNC](INFO) $bleemsync_path/etc/bleemsync/SYS/databases/regional.db does NOT EXIST"
+    echo "[BLEEMSYNC](INFO) This may be a new install. Creating databases folder"
+    mkdir -p "$bleemsync_path/etc/bleemsync/SYS/databases"
+  fi
+    
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+
+  # Migrate GameData contents and copy default pcsx.cfg if not present
+  for game in "${mountpoint}/games/"*/; do
+    if [ -d "${game}GameData" ]; then
+      mv "${game}GameData/"* "${game}"
+      cp -rf "${game}GameData/".[!.]* "${game}"
+      rm -r "${game}GameData"
+      rm -f "${game}pcsx.cfg"
+    fi
+  done
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync general fixing took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+
+  #This needs some serious cleaning in future revisions...
+  bleemsync_ui_app="$bleemsync_path/opt/bleemsync_ui/BleemSync"
+  rm -f "$runtime_log_path/bleemsync_ui.log"
+  rm -f "$bleemsync_path/opt/bleemsync_ui/temp/"*
+  cd "$bleemsync_path/opt/bleemsync_ui/"
+  chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
+
+  #urgh
+  sleep 4
+
+  if [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
+    echo "[BLEEMSYNC](INFO) UI database does not exist. Waiting for automatic creation during UI startup"
+    SECONDS=0
+    db_timeout=45
+    while [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]
+    do
+      sleep 1s
+      if [ $SECONDS -gt $db_timeout ]; then
+        echo "[BLEEMSYNC](ERROR) database has not been created after waiting $db_timeout seconds."
+        #display error message
+        echo 0 > /sys/class/leds/green/brightness
+        echo 1 > /sys/class/leds/red/brightness
+        $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
+        sleep 1
+        sync
+        reboot
+        exit 1
+      fi
+    done
+    echo "[BLEEMSYNC](INFO) database generated in $SECONDS seconds."
+  fi
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync UI startup took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  # Reload and apply udev rules that were overmounted above
+  # Allows both controllers to be detected through a USB hub
+  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/20-joystick.rules" "/etc/udev/rules.d/20-joystick.rules"
+  udevadm control --reload-rules
+  udevadm trigger
+#-----------------------------------------------------------------------------#
+  #Patch out health check if toggled.
+  if [ "$boot_disable_health" = "1" ]; then
+    start=$(date +%s%N)
+    echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
+    PATCH_DIR="/var/volatile/health_patch"
+    PATCH_TARGET=/usr/sony/bin/ui_menu
+    PATCH_WORKING="${PATCH_DIR}/ui_menu"
+
+    # Perform patching
+    mkdir -p "${PATCH_DIR}"
+    cp "${PATCH_TARGET}" "${PATCH_WORKING}"
+    echo -ne '\xb8\x0c\x00' | dd bs=1 of="${PATCH_WORKING}" seek=28084 conv=notrunc
+    echo -ne '\x06\x03' | dd bs=1 of="${PATCH_WORKING}" seek=28120 conv=notrunc
+    echo -ne '\x58\xbe' | dd bs=1 of="${PATCH_WORKING}" seek=28712 conv=notrunc
+    mount -o bind "${PATCH_WORKING}" "${PATCH_TARGET}"
+    if [ "$?" -eq "0" ]; then
+      echo "[BLEEMSYNC](INFO) patched out H+S statement"
+    else
+      echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
+    fi
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) BleemSync H+S patching took: $(((end-start)/1000000))ms to execute"
+  fi
+#-----------------------------------------------------------------------------#
+  #Select UI theme whilst load screen available (Profiler built in)
+  select_UI_theme
+#-----------------------------------------------------------------------------#
+  echo 0 > /sys/class/leds/red/brightness
+  echo "[BLEEMSYNC](INFO) completed bleemsync boot"
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
+  #Cleanup before starting main user applications
+  rm -rf "/tmp/systemd"*
+  rm -rf "/tmp/diag/"*
+
+  killall -s KILL sdl_display &> /dev/null
+
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  boot_command="launch_StockUI"
+  [ "$boot_target_stock_BM" = "1" ] && boot_command="launch_BootMenu"
+  [ "$boot_target_stock_RA" = "1" ] && boot_command="launch_retroarch"
+
+  # Add HDMI connection check, if not connected force BootMenu so BleemSync UI runs
+  # This is so that if the user has set boot directly to Stock UI or RA, then there is a way
+  # to force BleemSync to run without having to resort to editing config files
+  if [ `cat /sys/class/drm/card0-HDMI-A-1/status` = "disconnected" ]; then
+    boot_command="launch_BootMenu"
+  fi
+
+  while [ $boot_command != "quit" ]; do
+    $boot_command
+    [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
+    rm -f /tmp/launchfilecommand
+  done
+
+  # Debug cleanup
+  umount /etc/udev/rules.d/20-joystick.rules
+  if [ "$boot_disable_health" = "1" ]; then umount /usr/sony/bin/ui_menu; fi
+#-----------------------------------------------------------------------------#
+  sync
+  echo "[BLEEMSYNC](Executed) execute_bleemsync_func()"
+  killall -s TERM BleemSync &> "/dev/null"
+  killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
+  reboot
+  exit 0
+}
+###############################################################################
