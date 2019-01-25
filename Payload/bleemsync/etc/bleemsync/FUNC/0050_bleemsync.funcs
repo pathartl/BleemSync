@@ -276,15 +276,33 @@ execute_bleemsync_func(){
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
 
-  #This needs some serious cleaning in future revisions...
+  boot_command="launch_StockUI"
+  [ "$boot_target_stock_BM" = "1" ] && boot_command="launch_BootMenu"
+  [ "$boot_target_stock_RA" = "1" ] && boot_command="launch_retroarch"
+
+  # HDMI connection check, if not connected force BootMenu so BleemSync UI runs
+  # so that if the user has set boot directly to Stock UI or RA, then there is a way
+  # to force BleemSync to run without having to resort to editing config files
+  if [ `cat /sys/class/drm/card0-HDMI-A-1/status` = "disconnected" ]; then
+    boot_command="launch_BootMenu"
+  fi
+
+  # Prep BleemSync UI launch
   bleemsync_ui_app="$bleemsync_path/opt/bleemsync_ui/BleemSync"
   rm -f "$runtime_log_path/bleemsync_ui.log"
   rm -f "$bleemsync_path/opt/bleemsync_ui/temp/"*
-  cd "$bleemsync_path/opt/bleemsync_ui/"
-  chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
 
-  #urgh
-  sleep 4
+  # Skip launching BleemSync UI if a database exists, and the user is booting directly to RA or Stock UI
+  if [ ! "$boot_command" = "launch_BootMenu" ] && [ -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
+    echo "[BLEEMSYNC](INFO) Skip startup of BleemSync UI as booting directly to $boot_command"
+  else
+    #This needs some serious cleaning in future revisions...
+    echo "[BLEEMSYNC](INFO) Starting BleemSync UI"
+    cd "$bleemsync_path/opt/bleemsync_ui/"
+    chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
+    #urgh
+    sleep 4
+  fi
 
   if [ ! -f "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" ]; then
     echo "[BLEEMSYNC](INFO) UI database does not exist. Waiting for automatic creation during UI startup"
@@ -357,17 +375,7 @@ execute_bleemsync_func(){
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
-  boot_command="launch_StockUI"
-  [ "$boot_target_stock_BM" = "1" ] && boot_command="launch_BootMenu"
-  [ "$boot_target_stock_RA" = "1" ] && boot_command="launch_retroarch"
-
-  # Add HDMI connection check, if not connected force BootMenu so BleemSync UI runs
-  # This is so that if the user has set boot directly to Stock UI or RA, then there is a way
-  # to force BleemSync to run without having to resort to editing config files
-  if [ `cat /sys/class/drm/card0-HDMI-A-1/status` = "disconnected" ]; then
-    boot_command="launch_BootMenu"
-  fi
-
+ 
   while [ $boot_command != "quit" ]; do
     $boot_command
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
