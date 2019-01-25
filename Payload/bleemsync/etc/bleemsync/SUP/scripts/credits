@@ -21,8 +21,8 @@
 ###############################################################################
 
 source /var/volatile/bleemsync.cfg
-[ -f "${bleemsync_path}/SUB/head_credits.txt" ] && \
-    cat "${bleemsync_path}/SUB/head_credits.txt" && echo
+[ -f "$bleemsync_path/etc/bleemsync/SUP/license/head_credits.lic" ] && \
+    cat "$bleemsync_path/etc/bleemsync/SUP/license/head_credits.lic" && echo
 find "${VOL_GAADATA}" -name "*.lic" -exec cat {} \;
-[ -f "${bleemsync_path}/SUB/tail_credits.txt" ] && \
-    echo && cat "${bleemsync_path}/SUB/tail_credits.txt"
+[ -f "$bleemsync_path/etc/bleemsync/SUP/license/tail_credits.lic" ] && \
+    echo && cat "$bleemsync_path/etc/bleemsync/SUP/license/tail_credits.lic"
