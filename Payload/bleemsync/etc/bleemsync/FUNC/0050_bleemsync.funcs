@@ -337,7 +337,7 @@ execute_bleemsync_func(){
 
   # Mount replacement copyright script
   chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/credits"
-  mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/credits" /usr/sony/bin/showCopyright.sh
+  #mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/credits" /usr/sony/bin/showCopyright.sh
 #-----------------------------------------------------------------------------#
   #Patch out health check if toggled.
   if [ "$boot_disable_health" = "1" ]; then
