@@ -206,7 +206,7 @@ setup_StockUI() {
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
-  #rm -rf "/tmp/"*".sql" "/tmp/"*".csv"
+  rm -rf "/tmp/"*".sql" "/tmp/"*".csv"
 
   # Overmount the stock DB now that we're done using it
   mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
