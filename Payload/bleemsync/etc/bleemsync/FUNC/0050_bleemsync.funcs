@@ -180,34 +180,25 @@ setup_StockUI() {
     [ -z "$media_gaadata_count" ] && media_gaadata_count=0
     echo "[BLEEMSYNC](INFO) EMMC Count $emmc_gaadata_count Media Count $media_gaadata_count"
 
-    # Some fields in the stock database contain the "," character which makes it awkward to split the SQL dump (which is delimited by ",")
-    # Copy the stock database and strip this values from it
-    "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc_games.csv" \
-      ".mode quote" "select * from GAME;" ".output /tmp/emmc_discs.csv" "select * from DISC;" ".quit"
-
+    # Merge databases
     echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
+    "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc_games.sql" \
+      ".mode insert MENU_ENTRIES" "select GAME_ID + $media_gaadata_count, GAME_TITLE_STRING, PUBLISHER_NAME, RELEASE_YEAR, PLAYERS, RATING_IMAGE, GAME_MANUAL_QR_IMAGE, case when LINK_GAME_ID = '' then LINK_GAME_ID else LINK_GAME_ID + $media_gaadata_count end, 9999 from GAME;" \
+      ".output /tmp/emmc_discs.sql" ".mode insert DISC" "select null, GAME_ID + $media_gaadata_count, DISC_NUMBER, BASENAME from DISC;" ".quit"
+
+    cat "/tmp/emmc_games.sql" >> "/tmp/join.sql"
+    cat "/tmp/emmc_discs.sql" >> "/tmp/join.sql"
+    echo "COMMIT;" >> "/tmp/join.sql"
+    "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
+    
+    # Link directories
     for i in $(seq 1 $emmc_gaadata_count); do
       if [ -d "/gaadata/$i" -a -d "/data/AppData/sony/pcsx/$i" ]; then
-        new_id=$(( media_gaadata_count + i ))
+        new_id=$(( media_gaadata_count + i ))        
         ln -s "/gaadata/$i/" "${VOL_GAADATA}/$new_id"
         ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$new_id"
-        link_orig=$(grep "^$i," /tmp/emmc_games.csv | awk -F ',' '{print $NF}')
-        link_new="${link_orig%\'}"
-        link_new="${link_new#\'}"
-        [ -n "$link_new" ] && link_new=$(( media_gaadata_count + link_new ))
-        replacement=`grep "^$i," /tmp/emmc_games.csv | awk -F ',' "{ OFS=\",\"; \\\$1=\"$new_id\"; \\$NF=\"\"; print}"`
-        # BleemSync database contains additional fields in the GAME table which need to be accounted for
-        echo "INSERT INTO MENU_ENTRIES VALUES($replacement'$link_new',9999);" >> "/tmp/join.sql"
-        # BleemSync DISC database has an additional ID field, when this is imported it will produce NOT UNIQUE errors for additional discs of stock games
-        # This is inconsequential because additional disc entries have no actual use beyond telling ui_menu to display the disc swap help screen
-        while IFS='' read -r disc; do
-          echo "INSERT INTO DISC VALUES(NULL,$disc);" >> "/tmp/join.sql"
-        done <<< "$(grep "^$i," /tmp/emmc_discs.csv | sed "s/^$i,/$new_id,/g")"
       fi
-    done
-    echo "COMMIT;" >> "/tmp/join.sql"
-
-    "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
+    done 
 
     if [ "$link_alphabeticalise" = "1" ]; then
       "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "DROP VIEW GAME" "CREATE VIEW GAME AS SELECT * FROM MENU_ENTRIES ORDER BY GAME_TITLE_STRING" ".quit"
@@ -215,7 +206,7 @@ setup_StockUI() {
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
-  rm -rf "/tmp/"*".sql" "/tmp/"*".csv"
+  #rm -rf "/tmp/"*".sql" "/tmp/"*".csv"
 
   # Overmount the stock DB now that we're done using it
   mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
