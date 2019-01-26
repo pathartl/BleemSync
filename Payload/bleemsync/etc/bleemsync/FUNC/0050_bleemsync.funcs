@@ -193,7 +193,7 @@ setup_StockUI() {
     # Link directories
     for i in $(seq 1 $emmc_gaadata_count); do
       if [ -d "/gaadata/$i" -a -d "/data/AppData/sony/pcsx/$i" ]; then
-        new_id=$(( media_gaadata_count + i ))        
+        new_id=$(( media_gaadata_count + i ))   
         ln -s "/gaadata/$i/" "${VOL_GAADATA}/$new_id"
         ln -s "/data/AppData/sony/pcsx/$i/" "${VOL_DATAPCSX}/$new_id"
       fi
