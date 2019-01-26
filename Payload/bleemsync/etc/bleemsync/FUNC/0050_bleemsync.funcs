@@ -184,10 +184,9 @@ setup_StockUI() {
     echo "BEGIN TRANSACTION;" > "/tmp/join.sql"
     "$bleemsync_path/bin/sqlite3" "/gaadata/databases/regional.db" -cmd ".output /tmp/emmc_games.sql" \
       ".mode insert MENU_ENTRIES" "select GAME_ID + $media_gaadata_count, GAME_TITLE_STRING, PUBLISHER_NAME, RELEASE_YEAR, PLAYERS, RATING_IMAGE, GAME_MANUAL_QR_IMAGE, case when LINK_GAME_ID = '' then LINK_GAME_ID else LINK_GAME_ID + $media_gaadata_count end, 9999 from GAME;" \
-      ".output /tmp/emmc_discs.sql" ".mode insert DISC" "select null, GAME_ID + $media_gaadata_count, DISC_NUMBER, BASENAME from DISC;" ".quit"
+      ".mode insert DISC" "select null, GAME_ID + $media_gaadata_count, DISC_NUMBER, BASENAME from DISC;" ".quit"
 
     cat "/tmp/emmc_games.sql" >> "/tmp/join.sql"
-    cat "/tmp/emmc_discs.sql" >> "/tmp/join.sql"
     echo "COMMIT;" >> "/tmp/join.sql"
     "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/join.sql" ".quit"
     
