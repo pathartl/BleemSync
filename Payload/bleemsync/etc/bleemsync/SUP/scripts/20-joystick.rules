@@ -1,2 +1,0 @@
-KERNEL=="js0",SUBSYSTEMS=="input",SYMLINK+="input/joystick0"
-KERNEL=="js1",SUBSYSTEMS=="input",SYMLINK+="input/joystick1"
