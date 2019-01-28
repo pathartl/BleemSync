@@ -52,7 +52,9 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
   "mdf"
   "toc"
   "cbn"
-)
+  "iso"
+  "cso"
+) ##++ iso and cso
 ui_menu_pid=""
 
 ### INTERCEPT FUNCTIONS #######################################################
@@ -98,6 +100,8 @@ fi
 
 echo "[INTERCEPT](INFO) The current working directory: $PWD"
 
+pspFlag=0 #I'm deliberately going somewhere, so I don't f-up all the hard work you have already done, guys
+
 suspend_ui_menu
 # auto_dimmer causes audio glitching in RetroArch
 killall -s TERM auto_dimmer &> /dev/null
@@ -136,6 +140,17 @@ do
           arg="$intercept_game_alternative_path"
           intercept_game_path="$arg"
           intercept_game_ext="${f}"
+
+##
+if [ "${intercept_game_ext}" = "iso" ]; then
+pspFlag=1
+fi
+
+if [ "${intercept_game_ext}" = "cso" ]; then
+pspFlag=1
+fi
+##
+
           echo "[INTERCEPT](INFO) New Game full path: ${intercept_game_path}"
           echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
           break
@@ -181,6 +196,7 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
           echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
         else
           echo "[INTERCEPT](ERROR) an .m3u does not exist at $bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u"
+      
         fi 
       fi
       ;;
@@ -188,9 +204,17 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
   end=$(date +%s%N)
   echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
   echo -n 2 > /data/power/disable
+
+##
+if [ $pspFlag = 1 ]; then
+ launch_RA_from_StockUI_PPSSPP ##other path to RA execution
+else
   link_ra_memory_cards
   launch_retroarch_from_StockUI
   exit_checkSaveState
+fi 
+##
+
   resume_ui_menu
   echo -n 1 > /data/power/disable
   exit 0
