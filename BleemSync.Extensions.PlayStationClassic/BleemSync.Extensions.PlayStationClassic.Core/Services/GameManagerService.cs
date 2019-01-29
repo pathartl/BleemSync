@@ -102,7 +102,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             {
                 var disc = new Disc()
                 {
-                    DiscBasename = cueFile.Name.Replace(".cue", ""),
+                    DiscBasename = Path.ChangeExtension(cueFile.Name, string.Empty),
                     DiscNumber = discNum,
                     GameId = cueFile.NodeId,
                 };
