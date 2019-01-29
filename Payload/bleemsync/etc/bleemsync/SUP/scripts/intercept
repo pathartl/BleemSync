@@ -54,10 +54,10 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
   "cbn"
   "iso"
   "cso"
-  “n64”
-  “u64”
-  “v64”
-  “z64”
+  "n64"
+  "u64"
+  "v64"
+  "z64"
 ) 
 ##++ iso and cso
 ##++ n64, u64, v64, z64 

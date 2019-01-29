@@ -39,30 +39,6 @@ ra_savestate_path="/tmp/ra_savestate"
 #  intercept_game_ext=""      # The extension of game minus . (ie. cue)
 #  intercept_save_state=false # Set to true if ui_menu launches with -load
 
-launch_RA_from_StockUI_PPSSPP(){
-
-  start=$(date +%s%N)
-  echo "[BLEEMSYNC](INFO) Launching Retroarch PPSSPP breakout from the ui_menu"
-  #Not doing that stuff so much
-  rm -f "$runtime_log_path/retroarch.log"
-  [ ! -f "$retroarch_path/retroarch" ] && break #FAIL
-  #skip SHIT
-
-  echo "[BLEEMSYNC](INFO)  retroarch path: $retroarch_path"
-
-  mkdir -p "/tmp/ra_cache"
-  chmod +x "$retroarch_path/retroarch"
-  export HOME="$retroarch_path"
-
-  # Launch retroarch
-  echo "[BLEEMSYNC](INFO) Launching Retroarch for game $intercept_game_path"
-  end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) Retroarch launch_RA_from_StockUI_PPSSPP function took: $(((end-start)/1000000))ms to execute (up to launching RA exec)"
-  $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/ppsspp_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
-  echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
-  rm -fr "/tmp/ra_cache"
-}
-
 launch_retroarch_from_StockUI($core){
   start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
