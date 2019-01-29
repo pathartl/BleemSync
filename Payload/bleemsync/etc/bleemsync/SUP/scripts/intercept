@@ -54,7 +54,13 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
   "cbn"
   "iso"
   "cso"
-) ##++ iso and cso
+  “n64”
+  “u64”
+  “v64”
+  “z64”
+) 
+##++ iso and cso
+##++ n64, u64, v64, z64 
 ui_menu_pid=""
 
 ### INTERCEPT FUNCTIONS #######################################################
@@ -100,7 +106,9 @@ fi
 
 echo "[INTERCEPT](INFO) The current working directory: $PWD"
 
-pspFlag=0 #I'm deliberately going somewhere, so I don't f-up all the hard work you have already done, guys
+pspFlag=0
+ps1Flag=0
+n64Flag=0
 
 suspend_ui_menu
 # auto_dimmer causes audio glitching in RetroArch
@@ -142,12 +150,12 @@ do
           intercept_game_ext="${f}"
 
 ##
-if [ "${intercept_game_ext}" = "iso" ]; then
+if [ "${intercept_game_ext}" = "iso" ] || [ "${intercept_game_ext}" = "cso" ]; then
 pspFlag=1
-fi
-
-if [ "${intercept_game_ext}" = "cso" ]; then
-pspFlag=1
+elif [ "${intercept_game_ext}" = "n64" ] || [ "${intercept_game_ext}" = "u64" ] || [ "${intercept_game_ext}" = "v64" ] || [ "${intercept_game_ext}" = "n64" ]; then
+n64Flag=1
+else
+ps1Flag=1
 fi
 ##
 
@@ -207,10 +215,12 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
 
 ##
 if [ $pspFlag = 1 ]; then
- launch_RA_from_StockUI_PPSSPP ##other path to RA execution
+ launch_RA_from_StockUI("ppsspp_libretro.so") ##other path to RA execution
+elif [ $n64Flag = 1 ]; then
+ launch_RA_from_StockUI("mupen64plus_libretro.so")
 else
   link_ra_memory_cards
-  launch_retroarch_from_StockUI
+  launch_retroarch_from_StockUI("pcsx_rearmed_libretro.so")
   exit_checkSaveState
 fi 
 ##

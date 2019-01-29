@@ -63,7 +63,7 @@ launch_RA_from_StockUI_PPSSPP(){
   rm -fr "/tmp/ra_cache"
 }
 
-launch_retroarch_from_StockUI(){
+launch_retroarch_from_StockUI($core){
   start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
@@ -75,12 +75,22 @@ launch_retroarch_from_StockUI(){
   fi
   mkdir -p "/tmp/ra_cache"
   chmod +x "$retroarch_path/retroarch"
+
+##
+if [ $core = "pcsx_rearmed_libretro.so"]; then
+
   if [ -d "$ra_savestate_path" ]; then
       rm -fr "$ra_savestate_path"
   fi
   mkdir -p "$ra_savestate_path"
   link_ra_savestates
+
+fi
+##
+
   export HOME="$retroarch_path"
+
+if [ $core = "pcsx_rearmed_libretro.so"]; then
   #  Check if this is a Save State load
   if [ "$intercept_save_state" = true ]; then
     echo "[BLEEMSYNC](INFO) This is a Save State load"
@@ -93,14 +103,18 @@ launch_retroarch_from_StockUI(){
     fi
     mv "/data/AppData/sony/pcsx/.pcsx/sstates/${intercept_game_id}.000" "${ra_savestate_path}/${intercept_game_id}.state.auto"
   fi
+fi
 
   #  Launch retroarch
   echo "[BLEEMSYNC](INFO) Launching RetroArch for game $intercept_game_path"
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) RetroArch launch_retroarch_from_StockUI function took: $(((end-start)/1000000))ms to execute (up to launching RetroArch executable)"
-  $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
+  $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/$core" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
-  save_ra_savestates
+  if [ $core = "pcsx_rearmed_libretro.so"]; then
+    save_ra_savestates
+  fi
+
   rm -fr "/tmp/ra_cache"
 }
 
