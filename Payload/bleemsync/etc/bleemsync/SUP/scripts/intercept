@@ -48,7 +48,6 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
   "m3u"
   "pbp"
   "img"
-  "iso"
   "mdf"
   "toc"
   "cbn"
@@ -58,9 +57,12 @@ intercept_file_formats=(    # alternative PCSX ReARMed game formats
   "u64"
   "v64"
   "z64"
-) 
+)
 ##++ iso and cso
-##++ n64, u64, v64, z64 
+##++ n64, u64, v64, z64
+
+core="pcsx_rearmed_libretro.so"
+
 ui_menu_pid=""
 
 ### INTERCEPT FUNCTIONS #######################################################
@@ -106,13 +108,7 @@ fi
 
 echo "[INTERCEPT](INFO) The current working directory: $PWD"
 
-pspFlag=0
-ps1Flag=0
-n64Flag=0
-
 suspend_ui_menu
-# auto_dimmer causes audio glitching in RetroArch
-killall -s TERM auto_dimmer &> /dev/null
 intercept_command=""
 found_cdfile=false
 
@@ -151,11 +147,11 @@ do
 
 ##
 if [ "${intercept_game_ext}" = "iso" ] || [ "${intercept_game_ext}" = "cso" ]; then
-pspFlag=1
+core="ppsspp_libretro.so"
 elif [ "${intercept_game_ext}" = "n64" ] || [ "${intercept_game_ext}" = "u64" ] || [ "${intercept_game_ext}" = "v64" ] || [ "${intercept_game_ext}" = "n64" ]; then
-n64Flag=1
+core="mupen64plus_libretro.so"
 else
-ps1Flag=1
+core="pcsx_rearmed_libretro.so"
 fi
 ##
 
@@ -204,29 +200,16 @@ if [ "$launch_ra_from_stock_UI" = "1" ]; then
           echo "[INTERCEPT](INFO) New Game extension: ${intercept_game_ext}"
         else
           echo "[INTERCEPT](ERROR) an .m3u does not exist at $bleemsync_path/etc/bleemsync/SUP/retroarch/title/${intercept_game_id}.m3u"
-      
         fi 
       fi
       ;;
   esac
   end=$(date +%s%N)
   echo "[INTERCEPT](PROFILE) up to launching RetroArch took: $(((end-start)/1000000))ms to execute"
-  echo -n 2 > /data/power/disable
-
-##
-if [ $pspFlag = 1 ]; then
- launch_RA_from_StockUI("ppsspp_libretro.so") ##other path to RA execution
-elif [ $n64Flag = 1 ]; then
- launch_RA_from_StockUI("mupen64plus_libretro.so")
-else
   link_ra_memory_cards
-  launch_retroarch_from_StockUI("pcsx_rearmed_libretro.so")
+  launch_retroarch_from_StockUI "$core"
   exit_checkSaveState
-fi 
-##
-
   resume_ui_menu
-  echo -n 1 > /data/power/disable
   exit 0
 fi
 

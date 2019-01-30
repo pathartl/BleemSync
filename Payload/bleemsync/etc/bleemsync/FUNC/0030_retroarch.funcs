@@ -39,7 +39,10 @@ ra_savestate_path="/tmp/ra_savestate"
 #  intercept_game_ext=""      # The extension of game minus . (ie. cue)
 #  intercept_save_state=false # Set to true if ui_menu launches with -load
 
-launch_retroarch_from_StockUI($core){
+launch_retroarch_from_StockUI(){
+
+core="$1"
+
   start=$(date +%s%N)
   echo "[BLEEMSYNC](INFO) Launching RetroArch from ui_menu"
   #  Check RA Exists and is configured correctly
@@ -52,8 +55,10 @@ launch_retroarch_from_StockUI($core){
   mkdir -p "/tmp/ra_cache"
   chmod +x "$retroarch_path/retroarch"
 
+echo "[BLEEMSYNC](INFO) core $1"
+
 ##
-if [ $core = "pcsx_rearmed_libretro.so"]; then
+if [ "$core" = "pcsx_rearmed_libretro.so" ] ; then
 
   if [ -d "$ra_savestate_path" ]; then
       rm -fr "$ra_savestate_path"
@@ -66,7 +71,7 @@ fi
 
   export HOME="$retroarch_path"
 
-if [ $core = "pcsx_rearmed_libretro.so"]; then
+if [ "$core" = "pcsx_rearmed_libretro.so" ] ; then
   #  Check if this is a Save State load
   if [ "$intercept_save_state" = true ]; then
     echo "[BLEEMSYNC](INFO) This is a Save State load"
@@ -87,7 +92,7 @@ fi
   echo "[BLEEMSYNC](PROFILE) RetroArch launch_retroarch_from_StockUI function took: $(((end-start)/1000000))ms to execute (up to launching RetroArch executable)"
   $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/$core" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
-  if [ $core = "pcsx_rearmed_libretro.so"]; then
+  if [ "$core" = "pcsx_rearmed_libretro.so" ] ; then
     save_ra_savestates
   fi
 
