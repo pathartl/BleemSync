@@ -75,7 +75,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 switch (fileInfo.Extension.ToLower())
                 {
                     case ".pbp":
-                        additionalFiles.Add(CreateCueSheet(fileInfo, file));
                         break;
                 }
             }
