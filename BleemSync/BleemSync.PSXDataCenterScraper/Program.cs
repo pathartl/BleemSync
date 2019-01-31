@@ -34,6 +34,7 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
             scraper.ScrapeMainList("https://psxdatacenter.com/psp/ntsc-j_list.html");
             scraper.ScrapeMainList("https://psxdatacenter.com/psp/ntsc_ulist.html");
             scraper.ScrapeMainList("https://psxdatacenter.com/psp/pal_list.html");
+           
             
         }
     }

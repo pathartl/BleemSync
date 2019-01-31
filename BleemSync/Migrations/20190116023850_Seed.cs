@@ -21,6 +21,49 @@ namespace BleemSync.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Cores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite.Autoincrement", true),
+                    Core_Name = table.Column<string>(nullable: false),
+                    Core_FS_Location = table.Column<string>(nullable: false)
+                },
+                constraints:table =>
+                {
+                    table.PrimaryKey("Id", x => x.Id);
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "GameSystemDefaultCore",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    System_ID = table.Column<int>(nullable: false),
+                    Core_ID = table.Column<int>(nullable:false)
+                },
+                constraints:table =>
+                {
+                    table.PrimaryKey("Id", x => x.Id);
+                    table.ForeignKey(
+                    name:"FK_GameSystemDefaultCore_GameSystem_PK_GameSystem",
+                    column: x => x.System_ID,
+                    principalTable:"GameSystem",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                    name:"FK_GameSystemDefaultCore_Core_PK_Cores",
+                    column: x => x.Core_ID,
+                    principalTable:"Cores",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Restrict);
+
+                }
+            );
+
+            migrationBuilder.CreateTable(
                 name: "GameManagerNodes",
                 columns: table => new
                 {
