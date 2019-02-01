@@ -8,7 +8,7 @@ MAKE SURE IF YOU DO A PULL REQUEST THAT YOU ADD THE FEATURE TO THE THE LIST BELO
 ---------------------------------------------------------------------------------
 FEATURES TO GO INTO NEXT RELEASE
 ---------------------------------------------------------------------------------
-
+-   Fix database entry generation when .cue file extension is not all lowercase.
 
 
 
