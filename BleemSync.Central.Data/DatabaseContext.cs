@@ -5,8 +5,9 @@ namespace BleemSync.Central.Data
 {
     public class DatabaseContext : DbContext
     {
-        public DbSet<Game> Games { get; set; }
-        public DbSet<Disc> Discs { get; set; }
+        public DbSet<Models.PlayStation.Art> PlayStation_Art { get; set; }
+        public DbSet<Models.PlayStation.Disc> PlayStation_Discs { get; set; }
+        public DbSet<Models.PlayStation.Game> PlayStation_Games { get; set; }
 
         private static bool _created = false;
 
@@ -21,15 +22,6 @@ namespace BleemSync.Central.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Game>(entity =>
-            {
-                entity.ToTable("Games");
-            });
-
-            modelBuilder.Entity<Disc>(entity =>
-            {
-                entity.ToTable("Discs");
-            });
         }
     }
 }

@@ -18,7 +18,7 @@ namespace BleemSync.Central.ViewModels
         public virtual ICollection<DiscDTO> Discs { get; set; }
         public virtual ICollection<CoverDTO> Covers { get; set; }
 
-        public GameDTO(Game game)
+        public GameDTO(BaseGame game)
         {
             Id = game.Id;
             Title = game.Title;
