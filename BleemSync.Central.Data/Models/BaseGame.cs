@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace BleemSync.Central.Data.Models
 {
     [NotMapped]
-    public class Game
+    public class BaseGame
     {
         [Key]
         public int Id { get; set; }
         public string Title { get; set; }
+        public string Description { get; set; }
         public string Version { get; set; }
         public List<GameGenre> Genres { get; set; }
         public string Developer { get; set; }
@@ -22,6 +24,7 @@ namespace BleemSync.Central.Data.Models
         public List<string> EsrbRatingDescriptors { get; set; }
         public PegiRating PegiRating { get; set; }
         public List<string> PegiDescriptors { get; set; }
+        public bool OfficiallyLicensed { get; set; }
     }
 
     public enum GameRegion
