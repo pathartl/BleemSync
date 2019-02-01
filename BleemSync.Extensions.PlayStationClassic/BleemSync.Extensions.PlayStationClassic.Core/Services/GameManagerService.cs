@@ -66,6 +66,10 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             {
                 var source = file.Path;
                 var destination = Path.Combine(outputDirectory, file.Name);
+                var extension = Path.GetExtension(file.Name);
+                // Lowercase extension for consistency, except for .bin, which may be
+                // case-sensitively referenced by .cue files
+                if (extension.ToLower() != ".bin") Path.ChangeExtension(destination, extension.ToLower());
 
                 SystemMove(source, destination);
                 file.Path = Path.GetFullPath(destination);
@@ -101,7 +105,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             {
                 var disc = new Disc()
                 {
-                    DiscBasename = cueFile.Name.Replace(".cue", ""),
+                    DiscBasename = Path.ChangeExtension(cueFile.Name, null),
                     DiscNumber = discNum,
                     GameId = cueFile.NodeId,
                 };

@@ -8,6 +8,7 @@ MAKE SURE IF YOU DO A PULL REQUEST THAT YOU ADD THE FEATURE TO THE THE LIST BELO
 ---------------------------------------------------------------------------------
 FEATURES TO GO INTO NEXT RELEASE
 ---------------------------------------------------------------------------------
+- Fix database entry generation when .cue file extension is not all lowercase.
 - Fixed issue where cue files were being created for pbp files. No longer necessary with intercept updates.
 - Fixed issue with cue files with capital filenames being added to the system improperly
 
