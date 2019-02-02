@@ -4,6 +4,7 @@ using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
 using ExtCore.Data.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -196,7 +197,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         public void ClearDatabase()
         {
             _context.Database.EnsureDeleted();
-            _context.Database.EnsureCreated();
+            _context.Database.Migrate();
         }
 
         public IEnumerable<GameManagerNode> GetGames()
