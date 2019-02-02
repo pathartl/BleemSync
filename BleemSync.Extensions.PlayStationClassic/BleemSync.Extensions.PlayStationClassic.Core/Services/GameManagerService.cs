@@ -160,16 +160,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
         public void UpdateGame(GameManagerNode node)
         {
-            var game = _context.Games.Find(node.Id);
-
-            game.Title = node.Name;
-            game.Publisher = node.Publisher;
-            game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
-            game.Players = node.Players.HasValue ? node.Players.Value : 0;
-            game.Position = node.Position;
-
-            _context.Games.Update(game);
-            _context.SaveChanges();
+            UpdateGames(new GameManagerNode[] { node });
         }
 
         public void UpdateGames(IEnumerable<GameManagerNode> nodes)
@@ -200,6 +191,12 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             _context.Games.Remove(game);
             _context.SaveChanges();
+        }
+
+        public void ClearDatabase()
+        {
+            _context.Database.EnsureDeleted();
+            _context.Database.EnsureCreated();
         }
 
         public IEnumerable<GameManagerNode> GetGames()

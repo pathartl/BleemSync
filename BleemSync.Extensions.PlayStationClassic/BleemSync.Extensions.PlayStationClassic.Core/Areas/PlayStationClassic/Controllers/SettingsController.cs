@@ -1,5 +1,8 @@
-﻿using BleemSync.Extensions.Infrastructure.Attributes;
+﻿using BleemSync.Data.Abstractions;
+using BleemSync.Extensions.Infrastructure.Attributes;
 using BleemSync.Extensions.PlayStationClassic.Core.Models;
+using BleemSync.Extensions.PlayStationClassic.Core.Services;
+using ExtCore.Data.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SharpConfig;
@@ -12,10 +15,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
     public class SettingsController : Controller
     {
         private IConfiguration _configuration { get; set; }
+        private GameManagerService _gameManagerService { get; set; }
+        private IStorage _storage { get; set; }
+        private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
 
-        public SettingsController(IConfiguration configuration)
+        public SettingsController(IConfiguration configuration, IStorage storage, GameManagerService gameManagerService)
         {
             _configuration = configuration;
+            _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
+            _storage = storage;
         }
 
         [MenuItem(Name = "System Preferences")]
@@ -72,6 +80,21 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
             submittedConfiguration.SaveToFile(_configuration["PlayStationClassic:PayloadConfigPath"]);
 
             return View(payloadConfig);
+        }
+
+        [HttpGet]
+        public ActionResult RebuildDatabase()
+        {
+            _gameManagerService.ClearDatabase();
+
+            var nodes = _gameManagerNodeRepository.All();
+
+            foreach (var node in nodes)
+            {
+                _gameManagerService.AddGame(node);
+            }
+
+            return RedirectToAction("BleemSyncPreferences");
         }
     }
 }
