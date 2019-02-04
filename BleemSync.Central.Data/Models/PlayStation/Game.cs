@@ -14,6 +14,7 @@ namespace BleemSync.Central.Data.Models.PlayStation
         public bool VibrationCompatible { get; set; }
         public bool AnalogCompatible { get; set; }
         public bool DigitalCompatible { get; set; }
+        public bool LightGunCompatible { get; set; }
         public virtual ICollection<Disc> Discs { get; set; }
     }
 }

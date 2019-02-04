@@ -58,6 +58,14 @@ namespace BleemSync.PSXDataCenterScraper
             var featuresTable = dom.QuerySelector("#table19");
             var discsTable = dom.QuerySelector("#table7");
 
+            var blockCount = GetContent(dom.QuerySelector("#table19 tr:nth-child(2) td:nth-child(2)")).ToLower().Replace("block", "").Replace("blocks", "");
+            var multitap = GetContent(dom.QuerySelector("#table19 tr:nth-child(8) td:nth-child(2)")).ToLower() == "yes";
+            var linkCable = GetContent(dom.QuerySelector("#table19 tr:nth-child(9) td:nth-child(2)")).ToLower() == "yes";
+            var vibration = GetContent(dom.QuerySelector("#table19 tr:nth-child(7) td:nth-child(2)")).ToLower() == "yes";
+            var analog = GetContent(dom.QuerySelector("#table19 tr:nth-child(3) td:nth-child(2)")).ToLower().Contains("analog");
+            var digital = GetContent(dom.QuerySelector("#table19 tr:nth-child(3) td:nth-child(2)")).ToLower().Contains("standard");
+            var lightGun = !GetContent(dom.QuerySelector("#table19 tr:nth-child(4) td:nth-child(2)")).ToLower().Contains("none");
+
             var game = new Central.Data.Models.PlayStation.Game()
             {
                 Title = GetContent(metaTable.QuerySelector("tr:nth-child(1) td:nth-child(2)")),
@@ -67,7 +75,14 @@ namespace BleemSync.PSXDataCenterScraper
                 Developer = GetContent(metaTable.QuerySelector("tr:nth-child(6) td:nth-child(2)")).TrimEnd('.'),
                 Publisher = GetContent(metaTable.QuerySelector("tr:nth-child(7) td:nth-child(2)")).TrimEnd('.'),
                 Players = GetContent(featuresTable.QuerySelector("tr:nth-child(1) td:nth-child(2)")),
-                OfficiallyLicensed = true
+                OfficiallyLicensed = true,
+                MemoryCardBlockCount = Convert.ToInt32(blockCount),
+                MultitapCompatible = multitap,
+                LinkCableCompatible = linkCable,
+                VibrationCompatible = vibration,
+                AnalogCompatible = analog,
+                DigitalCompatible = digital,
+                LightGunCompatible = lightGun
             };
 
             // Get Date
@@ -133,6 +148,24 @@ namespace BleemSync.PSXDataCenterScraper
                         game.EsrbRating = EsrbRating.Unknown;
                         break;
                 }
+            }
+
+            var genres = new List<GameGenre>();
+            var genreStrings = GetContent(metaTable.QuerySelector("tr:nth-child(5) td:nth-child(2)")).Split(" / ");
+
+            var genresInDb = _context.Genres.Where(g => genreStrings.Contains(g.Name)).ToList();
+            var genreStringsNotInDb = genreStrings.Where(gs => !genresInDb.Select(g => g.Name).Contains(gs)).ToList();
+
+            genres.AddRange(genresInDb);
+
+            foreach (var genreString in genreStringsNotInDb)
+            {
+                var genre = new GameGenre()
+                {
+                    Name = genreString
+                };
+
+                genres.Add(genre);
             }
 
             var game = new BaseGame()
