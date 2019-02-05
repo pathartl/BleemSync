@@ -42,3 +42,29 @@
 .cover-dropzone img {
     max-width: 100%;
 }
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-toggle > .material-icons {
+    margin-right: 10px;
+}
+
+.dropdown-toggle > .caret {
+    margin-left: 10px;
+}
+
+.navbar > .container-fluid {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-header {
+    flex-grow: 1;
+}
+
+.dropdown-menu > li > a {
+    width: 100%;
+}

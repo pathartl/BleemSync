@@ -13,6 +13,7 @@ using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
 using BleemSync.Data;
 using System.Reflection;
+using BleemSync.Services;
 
 namespace BleemSync
 {
@@ -45,6 +46,7 @@ namespace BleemSync
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
+            services.AddScoped<UsbService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IConfiguration>(Configuration);

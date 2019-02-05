@@ -31,8 +31,33 @@ namespace BleemSync.Services.Utilities
 
         private void FormatWindows(DriveInfo driveInfo, DriveFormat format)
         {
+            var formatString = "";
+
+            switch (format)
+            {
+                case DriveFormat.Exfat:
+                    formatString = "exFAT";
+                    break;
+
+                case DriveFormat.Fat16:
+                    formatString = "FAT";
+                    break;
+
+                case DriveFormat.Fat32:
+                    formatString = "FAT32";
+                    break;
+
+                case DriveFormat.Ntfs:
+                    formatString = "NTFS";
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+
             var volume = driveInfo.RootDirectory.FullName.Replace("\\", "");
-            var proc = System.Diagnostics.Process.Start("format", $"");
+
+            var proc = System.Diagnostics.Process.Start("format", $"/FS:{formatString} /V:SONY /Q /X");
             proc.WaitForExit();
             if (proc.ExitCode != 0) throw new IOException($"mv returned {proc.ExitCode}");
         }

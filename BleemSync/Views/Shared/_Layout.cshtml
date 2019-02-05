@@ -12,24 +12,7 @@
     <link rel="stylesheet" href="~/lib/bleemsync/custom.css" />
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top pmd-navbar pmd-z-depth">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a href="javascript:void(0);" data-target="sidebar" data-placement="left" data-position="slidepush" is-open="true" class="btn btn-sm pmd-btn-fab pmd-btn-flat pmd-ripple-effect pull-left pmd-sidebar-toggle">
-                    <i class="material-icons md-light">menu</i>
-                </a>
-                <a href="/" class="navbar-brand"><img src="~/img/logo.png" alt="BleemSync Logo" style="width: 96px;" /></a>
-            </div>
-            @*<div class="pmd-navbar-right-icon pull-right">
-                <a href="/Games/Sync"
-                   class="btn my-auto pmd-btn-raised pmd-ripple-effect btn-success"
-                   style="margin: .74rem 0; height: 40px;"
-                   data-ajax="true"
-                   data-ajax-method="post"
-                   data-ajax-confirm="Continuing will reboot the console. Are you sure?">Sync</a>
-            </div>*@
-        </div>
-    </nav>
+    @await Component.InvokeAsync("Navbar");
     <div class="pmd-alert-container center top"></div>
     <section id="pmd-main">
         @await Component.InvokeAsync("Sidebar")
