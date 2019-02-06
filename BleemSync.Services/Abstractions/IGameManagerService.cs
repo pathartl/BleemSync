@@ -11,5 +11,6 @@ namespace BleemSync.Services.Abstractions
         void DeleteGame(GameManagerNode node);
         IEnumerable<GameManagerNode> GetGames();
         void Sync();
+        void RebuildDatabase(IEnumerable<GameManagerNode> nodes);
     }
 }

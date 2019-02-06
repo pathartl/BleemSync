@@ -11,7 +11,7 @@ namespace BleemSync.Data.Repositories
     {
         public IEnumerable<GameManagerNode> All()
         {
-            return dbSet.OrderBy(n => n.SortName != "" ? n.SortName : n.Name);
+            return dbSet.OrderBy(n => n.SortName != "" ? n.SortName : n.Name).Include(n => n.Files);
         }
 
         public GameManagerNode Get(int id)

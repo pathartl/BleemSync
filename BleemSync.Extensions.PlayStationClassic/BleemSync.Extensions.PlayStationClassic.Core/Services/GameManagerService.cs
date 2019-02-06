@@ -49,12 +49,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.Games.Add(game);
             _context.SaveChanges();
 
-            // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
-            var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
+            if (node.Files.Count > 0)
+            {
+                // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
+                var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
 
-            Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDirectory);
 
-            PostProcessGameFiles(node.Files, outputDirectory);
+                PostProcessGameFiles(node.Files, outputDirectory);
+            }
 
             _storage.Save();
         }
@@ -194,10 +197,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.SaveChanges();
         }
 
-        public void ClearDatabase()
+        public void RebuildDatabase(IEnumerable<GameManagerNode> nodes)
         {
             _context.Database.EnsureDeleted();
             _context.Database.Migrate();
+
+            foreach (var node in nodes)
+            {
+                AddGame(node);
+            }
         }
 
         public IEnumerable<GameManagerNode> GetGames()
