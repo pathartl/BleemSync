@@ -37,6 +37,7 @@ namespace BleemSync.UI
             var hasError = output.Attributes.SingleOrDefault(a => a.Name == "has-error") != null;
 
             var icon = output.Attributes.SingleOrDefault(a => a.Name == "icon");
+            var type = output.Attributes.SingleOrDefault(a => a.Name == "type");
 
             var binding = output.Attributes.SingleOrDefault(a => a.Name == "for");
 
@@ -50,6 +51,7 @@ namespace BleemSync.UI
             output.Attributes.RemoveAll("has-success");
             output.Attributes.RemoveAll("has-error");
             output.Attributes.RemoveAll("icon");
+            output.Attributes.RemoveAll("type");
             output.Attributes.RemoveAll("for");
 
             var formGroupClass = "form-group pmd-textfield";
@@ -71,6 +73,7 @@ namespace BleemSync.UI
             if (isDisabled) textboxAttributes.Add("disabled", "disabled");
             if (isReadOnly) textboxAttributes.Add("readonly", "readonly");
             if (isRequired) textboxAttributes.Add("required", "required");
+            if (type != null) textboxAttributes["type"] = type.Value;
 
             var inputPre = "";
             var inputPost = "";
