@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 
 namespace BleemSync.Extensions.PlayStationClassic.Core.Actions
 {
@@ -19,7 +20,13 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Actions
 
             services.AddScoped(typeof(IGameManagerService), typeof(GameManagerService));
             services.AddDbContext<MenuDatabaseContext>(options =>
-                options.UseSqlite(configuration["PlayStationClassic:ConnectionStrings:MenuDatabaseContext"])
+                options.UseSqlite(
+                    "Data Source=" + Path.Combine(
+                        configuration["BleemSync:Destination"],
+                        configuration["BleemSync:Path"],
+                        configuration["BleemSync:PlayStationClassic:DatabaseFile"]
+                    )
+                )
             );
         }
     }

@@ -26,7 +26,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
 
             try
             {
-                var preferencesString = System.IO.File.ReadAllText(_configuration["PlayStationClassic:SystemPreferencesPath"]);
+                var preferencesString = System.IO.File.ReadAllText(_configuration["BleemSync:PlayStationClassic:SystemPreferencesPath"]);
                 preferences = new SystemPreferences(preferencesString);
             } catch
             {
@@ -39,7 +39,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
         [HttpPost]
         public ActionResult SystemPreferences(SystemPreferences preferences)
         {
-            var path = _configuration["PlayStationClassic:SystemPreferencesPath"];
+            var path = _configuration["BleemSync:PlayStationClassic:SystemPreferencesPath"];
 
             System.IO.File.WriteAllText(path, preferences.ToString());
 
@@ -54,7 +54,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
 
             try
             {
-                var configuration = Configuration.LoadFromFile(_configuration["PlayStationClassic:PayloadConfigPath"]);
+                var configuration = Configuration.LoadFromFile(_configuration["BleemSync:PlayStationClassic:PayloadConfigPath"]);
                 payloadConfig = new PayloadConfig(configuration);
             } catch
             {
@@ -69,7 +69,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Areas.PlayStationClassic.
         {
             var submittedConfiguration = payloadConfig.ToConfiguration();
 
-            submittedConfiguration.SaveToFile(_configuration["PlayStationClassic:PayloadConfigPath"]);
+            submittedConfiguration.SaveToFile(_configuration["BleemSync:PlayStationClassic:PayloadConfigPath"]);
 
             return View(payloadConfig);
         }

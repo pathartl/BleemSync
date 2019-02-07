@@ -9,5 +9,6 @@ namespace BleemSync.ViewModels
     public class NavbarViewModel
     {
         public List<DriveInfo> Drives { get; set; }
+        public DriveInfo CurrentDrive { get; set; }
     }
 }

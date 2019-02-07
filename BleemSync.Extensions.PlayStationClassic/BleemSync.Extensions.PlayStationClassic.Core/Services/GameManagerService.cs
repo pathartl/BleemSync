@@ -30,7 +30,10 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _storage = storage;
             _configuration = configuration;
 
-            _baseGamesDirectory = configuration["PlayStationClassic:GamesDirectory"];
+            _baseGamesDirectory = Path.Combine(
+                configuration["BleemSync:Destination"],
+                configuration["BleemSync:PlayStationClassic:GamesDirectory"]
+            );
         }
 
         public void AddGame(GameManagerNode node)

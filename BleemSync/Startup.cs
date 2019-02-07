@@ -14,6 +14,10 @@ using Microsoft.AspNetCore.Http.Features;
 using BleemSync.Data;
 using System.Reflection;
 using BleemSync.Services;
+using BleemSync.Services.Extensions;
+using BleemSync.Services.ViewModels;
+using System.Data.SqlClient;
+using System.IO;
 
 namespace BleemSync
 {
@@ -26,15 +30,21 @@ namespace BleemSync
         {
             Configuration = configuration;
             ExtensionsPath = hostingEnvironment.ContentRootPath + Configuration["Extensions:Path"];
+
+            Directory.CreateDirectory(Path.Combine(Configuration["BleemSync:Destination"], Configuration["BleemSync:Path"]));
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+
+            builder["Data Source"] = Path.Combine(Configuration["BleemSync:Destination"], Configuration["BleemSync:Path"], Configuration["BleemSync:DatabaseFile"]);
+
             services.AddExtCore(ExtensionsPath, Configuration["Extensions:IncludingSubpaths"].ToLower() == true.ToString());
             services.Configure<StorageContextOptions>(options =>
             {
-                options.ConnectionString = Configuration.GetConnectionString("Default");
+                options.ConnectionString = builder.ConnectionString;
                 options.MigrationsAssembly = typeof(DesignTimeStorageContextFactory).GetTypeInfo().Assembly.FullName;
             });
 
@@ -56,6 +66,8 @@ namespace BleemSync
                 var factory = x.GetRequiredService<IUrlHelperFactory>();
                 return factory.GetUrlHelper(actionContext);
             });
+
+            services.ConfigureWritable<BleemSyncConfiguration>(Configuration.GetSection("BleemSync"));
 
             var sp = services.BuildServiceProvider();
             DesignTimeStorageContextFactory.Initialize(sp);

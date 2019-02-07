@@ -10,32 +10,51 @@
             <a href="/" class="navbar-brand"><img src="~/img/logo.png" alt="BleemSync Logo" style="width: 96px;" /></a>
         </div>
         <div class="pmd-navbar-right-icon pull-right">
-            <span class="dropdown pmd-dropdown clearfix">
-                <button class="btn pmd-ripple-effect btn-primary dropdown-toggle" type="button" id="dropdownMenuDivider" data-toggle="dropdown" aria-expanded="true">
-                    <i class="material-icons">usb</i>
-                    Choose Drive
-                    <span class="caret"></span>
-                </button>
-                <ul aria-labelledby="dropdownMenuDivider" role="menu" class="dropdown-menu">
-                    @foreach (var drive in Model.Drives)
-                    {
-                        if (drive.DriveIsFormattedProperly())
+            <form
+                id="switch-destination-device"
+                asp-controller="UsbApi"
+                asp-action="SwitchDestinationDevice"
+                enctype="multipart/form-data"
+                data-ajax="true"
+                data-ajax-method="POST"
+                data-ajax-success="DeviceSwitched"
+                data-ajax-failure="XHRError">
+                <span class="dropdown pmd-dropdown clearfix">
+                    <button class="btn pmd-ripple-effect btn-primary dropdown-toggle" type="button" id="dropdownMenuDivider" data-toggle="dropdown" aria-expanded="true">
+                        <i class="material-icons">usb</i>
+                        @if (Model.CurrentDrive != null)
                         {
-                            var driveUsagePercent = ((decimal)drive.TotalFreeSpace / (decimal)drive.TotalSize) * 100;
-
-                            <li>
-                                <a href="about:blank">@drive.VolumeLabel (@drive.RootDirectory)</a>
-                                <div class="text-center">
-                                    <small>@drive.GetHumanReadableFreeSpace() / @drive.GetHumanReadableTotalSpace()</small>
-                                </div>
-                                <div class="progress-rounded progress pmd-progress">
-                                	<div class="progress-bar progress-bar-info" style="width: @driveUsagePercent%;"></div>
-                              	</div>
-                            </li>
+                            <text>@Model.CurrentDrive.VolumeLabel (@Model.CurrentDrive.RootDirectory)</text>
                         }
-                    }
-                </ul>
-            </span>
+                        else
+                        {
+                            <text>Choose drive</text>
+                        }
+                        <span class="caret"></span>
+                    </button>
+                    <ul aria-labelledby="dropdownMenuDivider" role="menu" class="dropdown-menu">
+                        @foreach (var drive in Model.Drives)
+                        {
+                            if (drive.DriveIsFormattedProperly())
+                            {
+                                var driveUsagePercent = ((decimal)(drive.TotalSize - drive.TotalFreeSpace) / (decimal)drive.TotalSize) * 100;
+
+                                <li>
+                                    <button name="Drive" value="@drive" class="btn btn-block usb-switcher-drive" href="about:blank">
+                                        @drive.VolumeLabel (@drive.RootDirectory)
+                                        <div class="usb-switcher-drive-stats text-center">
+                                            <div class="progress-rounded progress pmd-progress">
+                                                <div class="progress-bar progress-bar-info" style="width: @driveUsagePercent%;"></div>
+                                            </div>
+                                            <small>@drive.GetHumanReadableUsedSpace() / @drive.GetHumanReadableTotalSpace()</small>
+                                        </div>
+                                    </button>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </span>
+            </form>
         </div>
         @*<div class="pmd-navbar-right-icon pull-right">
                 <a href="/Games/Sync"

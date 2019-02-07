@@ -69,6 +69,11 @@ namespace BleemSync.Services.Extensions
             return ConvertToDataUnit(driveInfo.TotalFreeSpace, unit);
         }
 
+        public static string GetHumanReadableUsedSpace(this DriveInfo driveInfo)
+        {
+            return GetHumanReadableSize(driveInfo.TotalSize - driveInfo.TotalFreeSpace);
+        }
+
         public static string GetHumanReadableFreeSpace(this DriveInfo driveInfo)
         {
             return GetHumanReadableSize(driveInfo.TotalFreeSpace);

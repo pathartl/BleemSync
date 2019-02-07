@@ -33,6 +33,15 @@
     <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
     <script src="~/lib/datatables/dataTables.bootstrap.min.js"></script>
     <script src="~/lib/datatables/dataTables.select.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#switch-destination-device').on('DeviceSwitched', () => {
+                window.location.reload();
+            });
+        });
+    </script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>

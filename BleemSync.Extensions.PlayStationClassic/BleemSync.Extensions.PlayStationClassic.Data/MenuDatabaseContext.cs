@@ -1,5 +1,7 @@
 ﻿using BleemSync.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace BleemSync.Data
 {
@@ -13,9 +15,15 @@ namespace BleemSync.Data
 
         private static bool _created = false;
 
-        public MenuDatabaseContext(DbContextOptions<MenuDatabaseContext> options) : base(options)
+        public MenuDatabaseContext(DbContextOptions<MenuDatabaseContext> options, IConfiguration configuration) : base(options)
         {
-            // Database.EnsureCreated();
+            Directory.CreateDirectory(
+                Path.Combine(
+                    configuration["BleemSync:Destination"],
+                    configuration["BleemSync:Path"]
+                )
+            );
+
             Database.Migrate();
         }
 

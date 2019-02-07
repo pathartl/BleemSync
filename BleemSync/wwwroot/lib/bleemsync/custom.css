@@ -68,3 +68,19 @@
 .dropdown-menu > li > a {
     width: 100%;
 }
+
+.usb-switcher-drive {
+    background: none;
+}
+
+.usb-switcher-drive:hover {
+    background: #e5e5e5;
+}
+
+.usb-switcher-drive-stats {
+    margin-top: 5px;
+}
+
+.usb-switcher-drive-stats .progress {
+    margin-bottom: 0;
+}

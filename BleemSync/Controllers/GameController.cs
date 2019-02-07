@@ -109,7 +109,11 @@ namespace BleemSync.Controllers
         public async Task<ActionResult> AddGame()
         {
             var temporaryFiles = new List<GameManagerFile>();
-            var formModel = await Request.StreamFile(_configuration["TemporaryPath"], temporaryFiles);
+            var formModel = await Request.StreamFile(
+                Path.Combine(
+                    _configuration["BleemSync:Destination"],
+                    _configuration["BleemSync:TemporaryPath"]
+                ), temporaryFiles);
 
             GameUpload gameUpload = new GameUpload();
             var bindingSuccessful = await TryUpdateModelAsync(gameUpload, prefix: "", valueProvider: formModel);

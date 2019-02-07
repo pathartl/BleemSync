@@ -22,7 +22,8 @@ namespace BleemSync.Views.Shared.Components.Sidebar
         public IViewComponentResult Invoke()
         {
             var viewModel = new NavbarViewModel() {
-                Drives = _usbService.GetDrives().ToList()
+                Drives = _usbService.GetDrives().ToList(),
+                CurrentDrive = _usbService.GetCurrentDrive()
             };
 
             return View("Default", viewModel);
