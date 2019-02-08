@@ -22,7 +22,7 @@ namespace BleemSync.Services
         private readonly IConfiguration _config;
         private readonly DbContext _context;
 
-        public UsbService(DbContext context, IWritableOptions<BleemSyncConfiguration> writableConfig, IConfiguration config)
+        public UsbService(DatabaseContext context, IWritableOptions<BleemSyncConfiguration> writableConfig, IConfiguration config)
         {
             _context = context;
             _writableConfig = writableConfig;
@@ -65,6 +65,8 @@ namespace BleemSync.Services
             {
                 config.Destination = drive.RootDirectory.FullName;
             });
+
+            _context.Database.Migrate();
         }
     }
 

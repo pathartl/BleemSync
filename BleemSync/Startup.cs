@@ -35,10 +35,6 @@ namespace BleemSync
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
-
-            builder["Data Source"] = Path.Combine(Configuration["BleemSync:Destination"], Configuration["BleemSync:Path"], Configuration["BleemSync:DatabaseFile"]);
-
             services.AddExtCore(ExtensionsPath, Configuration["Extensions:IncludingSubpaths"].ToLower() == true.ToString());
 
             services.AddDbContext<DatabaseContext>();

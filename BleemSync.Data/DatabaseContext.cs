@@ -1,7 +1,9 @@
 ﻿using BleemSync.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace BleemSync.Data
@@ -14,9 +16,21 @@ namespace BleemSync.Data
         public DbSet<GameMeta> Meta { get; set; }
         public DbSet<GameSystem> Systems { get; set; }
 
+        private readonly IConfiguration _config;
+
+        public DatabaseContext(DbContextOptions options, IConfiguration config) : base(options)
+        {
+            _config = config;
+
+            Directory.CreateDirectory(Path.Combine(_config["BleemSync:Destination"], _config["BleemSync:Path"]));
+            Database.Migrate();
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=BleemSync.db");
+            var connectionStringPath = Path.Combine(_config["BleemSync:Destination"], _config["BleemSync:Path"], _config["BleemSync:DatabaseFile"]);
+
+            optionsBuilder.UseSqlite($"Data Source={connectionStringPath}");
         }
     }
 }
