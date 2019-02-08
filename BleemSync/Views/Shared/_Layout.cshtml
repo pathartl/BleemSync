@@ -37,7 +37,9 @@
     <script>
         $(document).ready(function () {
             $('#switch-destination-device').on('DeviceSwitched', () => {
-                window.location.reload();
+                setTimeout(function () {
+                    window.location.reload(true);
+                }, 500);
             });
         });
     </script>

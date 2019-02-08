@@ -1,4 +1,5 @@
 ﻿using BleemSync.Services;
+using BleemSync.Services.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;

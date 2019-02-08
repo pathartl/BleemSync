@@ -8,6 +8,40 @@ using System.Text;
 
 namespace BleemSync.Services.Extensions
 {
+    public enum DriveFormat
+    {
+        [Display(Name = "FAT")]
+        Fat16,
+
+        [Display(Name = "FAT32")]
+        Fat32,
+
+        [Display(Name = "NTFS")]
+        Ntfs,
+
+        [Display(Name = "exFAT")]
+        Exfat,
+
+        [Display(Name = "ext3")]
+        Ext3,
+
+        [Display(Name = "ext4")]
+        Ext4,
+
+        [Display(Name = "HFS+")]
+        HfsPlus
+    }
+
+    public enum DataUnit
+    {
+        Bit,
+        Byte,
+        Kilobyte,
+        Megabyte,
+        Gigabyte,
+        Terabyte
+    }
+
     public static class DriveInfoExtensions
     {
         public static bool DriveIsFormattedProperly(this DriveInfo driveInfo)

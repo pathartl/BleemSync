@@ -1,9 +1,15 @@
-﻿using BleemSync.Services.Extensions;
+﻿using BleemSync.Data;
+using BleemSync.Services.Extensions;
 using BleemSync.Services.ViewModels;
+using ExtCore.Data.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,11 +21,21 @@ namespace BleemSync.Services
     {
         private readonly IWritableOptions<BleemSyncConfiguration> _writableConfig;
         private readonly IConfiguration _config;
+        private readonly DbContext _context;
 
-        public UsbService(IWritableOptions<BleemSyncConfiguration> writableConfig, IConfiguration config)
+        public UsbService(DbContext context, IWritableOptions<BleemSyncConfiguration> writableConfig, IConfiguration config)
+        {
+            _context = context;
+            _writableConfig = writableConfig;
+            _config = config;
+        }
+
+        public UsbService(IServiceProvider serviceProvider, IWritableOptions<BleemSyncConfiguration> writableConfig, IConfiguration config)
         {
             _writableConfig = writableConfig;
             _config = config;
+
+            var blah = serviceProvider.GetRequiredService<DesignTimeStorageContextFactory>();
         }
 
         public DriveInfo GetDrive(string driveName)
@@ -52,40 +68,24 @@ namespace BleemSync.Services
             {
                 config.Destination = drive.RootDirectory.FullName;
             });
+
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+
+            builder["Data Source"] = Path.Combine(_config["BleemSync:Destination"], _config["BleemSync:Path"], _config["BleemSync:DatabaseFile"]);
+
+            var connection = _context.Database.GetDbConnection();
+
+            connection.ConnectionString = builder.ConnectionString;
+
+            _context.Database.OpenConnection()
         }
     }
 
-    public enum DriveFormat
+    public static class DatabaseExtension
     {
-        [Display(Name = "FAT")]
-        Fat16,
-
-        [Display(Name = "FAT32")]
-        Fat32,
-
-        [Display(Name = "NTFS")]
-        Ntfs,
-
-        [Display(Name = "exFAT")]
-        Exfat,
-
-        [Display(Name = "ext3")]
-        Ext3,
-
-        [Display(Name = "ext4")]
-        Ext4,
-
-        [Display(Name = "HFS+")]
-        HfsPlus
-    }
-
-    public enum DataUnit
-    {
-        Bit,
-        Byte,
-        Kilobyte,
-        Megabyte,
-        Gigabyte,
-        Terabyte
+        public static void ChangeDatabase(this DatabaseFacade database, string connectionString)
+        {
+            //database.
+        }
     }
 }

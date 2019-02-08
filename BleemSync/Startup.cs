@@ -56,7 +56,11 @@ namespace BleemSync
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
-            services.AddScoped<UsbService>();
+            services.AddScoped<UsbService>(s => new UsbService(
+                DesignTimeStorageContextFactory.StorageContext,
+                s.GetRequiredService<IWritableOptions<BleemSyncConfiguration>>(),
+                s.GetRequiredService<IConfiguration>()
+                ));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IConfiguration>(Configuration);
