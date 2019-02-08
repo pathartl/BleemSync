@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace BleemSync.Migrations
+namespace BleemSync.Data.Migrations
 {
     public partial class Seed : Migration
     {
@@ -34,6 +34,7 @@ namespace BleemSync.Migrations
                     Developer = table.Column<string>(nullable: true),
                     Publisher = table.Column<string>(nullable: true),
                     Type = table.Column<int>(nullable: false),
+                    Position = table.Column<int>(nullable: false),
                     SystemId = table.Column<int>(nullable: true),
                     ParentId = table.Column<int>(nullable: true)
                 },

@@ -1,7 +1,5 @@
-﻿using BleemSync.Data.Abstractions;
-using BleemSync.Extensions.Infrastructure.Attributes;
+﻿using BleemSync.Extensions.Infrastructure.Attributes;
 using BleemSync.ViewModels;
-using ExtCore.Data.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,6 +11,7 @@ using System.Net;
 using System.IO;
 using BleemSync.Services.Abstractions;
 using Microsoft.Extensions.Configuration;
+using BleemSync.Services;
 
 namespace BleemSync.Controllers
 {
@@ -20,17 +19,15 @@ namespace BleemSync.Controllers
     [Route("[controller]/[action]")]
     public class GamesController : Controller
     {
-        private readonly IGameManagerNodeRepository _gameManagerNodeRepository;
-        private readonly IGameManagerFileRepository _gameManagerFileRepository;
-        private readonly IStorage _storage;
+        private readonly GameManagerNodeService _gameManagerNodeService;
+        private readonly GameManagerFileService _gameManagerFileService;
         private readonly IGameManagerService _gameManagerService;
         private readonly IConfiguration _configuration;
 
-        public GamesController(IStorage storage, IGameManagerService gameManagerService, IConfiguration configuration)
+        public GamesController(GameManagerNodeService gameManagerNodeService, GameManagerFileService gameManagerFileService, IGameManagerService gameManagerService, IConfiguration configuration)
         {
-            _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
-            _gameManagerFileRepository = storage.GetRepository<IGameManagerFileRepository>();
-            _storage = storage;
+            _gameManagerNodeService = gameManagerNodeService;
+            _gameManagerFileService = gameManagerFileService;
             _gameManagerService = gameManagerService;
             _configuration = configuration;
         }
@@ -43,7 +40,7 @@ namespace BleemSync.Controllers
 
         public ActionResult GetTree()
         {
-            var tree = _gameManagerNodeRepository
+            var tree = _gameManagerNodeService
                 .All()
                 .OrderBy(n => n.Position)
                 .ThenBy(n => n.SortName)
@@ -59,7 +56,7 @@ namespace BleemSync.Controllers
         [HttpPost]
         public void SaveTree(GameManagerNodeTreeSaveRequest request)
         {
-            var dbNodes = _gameManagerNodeRepository.All();
+            var dbNodes = _gameManagerNodeService.All();
 
             var position = 0;
             foreach (var node in request.Nodes)
@@ -77,17 +74,19 @@ namespace BleemSync.Controllers
                     dbNode.ParentId = Convert.ToInt32(node.Parent);
                 }
 
+                _gameManagerNodeService.Update(dbNode, false);
+
                 position++;
             }
 
-            _storage.Save();
+            _gameManagerNodeService.Save();
             _gameManagerService.UpdateGames(dbNodes);
         }
 
         [HttpGet("{id}")]
         public ActionResult GetById(int id)
         {
-            var game = _gameManagerNodeRepository.Get(id);
+            var game = _gameManagerNodeService.Get(id);
 
             return new JsonResult(game);
         }
@@ -95,7 +94,7 @@ namespace BleemSync.Controllers
         [HttpGet("{id}")]
         public ActionResult GetLocalCoverByGameId(int id)
         {
-            var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == id && f.Name.EndsWith(".png")).FirstOrDefault();
+            var coverFile = _gameManagerFileService.All().Where(f => f.NodeId == id && f.Name.EndsWith(".png")).FirstOrDefault();
 
             if (coverFile != null)
                 return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), coverFile.Path), "image/jpg");
@@ -156,8 +155,8 @@ namespace BleemSync.Controllers
                 Files = temporaryFiles
             };
 
-            _gameManagerNodeRepository.Create(node);
-            _storage.Save();
+            _gameManagerNodeService.Create(node);
+            _gameManagerNodeService.Save();
 
             _gameManagerService.AddGame(node);
 
@@ -185,7 +184,7 @@ namespace BleemSync.Controllers
 
         private ActionResult UpdateGame(GameUpload gameUpload)
         {
-            var node = _gameManagerNodeRepository.Get(gameUpload.Id);
+            var node = _gameManagerNodeService.Get(gameUpload.Id);
 
             node.Name = gameUpload.Name;
             node.SortName = gameUpload.SortName;
@@ -196,14 +195,14 @@ namespace BleemSync.Controllers
             node.Publisher = gameUpload.Publisher;
             node.Type = GameManagerNodeType.Game;
 
+            _gameManagerNodeService.Update(node);
+
             if (gameUpload.Cover != null && gameUpload.Cover != "")
             {
-                var coverFile = _gameManagerFileRepository.All().Where(f => f.NodeId == node.Id && f.Name.EndsWith(".png")).First();
+                var coverFile = _gameManagerFileService.All().Where(f => f.NodeId == node.Id && f.Name.EndsWith(".png")).First();
 
                 System.IO.File.WriteAllBytes(coverFile.Path, Convert.FromBase64String(gameUpload.Cover.Split(",")[1]));
             }
-
-            _storage.Save();
 
             _gameManagerService.UpdateGame(node);
 
@@ -212,9 +211,8 @@ namespace BleemSync.Controllers
 
         private ActionResult DeleteGame(GameUpload gameUpload)
         {
-            var node = _gameManagerNodeRepository.Get(gameUpload.Id);
-            _gameManagerNodeRepository.Delete(node);
-            _storage.Save();
+            var node = _gameManagerNodeService.Get(gameUpload.Id);
+            _gameManagerNodeService.Delete(node);
             _gameManagerService.DeleteGame(node);
 
             return Json("Game deleted!");

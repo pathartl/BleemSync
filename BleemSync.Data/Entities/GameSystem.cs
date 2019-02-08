@@ -1,9 +1,12 @@
-﻿using ExtCore.Data.Entities.Abstractions;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BleemSync.Data.Entities
 {
-    public class GameSystem : IEntity
+    [Table("GameSystem")]
+    public class GameSystem
     {
+        [Key]
         public int Id { get; set; }
         public int Name { get; set; }
     }

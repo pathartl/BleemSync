@@ -7,17 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 using ExtCore.WebApplication.Extensions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using ExtCore.Data.EntityFramework;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Http.Features;
-using BleemSync.Data;
-using System.Reflection;
 using BleemSync.Services;
 using BleemSync.Services.Extensions;
 using BleemSync.Services.ViewModels;
 using System.Data.SqlClient;
 using System.IO;
+using BleemSync.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BleemSync
 {
@@ -42,11 +40,8 @@ namespace BleemSync
             builder["Data Source"] = Path.Combine(Configuration["BleemSync:Destination"], Configuration["BleemSync:Path"], Configuration["BleemSync:DatabaseFile"]);
 
             services.AddExtCore(ExtensionsPath, Configuration["Extensions:IncludingSubpaths"].ToLower() == true.ToString());
-            services.Configure<StorageContextOptions>(options =>
-            {
-                options.ConnectionString = builder.ConnectionString;
-                options.MigrationsAssembly = typeof(DesignTimeStorageContextFactory).GetTypeInfo().Assembly.FullName;
-            });
+
+            services.AddDbContext<DatabaseContext>();
 
             services.Configure<FormOptions>(options =>
             {
@@ -56,11 +51,11 @@ namespace BleemSync
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
-            services.AddScoped<UsbService>(s => new UsbService(
-                DesignTimeStorageContextFactory.StorageContext,
-                s.GetRequiredService<IWritableOptions<BleemSyncConfiguration>>(),
-                s.GetRequiredService<IConfiguration>()
-                ));
+
+            services.AddScoped<UsbService>();
+            services.AddScoped<GameManagerFileService>();
+            services.AddScoped<GameManagerNodeService>();
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IConfiguration>(Configuration);
@@ -72,13 +67,6 @@ namespace BleemSync
             });
 
             services.ConfigureWritable<BleemSyncConfiguration>(Configuration.GetSection("BleemSync"));
-
-            var sp = services.BuildServiceProvider();
-            DesignTimeStorageContextFactory.Initialize(sp);
-            DesignTimeStorageContextFactory.StorageContext.Database.Migrate();
-
-            // Import games from older version
-            ImportInitialGames(sp);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,6 +74,12 @@ namespace BleemSync
         {
             app.UseDeveloperExceptionPage();
             app.UseStaticFiles();
+
+            using (var serviceScope = app.ApplicationServices.CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<DatabaseContext>();
+                context.Database.Migrate();
+            }
 
             app.UseExtCore();
             app.UseMvc(routes =>
@@ -98,21 +92,6 @@ namespace BleemSync
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-        }
-
-        void ImportInitialGames(ServiceProvider sp)
-        {
-            var dbContext = DesignTimeStorageContextFactory.StorageContext;
-            if (dbContext == null) return;
-            var deviceGameManager = sp.GetService<BleemSync.Services.Abstractions.IGameManagerService>();
-            if (deviceGameManager == null) return;
-            var countTask = dbContext.Set<BleemSync.Data.Entities.GameManagerNode>().CountAsync();
-            countTask.Wait();
-            if (countTask.Result == 0)
-            {
-                dbContext.AddRange(deviceGameManager.GetGames());
-                dbContext.SaveChanges();
-            }
         }
     }
 }

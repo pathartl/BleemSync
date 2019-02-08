@@ -1,9 +1,7 @@
 ﻿using BleemSync.Data;
-using BleemSync.Data.Abstractions;
 using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
-using ExtCore.Data.Abstractions;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -16,18 +14,12 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
     public class GameManagerService : IGameManagerService
     {
         private MenuDatabaseContext _context { get; set; }
-        private IStorage _storage { get; set; }
-        private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
-        private IGameManagerFileRepository _gameManagerFileRepository { get; set; }
         private IConfiguration _configuration { get; set; }
         private string _baseGamesDirectory { get; set; }
 
-        public GameManagerService(MenuDatabaseContext context, IStorage storage, IConfiguration configuration)
+        public GameManagerService(MenuDatabaseContext context, IConfiguration configuration)
         {
             _context = context;
-            _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
-            _gameManagerFileRepository = storage.GetRepository<IGameManagerFileRepository>();
-            _storage = storage;
             _configuration = configuration;
 
             _baseGamesDirectory = Path.Combine(
@@ -57,8 +49,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             Directory.CreateDirectory(outputDirectory);
 
             PostProcessGameFiles(node.Files, outputDirectory);
-
-            _storage.Save();
         }
 
         private void PostProcessGameFiles(List<GameManagerFile> files, string outputDirectory)

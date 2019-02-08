@@ -62,7 +62,7 @@ namespace BleemSync.Services.Extensions
             IConfigurationSection section,
             string file = "appsettings.json") where T : class, new()
         {
-            services.Configure<T>(section);
+            //services.Configure<T>(section);
             services.AddTransient<IWritableOptions<T>>(provider =>
             {
                 var environment = provider.GetService<IHostingEnvironment>();
