@@ -34,7 +34,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _baseGamesDirectory = configuration["PlayStationClassic:GamesDirectory"];
         }
 
-        public void AddGame(GameManagerNode node)
+        public void AddGame(GameManagerNode node, bool processFiles = true)
         {
             var game = new Game()
             {
@@ -49,7 +49,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.Games.Add(game);
             _context.SaveChanges();
 
-            if (node.Files.Count > 0)
+            if (node.Files.Count > 0 && processFiles)
             {
                 // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
                 var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
@@ -204,7 +204,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             foreach (var node in nodes)
             {
-                AddGame(node);
+                AddGame(node, false);
             }
         }
 
