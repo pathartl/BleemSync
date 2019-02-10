@@ -30,10 +30,14 @@
             <checkbox asp-for="OverrideThemeMusic" />
             <checkbox asp-for="RandomThemeOnLoad" />
             <checkbox asp-for="BootMenuMusic" />
-            <button type="submit" text="Save" />
+            
             <p class="text-muted">
                 A reboot is required for changes to apply.
             </p>
         </card-body>
+        <card-actions>
+            <button type="submit" text="Save" />
+            <button asp-action="RebuildDatabase" text="Rebuild Database" />
+        </card-actions>
     </card>
 </form>

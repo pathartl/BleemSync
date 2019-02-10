@@ -4,6 +4,7 @@ using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
 using ExtCore.Data.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -48,12 +49,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             _context.Games.Add(game);
             _context.SaveChanges();
 
-            // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
-            var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
+            if (node.Files.Count > 0)
+            {
+                // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
+                var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
 
-            Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDirectory);
 
-            PostProcessGameFiles(node.Files, outputDirectory);
+                PostProcessGameFiles(node.Files, outputDirectory);
+            }
 
             _storage.Save();
         }
@@ -160,16 +164,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
         public void UpdateGame(GameManagerNode node)
         {
-            var game = _context.Games.Find(node.Id);
-
-            game.Title = node.Name;
-            game.Publisher = node.Publisher;
-            game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
-            game.Players = node.Players.HasValue ? node.Players.Value : 0;
-            game.Position = node.Position;
-
-            _context.Games.Update(game);
-            _context.SaveChanges();
+            UpdateGames(new GameManagerNode[] { node });
         }
 
         public void UpdateGames(IEnumerable<GameManagerNode> nodes)
@@ -200,6 +195,50 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             _context.Games.Remove(game);
             _context.SaveChanges();
+        }
+
+        public void RebuildDatabase(IEnumerable<GameManagerNode> nodes)
+        {
+            _context.Database.EnsureDeleted();
+            _context.Database.Migrate();
+
+            foreach (var node in nodes)
+            {
+                var game = new Game()
+                {
+                    Id = node.Id,
+                    Title = node.Name,
+                    Publisher = node.Publisher,
+                    Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0,
+                    Players = node.Players.HasValue ? node.Players.Value : 0,
+                    Position = node.Position
+                };
+
+                _context.Games.Add(game);
+
+                if (node.Files.Count > 0)
+                {
+                    var cueFiles = node.Files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
+
+                    var discNum = 1;
+
+                    foreach (var cueFile in cueFiles)
+                    {
+                        var disc = new Disc()
+                        {
+                            DiscBasename = Path.ChangeExtension(cueFile.Name, null),
+                            DiscNumber = discNum,
+                            GameId = cueFile.NodeId,
+                        };
+
+                        _context.Discs.Add(disc);
+
+                        discNum++;
+                    }
+                }
+
+                _context.SaveChanges();
+            }
         }
 
         public IEnumerable<GameManagerNode> GetGames()

@@ -15,7 +15,6 @@ namespace BleemSync.Data
 
         public MenuDatabaseContext(DbContextOptions<MenuDatabaseContext> options) : base(options)
         {
-            // Database.EnsureCreated();
             Database.Migrate();
         }
 
