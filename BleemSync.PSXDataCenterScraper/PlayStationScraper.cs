@@ -33,8 +33,6 @@ namespace BleemSync.PSXDataCenterScraper
 
             var games = new List<BaseGame>();
 
-            Directory.CreateDirectory("covers");
-
             foreach (var link in links)
             {
                 //try
@@ -74,14 +72,20 @@ namespace BleemSync.PSXDataCenterScraper
             var digital = GetContent(dom.QuerySelector("#table19 tr:nth-child(3) td:nth-child(2)")).ToLower().Contains("standard");
             var lightGun = !GetContent(dom.QuerySelector("#table19 tr:nth-child(4) td:nth-child(2)")).ToLower().Contains("none");
 
-            Match match = Regex.Match(blockCountText, @"(?:\d\-|)(\d)", RegexOptions.IgnoreCase);
+            Match blockCountMatch = Regex.Match(blockCountText, @"(?:\d\-|)(\d)", RegexOptions.IgnoreCase);
             
-            if (match.Success)
+            if (blockCountMatch.Success)
             {
-                blockCount = Convert.ToInt32(match.Groups[1].Value);
+                blockCount = Convert.ToInt32(blockCountMatch.Groups[1].Value);
             }
 
             var serial = GetContent(dom.QuerySelector("#table4 tr:nth-child(3) td:nth-child(2)")).Split(" / ").First();
+            Match fingerprintMatch = Regex.Match(serial, @"^[a-zA-Z]{3,4}\-\d{5}", RegexOptions.IgnoreCase);
+
+            if (fingerprintMatch.Success)
+            {
+                serial = fingerprintMatch.Groups[0].Value;
+            }
 
             var game = new Central.Data.Models.PlayStation.Game();
             game.Title = GetContent(metaTable.QuerySelector("tr:nth-child(1) td:nth-child(2)"));
