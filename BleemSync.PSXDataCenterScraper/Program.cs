@@ -20,7 +20,7 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
             var services = new ServiceCollection();
 
             services.AddDbContext<DatabaseContext>(options =>
-                options.UseMySql(configuration["MySQLConnectionString"])
+                options.UseMySql("Server=10.0.1.10;Port=3308;Database=psxdatacenter;User=psx;Password=psx;charset=utf8mb4")
             );
 
             var serviceProvider = services.BuildServiceProvider();
@@ -28,9 +28,9 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
             var _context = serviceProvider.GetService<DatabaseContext>();
 
             var scraper = new PlayStationScraper(_context);
-            scraper.ScrapeMainList("https://psxdatacenter.com/ulist.html");
-            scraper.ScrapeMainList("https://psxdatacenter.com/plist.html");
-            scraper.ScrapeMainList("https://psxdatacenter.com/jlist.html");
+            scraper.ScrapeMainList("http://10.0.1.12/psxdatacenter/psxdatacenter.com/ulist.html");
+            //scraper.ScrapeMainList("https://psxdatacenter.com/plist.html");
+            //scraper.ScrapeMainList("https://psxdatacenter.com/jlist.html");
         }
     }
 }

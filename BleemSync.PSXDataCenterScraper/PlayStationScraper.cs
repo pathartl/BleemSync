@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BleemSync.PSXDataCenterScraper
 {
@@ -22,6 +24,7 @@ namespace BleemSync.PSXDataCenterScraper
         public void ScrapeMainList(string url)
         {
             HtmlWeb web = new HtmlWeb();
+            web.OverrideEncoding = Encoding.UTF8;
 
             var html = web.Load(url);
             var dom = html.DocumentNode;
@@ -34,22 +37,26 @@ namespace BleemSync.PSXDataCenterScraper
 
             foreach (var link in links)
             {
-                try
-                {
-                    var game = GetGame("https://psxdatacenter.com/" + link.GetAttributeValue("href", ""));
+                //try
+                //{
+                    var game = GetGame("http://10.0.1.12/psxdatacenter/psxdatacenter.com/" + link.GetAttributeValue("href", ""));
 
                     _context.Add(game);
                     _context.SaveChanges();
-                }
-                catch {
-                    Console.WriteLine($"Could not scrape {link}");
-                }
+                //}
+                //catch (Exception e) {
+                //    Console.WriteLine($"Could not scrape {link}");
+                //}
             }
+
+            Console.WriteLine("Done! Press any key to continue.");
+            Console.ReadLine();
         }
 
         private Central.Data.Models.PlayStation.Game GetGame(string url)
         {
             HtmlWeb web = new HtmlWeb();
+            web.OverrideEncoding = Encoding.GetEncoding("iso-8859-1");
 
             var html = web.Load(url.Replace("https", "http"));
             var dom = html.DocumentNode;
@@ -58,7 +65,8 @@ namespace BleemSync.PSXDataCenterScraper
             var featuresTable = dom.QuerySelector("#table19");
             var discsTable = dom.QuerySelector("#table7");
 
-            var blockCount = GetContent(dom.QuerySelector("#table19 tr:nth-child(2) td:nth-child(2)")).ToLower().Replace("block", "").Replace("blocks", "");
+            var blockCount = 0;
+            var blockCountText = GetContent(dom.QuerySelector("#table19 tr:nth-child(2) td:nth-child(2)"));
             var multitap = GetContent(dom.QuerySelector("#table19 tr:nth-child(8) td:nth-child(2)")).ToLower() == "yes";
             var linkCable = GetContent(dom.QuerySelector("#table19 tr:nth-child(9) td:nth-child(2)")).ToLower() == "yes";
             var vibration = GetContent(dom.QuerySelector("#table19 tr:nth-child(7) td:nth-child(2)")).ToLower() == "yes";
@@ -66,24 +74,32 @@ namespace BleemSync.PSXDataCenterScraper
             var digital = GetContent(dom.QuerySelector("#table19 tr:nth-child(3) td:nth-child(2)")).ToLower().Contains("standard");
             var lightGun = !GetContent(dom.QuerySelector("#table19 tr:nth-child(4) td:nth-child(2)")).ToLower().Contains("none");
 
-            var game = new Central.Data.Models.PlayStation.Game()
+            Match match = Regex.Match(blockCountText, @"(?:\d\-|)(\d)", RegexOptions.IgnoreCase);
+            
+            if (match.Success)
             {
-                Title = GetContent(metaTable.QuerySelector("tr:nth-child(1) td:nth-child(2)")),
-                Description = GetContent(dom.QuerySelector("#table16 tbody > tr:nth-child(1) td:nth-child(1)")),
-                Version = "",
-                Genres = new List<GameGenre>(),
-                Developer = GetContent(metaTable.QuerySelector("tr:nth-child(6) td:nth-child(2)")).TrimEnd('.'),
-                Publisher = GetContent(metaTable.QuerySelector("tr:nth-child(7) td:nth-child(2)")).TrimEnd('.'),
-                Players = GetContent(featuresTable.QuerySelector("tr:nth-child(1) td:nth-child(2)")),
-                OfficiallyLicensed = true,
-                MemoryCardBlockCount = Convert.ToInt32(blockCount),
-                MultitapCompatible = multitap,
-                LinkCableCompatible = linkCable,
-                VibrationCompatible = vibration,
-                AnalogCompatible = analog,
-                DigitalCompatible = digital,
-                LightGunCompatible = lightGun
-            };
+                blockCount = Convert.ToInt32(match.Groups[1].Value);
+            }
+
+            var serial = GetContent(dom.QuerySelector("#table4 tr:nth-child(3) td:nth-child(2)")).Split(" / ").First();
+
+            var game = new Central.Data.Models.PlayStation.Game();
+            game.Title = GetContent(metaTable.QuerySelector("tr:nth-child(1) td:nth-child(2)"));
+            game.Description = GetContent(dom.QuerySelector("#table16 tr:nth-child(1) td:nth-child(1)"));
+            game.Version = "";
+            game.Genres = new List<GameGenre>();
+            game.Developer = GetContent(metaTable.QuerySelector("tr:nth-child(6) td:nth-child(2)")).TrimEnd('.');
+            game.Publisher = GetContent(metaTable.QuerySelector("tr:nth-child(7) td:nth-child(2)")).TrimEnd('.');
+            game.Players = GetContent(featuresTable.QuerySelector("tr:nth-child(1) td:nth-child(2)"));
+            game.OfficiallyLicensed = true;
+            game.MemoryCardBlockCount = blockCount;
+            game.MultitapCompatible = multitap;
+            game.LinkCableCompatible = linkCable;
+            game.VibrationCompatible = vibration;
+            game.AnalogCompatible = analog;
+            game.DigitalCompatible = digital;
+            game.LightGunCompatible = lightGun;
+            game.Fingerprint = serial;
 
             // Get Date
             var dateString = GetContent(metaTable.QuerySelector("tr:nth-child(8) td:nth-child(2)"));
@@ -93,6 +109,7 @@ namespace BleemSync.PSXDataCenterScraper
                 game.DateReleased = dateReleased;
             }
 
+            #region Region
             // Get Region
             var regionString = GetContent(metaTable.QuerySelector("tr:nth-child(4) td:nth-child(2)"));
 
@@ -114,7 +131,9 @@ namespace BleemSync.PSXDataCenterScraper
                     game.Region = GameRegion.RegionFree;
                     break;
             }
+            #endregion
 
+            #region Rating
             // Get rating
             var ratingImage = metaTable.QuerySelector("[src*=\"rating/esrb\"]");
 
@@ -149,7 +168,9 @@ namespace BleemSync.PSXDataCenterScraper
                         break;
                 }
             }
+            #endregion
 
+            #region Genres
             var genres = new List<GameGenre>();
             var genreStrings = GetContent(metaTable.QuerySelector("tr:nth-child(5) td:nth-child(2)")).Split(" / ");
 
@@ -167,78 +188,146 @@ namespace BleemSync.PSXDataCenterScraper
 
                 genres.Add(genre);
             }
+            #endregion
 
-            var game = new BaseGame()
+            #region Art
+            // Jewel covers first
+            for (int i = 1; i <= 6; i++)
             {
-                Title = GetContent(metaTable.QuerySelector("tr:nth-child(1) td:nth-child(2)")),
-                CommonTitle = GetContent(metaTable.QuerySelector("tr:nth-child(2) td:nth-child(2)")),
-                Region = GetContent(metaTable.QuerySelector("tr:nth-child(4) td:nth-child(2)")),
-                Genre = GetContent(metaTable.QuerySelector("tr:nth-child(5) td:nth-child(2)")),
-                
-                
-                Players = GetPlayerCount(GetContent(featuresTable.QuerySelector("tr:nth-child(1) td:nth-child(2)"))),
-                Discs = new List<Disc>(),
-                Covers = new List<Cover>()
-            };
+                var jewelCoverType = GetContent(dom.QuerySelector($"#table28 tr:nth-child(2) td:nth-child({i})"));
+                var jewelCoverDescription = GetContent(dom.QuerySelector($"#table28 tr:nth-child(4) td:nth-child({i})"));
 
-            var serialNumbers = new List<string>();
-
-            for (int i = 2; i <= 7; i++)
-            {
-                var cell = GetContent(discsTable.QuerySelector($"tr:nth-child(2) td:nth-child({i})"));
-
-                if (cell != "")
+                if (jewelCoverType.Trim() != "" && !jewelCoverDescription.Trim().ToUpper().Contains("MISSING"))
                 {
-                    serialNumbers.Add(cell);
+                    var art = new Central.Data.Models.PlayStation.Art() {
+                        Id = Guid.NewGuid()
+                    };
+
+                    var imgNode = dom.QuerySelector($"#table28 tr:nth-child(3) td:nth-child({i}) img");
+
+                    if (imgNode != null)
+                    {
+                        var imgSrc = imgNode.GetAttributeValue("src", "");
+                        var imgHiResPath = imgSrc.Replace("thumbs", "hires");
+                        var imgFile = new FileInfo(imgHiResPath).Name;
+                        var imgExtension = new FileInfo(imgHiResPath).Extension;
+
+                        art.File = art.Id.ToString() + imgExtension;
+
+                        switch (jewelCoverType.Trim().ToUpper())
+                        {
+                            case "FRONT":
+                                art.Type = Central.Data.Models.PlayStation.ArtType.Front;
+                                break;
+
+                            case "BACK":
+                                art.Type = Central.Data.Models.PlayStation.ArtType.Back;
+                                break;
+
+                            case "INLAY":
+                                art.Type = Central.Data.Models.PlayStation.ArtType.Inlay;
+                                break;
+
+                            case "INSIDE":
+                                art.Type = Central.Data.Models.PlayStation.ArtType.Inside;
+                                break;
+
+                            case "DISC":
+                                art.Type = Central.Data.Models.PlayStation.ArtType.Disc;
+                                break;
+
+                            default:
+                                art.Type = Central.Data.Models.PlayStation.ArtType.Other;
+                                break;
+                        }
+
+                        var outputArtDir = Path.Combine("art", "playstation", game.Fingerprint, Enum.GetName(typeof(Central.Data.Models.PlayStation.ArtType), art.Type));
+
+                        Directory.CreateDirectory(outputArtDir);
+
+                        try
+                        {
+                            using (WebClient wc = new WebClient())
+                            {
+                                var currentPage = new FileInfo(url).Name;
+                                var pageLessPath = url.Replace(currentPage, "");
+
+                                wc.DownloadFile(
+                                    new Uri(pageLessPath + imgHiResPath),
+                                    Path.Combine(outputArtDir, art.File)
+                                );
+                            }
+                        }
+                        catch { }
+
+                        game.Art.Add(art);
+                    }
                 }
             }
+            #endregion
 
-            foreach (var serialNumber in serialNumbers)
+            #region Discs
+            for (int i = 1; i <= 6; i++)
             {
-                var disc = new Disc()
+                var node = dom.QuerySelector($"#table7 tr:nth-child(1) td:nth-child({i + 1})");
+                
+                if (GetContent(node) != "")
                 {
-                    SerialNumber = serialNumber,
-                    Game = game,
-                };
+                    var discSerial = GetContentLines(node).Last();
+                    var trackCount = GetContentLines(dom.QuerySelector($"#table7 tr:nth-child(4) td:nth-child({i + 1})")).First();
 
-                game.Discs.Add(disc);
+                    var disc = new Central.Data.Models.PlayStation.Disc()
+                    {
+                        DiscNumber = i,
+                        Fingerprint = discSerial,
+                        TrackCount = Convert.ToInt32(trackCount)
+                    };
+
+                    game.Discs.Add(disc);
+                }
             }
-
-            var coverNode = dom.QuerySelector("#table2 tr:nth-child(2) td:nth-child(1) img");
-            var fileExtension = new FileInfo(coverNode.GetAttributeValue("src", "")).Extension;
-
-            var cover = new Cover()
-            {
-                File = serialNumbers.First() + fileExtension,
-                Game = game
-            };
-
-            game.Covers.Add(cover);
-
-            using (WebClient wc = new WebClient())
-            {
-                var currentPage = new FileInfo(url).Name;
-                var pageLessPath = url.Replace(currentPage, "");
-                wc.DownloadFile(
-                    new Uri(pageLessPath + coverNode.GetAttributeValue("src", "")),
-                    Path.Combine("covers", cover.File)
-                );
-            }
+            #endregion
 
             Console.WriteLine($"Grabbed info for [{game.Title}]");
 
             return game;
         }
 
+        private IEnumerable<string> GetContentLines(HtmlNode node)
+        {
+            try
+            {
+                var content = node.InnerText
+                    .Replace("\r\n", "\n")
+                    .Replace("\t", "")
+                    .Replace("&nbsp;", "")
+                    .Trim()
+                    .Split("\n");
+
+                return content;
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
         private string GetContent(HtmlNode node)
         {
-            var content = node.InnerText;
+            try
+            {
+                var content = node.InnerText
+                    .Replace("\t", "")
+                    .Replace("\n", "")
+                    .Replace("\r", "")
+                    .Replace("&nbsp;", "")
+                    .Trim();
 
-            return content
-                .Replace("\t", "")
-                .Replace("\n", "")
-                .Replace("\r", "")
-                .Replace("&nbsp;", "");
+                return content;
+            } catch
+            {
+                return "";
+            }
         }
 
         private int GetPlayerCount(string input)

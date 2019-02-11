@@ -16,5 +16,12 @@ namespace BleemSync.Central.Data.Models.PlayStation
         public bool DigitalCompatible { get; set; }
         public bool LightGunCompatible { get; set; }
         public virtual ICollection<Disc> Discs { get; set; }
+        public virtual ICollection<Art> Art { get; set; }
+
+        public Game() : base()
+        {
+            Discs = new List<Disc>();
+            Art = new List<Art>();
+        }
     }
 }

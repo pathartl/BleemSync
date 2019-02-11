@@ -9,7 +9,9 @@ namespace BleemSync.Central.Data.Models.PlayStation
     public class Art : BaseArt
     {
         public ArtType Type { get; set; }
-        public Disc Disc { get; set; }
+        public bool IsGreatestHits { get; set; }
+        public virtual Disc Disc { get; set; }
+        public virtual Game Game { get; set; }
     }
 
     public enum ArtType

@@ -11,5 +11,11 @@ namespace BleemSync.Central.Data.Models.PlayStation
         public int DiscNumber { get; set; }
         public virtual Game Game { get; set; }
         public int TrackCount { get; set; }
+        public virtual ICollection<Art> Art { get; set; }
+
+        public Disc() : base()
+        {
+            Art = new List<Art>();
+        }
     }
 }

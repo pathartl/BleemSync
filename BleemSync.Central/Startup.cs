@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
 using BleemSync.Central.Data;
 using Microsoft.EntityFrameworkCore;
+using BleemSync.Central.Data.Models;
 
 namespace BleemSync.Central
 {
@@ -21,11 +22,13 @@ namespace BleemSync.Central
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddDbContext<DatabaseContext>(options => 
+            services.AddDbContext<DatabaseContext>(options =>
                     options.UseMySql(Configuration["MySQLConnectionString"]).UseLazyLoadingProxies()
                 )
-                .AddSingleton(Configuration)
+                .AddDefaultIdentity<ApplicationUser>()
+                    .AddEntityFrameworkStores<DatabaseContext>();
+
+            services.AddSingleton(Configuration)
                 .AddMvc()
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -42,6 +45,9 @@ namespace BleemSync.Central
             {
                 app.UseHsts();
             }
+
+            app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseCors(builder => builder
                 .AllowAnyOrigin()

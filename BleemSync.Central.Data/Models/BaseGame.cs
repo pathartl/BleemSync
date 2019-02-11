@@ -11,20 +11,30 @@ namespace BleemSync.Central.Data.Models
     {
         [Key]
         public int Id { get; set; }
+        public string Fingerprint { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Version { get; set; }
-        public List<GameGenre> Genres { get; set; }
+        public virtual ICollection<GameGenre> Genres { get; set; }
         public string Developer { get; set; }
         public string Publisher { get; set; }
         public DateTime DateReleased { get; set; }
         public GameRegion Region { get; set; }
         public string Players { get; set; }
+
         public EsrbRating EsrbRating { get; set; }
-        public List<string> EsrbRatingDescriptors { get; set; }
+        public virtual ICollection<EsrbRatingDescriptor> EsrbRatingDescriptors { get; set; }
+
         public PegiRating PegiRating { get; set; }
-        public List<string> PegiDescriptors { get; set; }
+        public virtual ICollection<PegiRatingDescriptor> PegiDescriptors { get; set; }
         public bool OfficiallyLicensed { get; set; }
+
+        public BaseGame()
+        {
+            Genres = new List<GameGenre>();
+            EsrbRatingDescriptors = new List<EsrbRatingDescriptor>();
+            PegiDescriptors = new List<PegiRatingDescriptor>();
+        }
     }
 
     public enum GameRegion
@@ -34,25 +44,5 @@ namespace BleemSync.Central.Data.Models
         NTSC_U,
         PAL,
         NTSC_C
-    }
-
-    public enum EsrbRating
-    {
-        Unknown,
-        Everyone,
-        Everyone10Plus,
-        Teen,
-        Mature,
-        AdultsOnly
-    }
-
-    public enum PegiRating
-    {
-        Unknown,
-        Pegi3,
-        Pegi7,
-        Pegi12,
-        Pegi16,
-        Pegi18
     }
 }

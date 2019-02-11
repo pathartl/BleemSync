@@ -9,6 +9,8 @@ namespace BleemSync.Central.Data
         public DbSet<Models.PlayStation.Disc> PlayStation_Discs { get; set; }
         public DbSet<Models.PlayStation.Game> PlayStation_Games { get; set; }
         public DbSet<GameGenre> Genres { get; set; }
+        public DbSet<EsrbRatingDescriptor> EsrbRatingDescriptors { get; set; }
+        public DbSet<PegiRatingDescriptor> PegiRatingDescriptors { get; set; }
 
         private static bool _created = false;
 
