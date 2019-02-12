@@ -192,6 +192,8 @@ namespace BleemSync.PSXDataCenterScraper
 
                 genres.Add(genre);
             }
+
+            game.Genres = genres;
             #endregion
 
             #region Art

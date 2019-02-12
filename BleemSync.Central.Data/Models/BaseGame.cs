@@ -28,6 +28,7 @@ namespace BleemSync.Central.Data.Models
         public PegiRating PegiRating { get; set; }
         public virtual ICollection<PegiRatingDescriptor> PegiDescriptors { get; set; }
         public bool OfficiallyLicensed { get; set; }
+        public bool IsActive { get; set; }
 
         public BaseGame()
         {

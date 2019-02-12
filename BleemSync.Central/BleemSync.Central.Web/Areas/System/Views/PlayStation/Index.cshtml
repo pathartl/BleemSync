@@ -1,0 +1,16 @@
+﻿@addTagHelper *, BleemSync.UI
+@model IEnumerable<BleemSync.Central.Data.Models.PlayStation.Game>
+
+<card title="PlayStation Games">
+    <card-body>
+        <table>
+            @foreach (var game in Model)
+            {
+                <tr>
+                    <td>@game.Title</td>
+                    <td>@game.Fingerprint</td>
+                </tr>
+            }
+        </table>
+    </card-body>
+</card>

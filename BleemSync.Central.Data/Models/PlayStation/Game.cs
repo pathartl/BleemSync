@@ -17,6 +17,7 @@ namespace BleemSync.Central.Data.Models.PlayStation
         public bool LightGunCompatible { get; set; }
         public virtual ICollection<Disc> Discs { get; set; }
         public virtual ICollection<Art> Art { get; set; }
+        public virtual ICollection<GameRevision> Revisions { get; set; }
 
         public Game() : base()
         {
