@@ -220,6 +220,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 if (node.Files.Count > 0)
                 {
                     var cueFiles = node.Files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
+                    if (cueFiles.Count() == 0) cueFiles = node.Files.where(f => Path.GetExtension(f.Name) != ".png");
 
                     var discNum = 1;
 
