@@ -54,33 +54,45 @@ namespace BleemSync.Controllers
         }
 
         [HttpPost]
-        public void SaveTree(GameManagerNodeTreeSaveRequest request)
+        public ActionResult SaveTree(GameManagerNodeTreeSaveRequest request)
         {
             var dbNodes = _gameManagerNodeService.All();
 
             var position = 0;
             foreach (var node in request.Nodes)
             {
-                var dbNode = dbNodes.Single(n => n.Id == Convert.ToInt32(node.Id));
+                int id;
 
-                dbNode.Position = position;
-
-                if (node.Parent == "#")
+                if (int.TryParse(node.Id, out id))
                 {
-                    dbNode.ParentId = null;
+                    var dbNode = dbNodes.Single(n => n.Id == Convert.ToInt32(node.Id));
+
+                    dbNode.Position = position;
+                    dbNode.Name = node.Text;
+
+                    if (node.Parent == "#")
+                    {
+                        dbNode.ParentId = null;
+                    }
+                    else
+                    {
+                        dbNode.ParentId = Convert.ToInt32(node.Parent);
+                    }
+
+                    _gameManagerNodeService.Update(dbNode, false);
                 }
                 else
                 {
-                    dbNode.ParentId = Convert.ToInt32(node.Parent);
+                    _gameManagerNodeService.Create(node.ToGameManagerNode(), false);
                 }
-
-                _gameManagerNodeService.Update(dbNode, false);
 
                 position++;
             }
 
             _gameManagerNodeService.Save();
             _gameManagerService.UpdateGames(dbNodes);
+
+            return Json("Tree updated!");
         }
 
         [HttpGet("{id}")]
@@ -209,13 +221,20 @@ namespace BleemSync.Controllers
             return Json("Game updated!");
         }
 
-        private ActionResult DeleteGame(GameUpload gameUpload)
+        [HttpDelete("{id}")]
+        public ActionResult DeleteGame(int id)
         {
-            var node = _gameManagerNodeService.Get(gameUpload.Id);
+            var node = _gameManagerNodeService.Get(id);
+
             _gameManagerNodeService.Delete(node);
             _gameManagerService.DeleteGame(node);
 
-            return Json("Game deleted!");
+            return Json("Node deleted!");
+        }
+
+        private ActionResult DeleteGame(GameUpload gameUpload)
+        {
+            return DeleteGame(gameUpload.Id);
         }
 
         [HttpPost]

@@ -164,7 +164,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         {
             foreach (var node in nodes)
             {
+                var isNewEntry = false;
                 var game = _context.Games.Find(node.Id);
+
+                if (game == null)
+                {
+                    game = new Game();
+                    game.Id = node.Id;
+                    isNewEntry = true;
+                }
 
                 game.Title = node.Name;
                 game.Publisher = node.Publisher;
@@ -172,7 +180,14 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 game.Players = node.Players.HasValue ? node.Players.Value : 0;
                 game.Position = node.Position;
 
-                _context.Games.Update(game);
+                if (isNewEntry)
+                {
+                    _context.Games.Add(game);
+                }
+                else
+                {
+                    _context.Games.Update(game);
+                }
             }
 
             _context.SaveChanges();

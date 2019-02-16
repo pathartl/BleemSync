@@ -11,6 +11,7 @@
         this._coverInput = $('input[name="Cover"]');
         this._coverPreview = $('.cover-preview');
         this._deleteGameButton = $('#edit-game-form button[value="Delete"]');
+        this._addFolderButton = $('#game-manager-add-folder');
 
         this.Init();
     }
@@ -64,6 +65,11 @@
             this.LoadAddGameForm();
         });
 
+        this._addFolderButton.on('click', (e) => {
+            e.preventDefault();
+            this.AddFolder();
+        });
+
         this._deleteGameButton.on('click', (e) => {
             if (!confirm("Are you sure you want to delete the game? This will " +
                 "also remove the virtual memory card and save state associated with the game."))
@@ -87,26 +93,42 @@
         this._tree.jstree({
             'core': {
                 'data': data,
-                'check_callback': true
+                'check_callback': true,
+                'dblclick_toggle': false
             },
             'types': {
                 '#': {
-                    'valid_children': ['Folder', 'Game']
+                    'valid_children': ['Folder', 'Game'],
+                    'icon': 'material-icons storage'
                 },
                 'Folder': {
-                    'valid_children': ['Folder', 'Game']
+                    'valid_children': ['Folder', 'Game'],
+                    'icon': 'material-icons folder'
                 },
                 'Game': {
-                    'valid_children': []
+                    'valid_children': [],
+                    'icon': 'material-icons videogame_asset'
+                }
+            },
+            'contextmenu': {
+                'items': {
+                    'delete': {
+                        'label': 'Delete',
+                        'action': (data) => this.ContextOnDelete(data)
+                    }
                 }
             },
             'plugins': [
                 'dnd',
-                'types'
+                'types',
+                'state',
+                'contextmenu'
             ]
         })
             .on('move_node.jstree', (e, data) => this.TreeOnMoveNode(data))
-            .on('select_node.jstree', (e, data) => this.TreeOnSelectNode(data));
+            .on('select_node.jstree', (node, data, event) => this.TreeOnSelectNode(node, data, event))
+            .on('rename_node.jstree', (e, data) => this.TreeOnRenameNode(data))
+            .on('dblclick.jstree', (event) => this.TreeOnDoubleClickNode(event));
     }
 
     TreeOnMoveNode(data) {
@@ -120,14 +142,42 @@
         });
     }
 
-    TreeOnSelectNode(data) {
+    TreeOnRenameNode(data) {
+        var treeData = this._tree.jstree(true).get_json(null, { 'flat': true });
+
+        $.ajax({
+            type: 'POST',
+            url: '/Games/SaveTree',
+            data: { Nodes: treeData },
+            dataType: 'json',
+            success: () => this.TreeReload()
+        });
+    }
+
+    TreeOnSelectNode(node, data, event) {
+        console.log(event);
         this.LoadEditGameForm(data.node.id);
+    }
+
+    TreeOnDoubleClickNode(event) {
+        var node = this._tree.jstree(true).get_node(event.target);
+        this._tree.jstree(true).edit(node);
     }
 
     TreeReload() {
         $.getJSON('/Games/GetTree', (data) => {
             this._tree.jstree(true).settings.core.data = data;
             this._tree.jstree(true).refresh();
+        });
+    }
+
+    ContextOnDelete(data) {
+        var node = this._tree.jstree(true).get_node(data.reference);
+
+        $.ajax({
+            type: 'DELETE',
+            url: `/Games/DeleteGame/${node.id}`,
+            success: () => this.TreeReload()
         });
     }
 
@@ -148,6 +198,15 @@
     LoadAddGameForm(viewModel) {
         this._forms.hide();
         this._addGameForm.show().setViewModel(viewModel);
+    }
+
+    AddFolder() {
+        var node = this._tree.jstree(true).create_node(null, {
+            "text": "New Folder",
+            "type": "Folder"
+        });
+
+        this._tree.jstree(true).edit(node);
     }
 
     ReadFileAsText(file) {

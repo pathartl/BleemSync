@@ -84,3 +84,66 @@
 .usb-switcher-drive-stats .progress {
     margin-bottom: 0;
 }
+
+.btn-icon {
+    padding-left: 46px;
+    position: relative;
+}
+
+.btn-icon > i {
+    color: inherit;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    margin-top: -13px;
+}
+
+.game-manager-node-tree {
+    margin-top: 15px;
+}
+
+.jstree-node {
+    background: none !important;
+}
+
+.jstree-ocl {
+    background: none !important;
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga';
+    overflow: hidden;
+}
+
+.jstree-node:not(.jstree-leaf) > .jstree-ocl::before {
+    content: 'chevron_right';
+    transition: .1s all;
+    display: block;
+}
+
+.jstree-open > .jstree-ocl::before {
+    transform: rotate(90deg);
+}
+
+.jstree-open > .jstree-anchor > .jstree-icon.folder::before {
+    content: 'folder_open';
+}
+
+.jstree-icon.folder::before {
+    content: 'folder';
+}
+
+.jstree-icon.videogame_asset::before {
+    content: 'videogame_asset';
+}
