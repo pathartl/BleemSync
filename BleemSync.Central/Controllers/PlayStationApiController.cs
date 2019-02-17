@@ -58,6 +58,7 @@ namespace BleemSync.Central.Controllers
         public ActionResult GetCoverBySerial(string serial)
         {
             var game = _service.GetGameBySerialNumber(serial);
+            if (game == null) return new NotFoundResult();
             var cover = game.Covers.First();
 
             var coverDirectory = _configuration["CoversPath"];
