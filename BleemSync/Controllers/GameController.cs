@@ -91,6 +91,7 @@ namespace BleemSync.Controllers
 
             _gameManagerNodeService.Save();
             _gameManagerService.UpdateGames(dbNodes);
+            _gameManagerService.GenerateFolders();
 
             return Json("Tree updated!");
         }
@@ -171,6 +172,7 @@ namespace BleemSync.Controllers
             _gameManagerNodeService.Save();
 
             _gameManagerService.AddGame(node);
+            _gameManagerService.GenerateFolders();
 
             Response.StatusCode = (int)HttpStatusCode.OK;
             return Json("Game added!");
@@ -217,6 +219,7 @@ namespace BleemSync.Controllers
             }
 
             _gameManagerService.UpdateGame(node);
+            _gameManagerService.GenerateFolders();
 
             return Json("Game updated!");
         }
@@ -228,6 +231,7 @@ namespace BleemSync.Controllers
 
             _gameManagerNodeService.Delete(node);
             _gameManagerService.DeleteGame(node);
+            _gameManagerService.GenerateFolders();
 
             return Json("Node deleted!");
         }
@@ -235,13 +239,6 @@ namespace BleemSync.Controllers
         private ActionResult DeleteGame(GameUpload gameUpload)
         {
             return DeleteGame(gameUpload.Id);
-        }
-
-        [HttpPost]
-        public IActionResult Sync()
-        {
-            _gameManagerService.Sync();
-            return Json("Syncing");
         }
     }
 }
