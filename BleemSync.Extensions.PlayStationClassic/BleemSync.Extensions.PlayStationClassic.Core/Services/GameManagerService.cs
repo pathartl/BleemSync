@@ -82,14 +82,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
                 switch (fileInfo.Extension.ToLower())
                 {
-                    case ".pbp":
-                        break;
                 }
             }
 
-            var cueFiles = files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
-            var firstDiscFile = cueFiles.Select(f => f.Name).FirstOrDefault();
-            if (firstDiscFile == null) firstDiscFile = files.First().Name;
+            files.AddRange(additionalFiles);
+
+            var cueFiles = files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue").ToList();
+            // If we don't have any .cues, assume all files (except cover.png) are discs
+            if (cueFiles.Count == 0) cueFiles = files.Where(f => f.Name != "cover.png").ToList();
+            var firstDiscFile = cueFiles.First().Name;
             var baseName = Path.GetFileNameWithoutExtension(firstDiscFile);
             var coverFile = files.Where(f => f.Name == "cover.png").FirstOrDefault();
             if (coverFile != null)
@@ -101,8 +102,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 coverFile.Path = Path.GetFullPath(newCoverFilePath);
                 coverFile.Name = newCoverFileName;
             }
-
-            files.AddRange(additionalFiles);
 
             var discNum = 1;
             foreach (var cueFile in cueFiles)
@@ -219,6 +218,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 if (node.Files.Count > 0)
                 {
                     var cueFiles = node.Files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
+                    if (cueFiles.Count() == 0) cueFiles = node.Files.Where(f => Path.GetExtension(f.Name) != ".png");
 
                     var discNum = 1;
 
