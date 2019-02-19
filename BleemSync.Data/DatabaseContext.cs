@@ -30,7 +30,9 @@ namespace BleemSync.Data
         {
             var connectionStringPath = Path.Combine(_config["BleemSync:Destination"], _config["BleemSync:Path"], _config["BleemSync:DatabaseFile"]);
 
-            optionsBuilder.UseSqlite($"Data Source={connectionStringPath}");
+            optionsBuilder
+                .UseLazyLoadingProxies()
+                .UseSqlite($"Data Source={connectionStringPath}");
         }
     }
 }

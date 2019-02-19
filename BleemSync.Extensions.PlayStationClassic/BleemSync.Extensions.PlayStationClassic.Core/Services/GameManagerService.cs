@@ -34,6 +34,11 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
         private void AddDiscs(GameManagerNode gameNode)
         {
+            AddDiscs(gameNode, _context);
+        }
+
+        private void AddDiscs(GameManagerNode gameNode, MenuDatabaseContext context)
+        {
             #region Populate Disc Entries
             // Playlist files / cue sheets should always be first in this list
             var launchableGameFileExtensions = new string[]
@@ -75,10 +80,12 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                     GameId = gameNode.Id,
                 };
 
-                _context.Discs.Add(disc);
+                context.Discs.Add(disc);
 
                 discNum++;
             }
+
+            context.SaveChanges();
             #endregion
         }
 
@@ -110,24 +117,27 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             }
 
             #region Move Cover File
-            // Rename the cover file to the basename of the game's image or cue sheet
-            string basename = "";
-            var firstCueSheet = gameNode.Files.Where(f => Path.GetExtension(f.Path) == ".cue").FirstOrDefault();
-
-            if (firstCueSheet != null)
+            if (gameNode.Files.Count > 0)
             {
-                basename = Path.GetFileNameWithoutExtension(firstCueSheet.Path);
-            }
-            else
-            {
-                basename = Path.GetFileNameWithoutExtension(gameNode.Files.First().Path);
-            }
+                // Rename the cover file to the basename of the game's image or cue sheet
+                string basename = "";
+                var firstCueSheet = gameNode.Files.Where(f => Path.GetExtension(f.Path) == ".cue").FirstOrDefault();
 
-            var cover = gameNode.Files.Where(f => f.Name == "cover.png").FirstOrDefault();
+                if (firstCueSheet != null)
+                {
+                    basename = Path.GetFileNameWithoutExtension(firstCueSheet.Path);
+                }
+                else
+                {
+                    basename = Path.GetFileNameWithoutExtension(gameNode.Files.First().Path);
+                }
 
-            if (cover != null)
-            {
-                FileUtility.Move(cover.Path, Path.Combine(gameDirectory, $"{basename}.png"));
+                var cover = gameNode.Files.Where(f => f.Name == "cover.png").FirstOrDefault();
+
+                if (cover != null)
+                {
+                    FileUtility.Move(cover.Path, Path.Combine(gameDirectory, $"{basename}.png"));
+                }
             }
             #endregion
 
@@ -142,7 +152,12 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         private void AddGame(GameManagerNode node, MenuDatabaseContext context)
         {
             UpdateGame(node, context);
-            MoveGame(node);
+
+            if (node.Type == GameManagerNodeType.Game)
+            {
+                MoveGame(node);
+                AddDiscs(node, context);
+            }
         }
 
         public void UpdateGame(GameManagerNode node)
@@ -153,7 +168,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
         private void UpdateGame(GameManagerNode node, MenuDatabaseContext context)
         {
             var exists = true;
-            var game = _context.Games.Find(node.Id);
+            var game = context.Games.Find(node.Id);
 
             // If game doesn't exist in database, create it
             if (game == null)
@@ -327,11 +342,15 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                     folderId.ToString()
                 );
 
+                var folderDatabaseFilePath = Path.Combine(folderGameDir, "folder.db");
+
+                if (File.Exists(folderDatabaseFilePath))
+                {
+                    File.Delete(folderDatabaseFilePath);
+                }
+
                 var optionsBuilder = new DbContextOptionsBuilder<MenuDatabaseContext>();
-                optionsBuilder.UseSqlite("Data Source=" + Path.Combine(
-                    folderGameDir,
-                    "folder.db"
-                ));
+                optionsBuilder.UseSqlite($"Data Source={folderDatabaseFilePath}");
 
                 Directory.CreateDirectory(folderGameDir);
 
