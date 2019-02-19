@@ -2,6 +2,7 @@
 using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
+using BleemSync.Services.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -102,7 +103,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 // Lowercase/normalize extension
                 Path.ChangeExtension(destination, extension);
 
-                File.Move(source, destination);
+                FileUtility.Move(source, destination);
 
                 // Update the path in the database
                 file.Path = Path.GetFullPath(destination);
@@ -126,7 +127,7 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
 
             if (cover != null)
             {
-                File.Move(cover.Path, Path.Combine(gameDirectory, $"{basename}.png"));
+                FileUtility.Move(cover.Path, Path.Combine(gameDirectory, $"{basename}.png"));
             }
             #endregion
 
