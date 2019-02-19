@@ -59,7 +59,7 @@ namespace BleemSync.Central.Services
 
             var game = _context.Games.Where(g => g.Discs.Any(d => d.SerialNumber == sanitized)).FirstOrDefault();
 
-            return new GameDTO(game);
+            return game == null ? null : new GameDTO(game);
         }
     }
 }
