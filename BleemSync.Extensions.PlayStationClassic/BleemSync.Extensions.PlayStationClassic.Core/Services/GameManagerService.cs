@@ -330,6 +330,36 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             return nodes;
         }
 
+        private void AddParentNavigationItem(int parentId, MenuDatabaseContext context)
+        {
+            var parent = _bleemsyncContext.Nodes.Where(n => n.Id == parentId).FirstOrDefault();
+
+            AddParentNavigationItem(parent, context);
+        }
+
+        private void AddParentNavigationItem(GameManagerNode parent, MenuDatabaseContext context)
+        {
+            var parentNavItem = new Game()
+            {
+                Id = parent.Id,
+                Title = "Back",
+                Players = 1,
+                Publisher = parent.Name,
+                Position = -1,
+                Discs = new List<Disc>()
+                {
+                    new Disc()
+                    {
+                        DiscBasename = "folder",
+                        DiscNumber = 1,
+                        GameId = parent.Id
+                    }
+                }
+            };
+
+            context.Games.Add(parentNavItem);
+        }
+
         public void GenerateFolders()
         {
             var folderIds = _bleemsyncContext.Nodes.Where(n => n.Type == GameManagerNodeType.Folder).Select(n => n.Id).ToList();
@@ -357,6 +387,8 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 using (var folderContext = new MenuDatabaseContext(optionsBuilder.Options, _configuration))
                 {
                     var nodesForFolder = _bleemsyncContext.Nodes.Where(n => n.ParentId == folderId).ToList();
+
+                    AddParentNavigationItem(folderId, folderContext);
 
                     foreach (var node in nodesForFolder)
                     {
