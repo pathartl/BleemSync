@@ -14,7 +14,7 @@ namespace BleemSync.Central.Web.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("BleemSync.Central.Data.Models.EsrbRatingDescriptor", b =>
@@ -152,6 +152,8 @@ namespace BleemSync.Central.Web.Migrations
 
                     b.Property<int>("Region");
 
+                    b.Property<int>("RevisionId");
+
                     b.Property<string>("Title");
 
                     b.Property<string>("Version");
@@ -191,6 +193,9 @@ namespace BleemSync.Central.Web.Migrations
                     b.HasIndex("GameId");
 
                     b.HasIndex("RejectedById");
+
+                    b.HasIndex("RevisedGameId")
+                        .IsUnique();
 
                     b.HasIndex("SubmittedById");
 
@@ -418,7 +423,7 @@ namespace BleemSync.Central.Web.Migrations
                         .WithMany()
                         .HasForeignKey("ApprovedById");
 
-                    b.HasOne("BleemSync.Central.Data.Models.PlayStation.Game")
+                    b.HasOne("BleemSync.Central.Data.Models.PlayStation.Game", "Game")
                         .WithMany("Revisions")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -426,6 +431,11 @@ namespace BleemSync.Central.Web.Migrations
                     b.HasOne("BleemSync.Central.Data.Models.ApplicationUser", "RejectedBy")
                         .WithMany()
                         .HasForeignKey("RejectedById");
+
+                    b.HasOne("BleemSync.Central.Data.Models.PlayStation.Game", "RevisedGame")
+                        .WithOne("Revision")
+                        .HasForeignKey("BleemSync.Central.Data.Models.PlayStation.GameRevision", "RevisedGameId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BleemSync.Central.Data.Models.ApplicationUser", "SubmittedBy")
                         .WithMany()

@@ -18,6 +18,8 @@ namespace BleemSync.Central.Data.Models.PlayStation
         public virtual ICollection<Disc> Discs { get; set; }
         public virtual ICollection<Art> Art { get; set; }
         public virtual ICollection<GameRevision> Revisions { get; set; }
+        public int RevisionId { get; set; }
+        public virtual GameRevision Revision { get; set; }
 
         public Game() : base()
         {

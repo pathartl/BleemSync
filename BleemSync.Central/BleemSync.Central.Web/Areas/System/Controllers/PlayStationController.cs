@@ -21,9 +21,15 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
 
         public IActionResult Index()
         {
-            var games = _service.GetGames();
+            return View();
+        }
 
-            return View(games);
+        [HttpGet("{id}")]
+        public IActionResult Details(int id)
+        {
+            var game = _service.GetGame(id);
+
+            return View(game);
         }
 
         [HttpGet("{id}")]
@@ -37,9 +43,46 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
         [HttpPost("{id}")]
         public IActionResult Edit(Game game)
         {
-            _service.ReviseGame(game);
+            _service.ReviseGameAsync(game);
 
             return RedirectToAction("Index");
+        }
+
+        public IActionResult Moderation()
+        {
+            var games = _service.GetGameRevisions(gr => gr.ApprovedBy == null).ToList();
+
+            return View(games);
+        }
+
+        public IActionResult DataTable()
+        {
+            int start = Convert.ToInt32(Request.Form["start"]);
+            int length = Convert.ToInt32(Request.Form["length"]);
+
+            var games = _service.GetGames(start, length).ToList();
+
+            int filteredCount = games.Count;
+
+            List<string[]> records = new List<string[]>();
+
+            foreach (var game in games)
+            {
+                records.Add(new string[]
+                {
+                    $"<a href=\"{Url.Action("Details", new { Id = game.Id })}\">{game.Title}</a>"
+                });
+            }
+
+            dynamic result = new
+            {
+                draw = Request.Form["draw"],
+                recordsTotal = filteredCount,
+                recordsFiltered = filteredCount,
+                data = records
+            };
+
+            return Json(result);
         }
     }
 }

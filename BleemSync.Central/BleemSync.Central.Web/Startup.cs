@@ -46,6 +46,7 @@ namespace BleemSync.Central.Web
                 .AddEntityFrameworkStores<DatabaseContext>();
 
             services.AddScoped<PlayStationService>();
+            services.AddHttpContextAccessor();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

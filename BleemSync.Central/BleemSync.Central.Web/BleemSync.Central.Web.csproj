@@ -22,4 +22,63 @@
     <ProjectReference Include="..\..\BleemSync.UI\BleemSync.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Medium-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-BoldItalic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Italic-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-BoldItalic-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Thin-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-LightItalic-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Black-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Italic-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Black-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Light-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Regular-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Light-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-ThinItalic-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-MediumItalic-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Bold-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-BoldItalic-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Regular-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Light-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Black-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-BlackItalic-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-LightItalic-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Thin-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Regular-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Medium-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Regular-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Bold-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Italic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-ThinItalic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Italic-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-LightItalic-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-BoldItalic-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Light-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-BoldItalic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Regular-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Light-webfont.ttf" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Italic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-ThinItalic-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Thin-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-MediumItalic-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-BlackItalic-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-LightItalic-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-BoldItalic-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-LightItalic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Medium-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Bold-webfont.svg" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Bold-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-Light-webfont.eot" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\Roboto-BlackItalic-webfont.woff" />
+    <Content Remove="wwwroot\lib\propeller\fonts\roboto\RobotoCondensed-Italic-webfont.svg" />
+    <Content Remove="wwwroot\lib\bleemsync\form-helpers.js" />
+    <Content Remove="wwwroot\lib\bleemsync\playstation-utilities.js" />
+    <Content Remove="wwwroot\lib\bleemsync\alerts.js" />
+    <Content Remove="wwwroot\lib\bleemsync\custom.css" />
+    <Content Remove="wwwroot\lib\bleemsync\central-service.js" />
+    <Content Remove="wwwroot\lib\bleemsync\game-manager.js" />
+    <Content Remove="wwwroot\lib\bleemsync\scrape-games.js" />
+    <Content Remove="Areas\System\Views\_ViewStart.cshtml" />
+  </ItemGroup>
 </Project>

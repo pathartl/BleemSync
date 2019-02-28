@@ -1,0 +1,24 @@
+﻿@addTagHelper *, BleemSync.UI
+@model BleemSync.Central.Data.Models.PlayStation.Game
+
+<card title="@Model.Title">
+    <card-body>
+        <form method="post">
+            <hidden asp-for="Id" />
+            <textbox disabled asp-for="Title" />
+            <textbox disabled asp-for="Fingerprint" />
+            <textbox disabled asp-for="Version" />
+            <textbox disabled asp-for="Developer" />
+            <textbox disabled asp-for="Publisher" />
+            <textbox disabled asp-for="DateReleased" />
+            <textbox disabled asp-for="Players" />
+            <checkbox disabled asp-for="OfficiallyLicensed" />
+            <checkbox disabled asp-for="MultitapCompatible" />
+            <checkbox disabled asp-for="LinkCableCompatible" />
+            <checkbox disabled asp-for="VibrationCompatible" />
+            <checkbox disabled asp-for="AnalogCompatible" />
+            <checkbox disabled asp-for="DigitalCompatible" />
+            <checkbox disabled asp-for="LightGunCompatible" />
+        </form>
+    </card-body>
+</card>

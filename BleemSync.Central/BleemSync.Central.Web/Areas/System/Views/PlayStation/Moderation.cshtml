@@ -1,0 +1,25 @@
+﻿@addTagHelper *, BleemSync.UI
+@model IEnumerable<BleemSync.Central.Data.Models.PlayStation.GameRevision>
+
+<card>
+    <card-body>
+        <table id="datatable" class="table pmd-table table-hover table-striped display responsive nowrap" cellspacing="0" cellpadding="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Fingerprint</th>
+                    <th>Title</th>
+                    <th>Submitter</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var revision in Model) {
+                    <tr>
+                        <td>@revision.Game.Fingerprint</td>
+                        <td>@revision.Game.Title</td>
+                        <td>@revision.SubmittedBy.UserName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </card-body>
+</card>

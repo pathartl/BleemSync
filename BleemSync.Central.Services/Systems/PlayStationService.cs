@@ -1,9 +1,13 @@
 ﻿using BleemSync.Central.Data;
 using BleemSync.Central.Data.Models;
 using BleemSync.Central.Data.Models.PlayStation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Text;
 
 namespace BleemSync.Central.Services.Systems
@@ -11,37 +15,46 @@ namespace BleemSync.Central.Services.Systems
     public class PlayStationService
     {
         public readonly DatabaseContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PlayStationService(DatabaseContext context)
+        public PlayStationService(DatabaseContext context, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public IEnumerable<Game> GetGames()
         {
-            return _context.PlayStation_Games.Where(g => g.IsActive).ToList();
+            return GetGames(g => g.IsActive).ToList();
         }
 
         public IEnumerable<Game> GetGames(int start, int length)
         {
-            return _context.PlayStation_Games.Where(g => g.IsActive).Skip(start).Take(length).ToList();
+            return GetGames(g => g.IsActive).Skip(start).Take(length).ToList();
+        }
+
+        public IQueryable<Game> GetGames(Expression<Func<Game, bool>> predicate)
+        {
+            return _context.PlayStation_Games.Where(predicate);
         }
 
         public int GetGamesCount()
         {
-            return _context.PlayStation_Games.Where(g => g.IsActive).Count();
+            return GetGames(g => g.IsActive).Count();
         }
 
         public Game GetGame(int id)
         {
-            return _context.PlayStation_Games.Where(g => g.IsActive).SingleOrDefault(g => g.Id == id);
+            return GetGames(g => g.IsActive).SingleOrDefault(g => g.Id == id);
         }
 
         public Game GetGameByFingerprint(string fingerprint)
         {
             var sanitizedFingerprint = fingerprint.Trim();
 
-            var game = _context.PlayStation_Games.Where(g => g.Fingerprint == sanitizedFingerprint && g.IsActive).FirstOrDefault();
+            var game = GetGames(g => g.Fingerprint == sanitizedFingerprint && g.IsActive).FirstOrDefault();
 
             if (game == null)
             {
@@ -49,6 +62,16 @@ namespace BleemSync.Central.Services.Systems
             }
 
             return game;
+        }
+
+        public IEnumerable<GameRevision> GetGameRevisions()
+        {
+            return GetGameRevisions(gr => true).ToList();
+        }
+
+        public IQueryable<GameRevision> GetGameRevisions(Expression<Func<GameRevision, bool>> predicate)
+        {
+            return _context.PlayStation_GameRevisions.Where(predicate);
         }
 
         public void AddGame(Game game)
@@ -63,8 +86,9 @@ namespace BleemSync.Central.Services.Systems
             _context.SaveChanges();
         }
 
-        public void ReviseGame(Game game)
+        public async void ReviseGameAsync(Game game)
         {
+            var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
             var originalGameId = game.Id;
 
             game.Id = 0;
@@ -76,7 +100,7 @@ namespace BleemSync.Central.Services.Systems
             {
                 GameId = originalGameId,
                 SubmittedOn = DateTime.Now,
-                // SubmittedBy
+                SubmittedBy = user,
                 RevisedGameId = game.Id
             };
 
