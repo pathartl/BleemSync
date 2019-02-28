@@ -2,7 +2,7 @@
 @using System.ComponentModel.DataAnnotations;
 @addTagHelper *, BleemSync.UI
 
-<partial name="ProgressBar" />
+<partial name="UploadQueue" />
 
 <link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
 
@@ -16,13 +16,11 @@
     <card title="Game Manager">
         <card-body>
             <div class="game-manager-kitchen-sink">
+                <button class="add-game-button" text="Add Game" icon="gamepad" onclick="" />
                 <button id="game-manager-add-folder" text="Add Folder" icon="create_new_folder" />
             </div>
             <div class="game-manager-node-tree" data-url="@Url.Action("GetTree")"></div>
         </card-body>
-        <card-actions>
-            <button text="Add New Game" class="add-game-button" onclick="" />
-        </card-actions>
     </card>
 </column>
 
@@ -32,6 +30,7 @@
           enctype="multipart/form-data"
           data-ajax="true"
           data-ajax-method="POST"
+          data-ajax-queue="Queued"
           data-ajax-success="GameAdded"
           data-ajax-failure="XHRError">
         <card title="Add New Game">

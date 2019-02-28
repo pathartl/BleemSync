@@ -1,4 +1,48 @@
-﻿class GameManager {
+﻿class UploadQueue {
+    constructor() {
+        this.Requests = new Array();
+        this.IsUploading = false;
+
+        this._queuePane = $('#upload-queue');
+        this._displayName = $('#upload-queue--current-upload-name');
+        this._queueList = $('.upload-queue--list');
+    }
+
+    Start() {
+        this._queuePane.addClass('active');
+
+        if (!this.IsUploading) {
+            this.IsUploading = true;
+            this.Upload(this.Requests[0]);
+            this.Requests = this.Requests.slice(1);
+        }
+    }
+
+    Add(options) {
+        this.Requests.push(options);
+
+        var listItem = $('<div />').addClass('upload-queue--list--item list-group-item').text(options.data.get('Name'));
+
+        this._queueList.append(listItem);
+    }
+
+    Upload(options) {
+        this._displayName.text(options.data.get('Name'));
+        $.ajax(options);
+    }
+
+    Complete() {
+        this._queueList.find('.list-group-item').first().remove();
+
+        if (this.Requests.length == 0) {
+            this._queuePane.removeClass('active');
+            this._queuePane.find('.progress-bar').css('width', 0);
+            this._displayName.text('');
+        }
+    }
+}
+
+class GameManager {
     constructor() {
         this._tree = $('.game-manager-node-tree');
         this._forms = $('.game-manager-form');
@@ -6,12 +50,14 @@
         this._addGameForm = $('#add-game-form');
         this._addGameButton = $('.add-game-button');
         this._uploadInput = $('input[name="Files"]');
-        this._progressBar = $('#progress-bar-modal');
+        this._progressBar = $('#progress-bar');
         this._coverDropZone = $('.cover-dropzone');
         this._coverInput = $('input[name="Cover"]');
         this._coverPreview = $('.cover-preview');
         this._deleteGameButton = $('#edit-game-form button[value="Delete"]');
         this._addFolderButton = $('#game-manager-add-folder');
+
+        this._uploadQueue = new UploadQueue();
 
         this.Init();
     }
@@ -36,6 +82,13 @@
                 AlertService.Error("You've selected .cue files but not .bin files. You should select both kinds of files.");
 
             this.ParseUploader();
+        });
+
+        this._addGameForm.on('Queued', (e, options) => {
+            e.preventDefault();
+            this._uploadQueue.Add(options);
+            this._uploadQueue.Start();
+            this._addGameForm.clearForm();
         });
 
         this._addGameForm.on('GameAdded', () => {
@@ -264,18 +317,21 @@
     }
 
     OnGameUpdated() {
-        this._progressBar.modal('hide');
+        // this._progressBar.modal('hide');
         this.TreeReload();
         this._editGameForm.clearForm();
         this._forms.hide();
     }
 
     OnGameAdded() {
-        this._progressBar.modal('hide');
+        this._uploadQueue.IsUploading = false;
+        // this._progressBar.modal('hide');
         this._uploadInput.val(null);
         this.TreeReload();
         this._addGameForm.clearForm();
         this._forms.hide();
+        this._uploadQueue.Start();
+        this._uploadQueue.Complete();
     }
 
     OnXHRError(response) {

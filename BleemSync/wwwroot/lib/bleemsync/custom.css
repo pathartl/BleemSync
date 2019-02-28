@@ -86,11 +86,20 @@
 }
 
 .btn-icon {
-    padding-left: 46px;
     position: relative;
 }
 
-.btn-icon > i {
+.btn-icon.no-text {
+    height: 26px;
+    width: 26px;
+    padding: 0;
+}
+
+.btn-icon:not(.no-text) {
+    padding-left: 46px;
+}
+
+.btn-icon:not(.no-text) > i {
     color: inherit;
     position: absolute;
     left: 12px;
@@ -146,4 +155,50 @@
 
 .jstree-icon.videogame_asset::before {
     content: 'videogame_asset';
+}
+
+#upload-queue {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: #4285f4;
+    padding: 15px;
+    padding-top: 8px;
+    transition: .1s all;
+    transform: translateY(100%);
+}
+
+#upload-queue.active {
+    transform: translateY(0);
+}
+
+#upload-queue.active.expand {
+    transform: translateY(-400%);
+}
+
+.upload-queue--progress {
+    color: #fff;
+}
+
+.upload-queue--progress #progress-bar {
+    margin-top: 8px;
+}
+
+#upload-queue.expand .upload-queue--expand-list-button > i {
+    transform: rotate(180deg);
+}
+
+#upload-queue .progress {
+    margin-bottom: 0px;
+}
+
+.upload-queue--list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 400%;
+    background: #fff;
 }

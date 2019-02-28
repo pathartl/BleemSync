@@ -9,16 +9,16 @@
             </a>
             <a href="/" class="navbar-brand"><img src="~/img/logo.png" alt="BleemSync Logo" style="width: 96px;" /></a>
         </div>
+
         <div class="pmd-navbar-right-icon pull-right">
-            <form
-                id="switch-destination-device"
-                asp-controller="UsbApi"
-                asp-action="SwitchDestinationDevice"
-                enctype="multipart/form-data"
-                data-ajax="true"
-                data-ajax-method="POST"
-                data-ajax-success="DeviceSwitched"
-                data-ajax-failure="XHRError">
+            <form id="switch-destination-device"
+                  asp-controller="UsbApi"
+                  asp-action="SwitchDestinationDevice"
+                  enctype="multipart/form-data"
+                  data-ajax="true"
+                  data-ajax-method="POST"
+                  data-ajax-success="DeviceSwitched"
+                  data-ajax-failure="XHRError">
                 <span class="dropdown pmd-dropdown clearfix">
                     <button class="btn pmd-ripple-effect btn-primary dropdown-toggle" type="button" id="dropdownMenuDivider" data-toggle="dropdown" aria-expanded="true">
                         <i class="material-icons">usb</i>
@@ -56,13 +56,5 @@
                 </span>
             </form>
         </div>
-        @*<div class="pmd-navbar-right-icon pull-right">
-                <a href="/Games/Sync"
-                   class="btn my-auto pmd-btn-raised pmd-ripple-effect btn-success"
-                   style="margin: .74rem 0; height: 40px;"
-                   data-ajax="true"
-                   data-ajax-method="post"
-                   data-ajax-confirm="Continuing will reboot the console. Are you sure?">Sync</a>
-            </div>*@
     </div>
 </nav>

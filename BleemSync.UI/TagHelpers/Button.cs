@@ -141,6 +141,11 @@ namespace BleemSync.UI
                 output.PreContent.AppendHtml($"<i class=\"material-icons pmd-sm\">{Icon}</i>");
             }
 
+            if (Text == null)
+            {
+                output.AddClass("no-text");
+            }
+
             if (Action != null || Controller != null)
             {
                 if (Type == null || (Type != null && Type == "submit"))
@@ -157,6 +162,7 @@ namespace BleemSync.UI
             }
             else if (OnClick != null)
             {
+                output.SetAttribute("onclick", OnClick);
                 output.TagName = "button";
             }
             else
