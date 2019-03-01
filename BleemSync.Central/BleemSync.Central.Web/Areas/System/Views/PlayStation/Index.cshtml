@@ -3,10 +3,12 @@
 
 <card>
     <card-body>
-        <table id="datatable" class="table pmd-table table-hover table-striped display responsive nowrap" cellspacing="0" cellpadding="0" width="100%">
+        <table id="datatable" class="table pmd-table table-hover table-striped table-sm display responsive nowrap" cellspacing="0" cellpadding="0" width="100%">
             <thead>
                 <tr>
+                    <th>Serial</th>
                     <th>Title</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -27,7 +29,7 @@
                 style: 'multi',
                 selector: 'td:first-child'
             },
-            order: [0, 'asc'],
+            order: [1, 'asc'],
             ordering: false,
             bFilter: true,
             bLengthChange: true,

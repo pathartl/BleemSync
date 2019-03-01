@@ -86,7 +86,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
 
             var games = _service.GetGames(g => g.IsActive).OrderBy(g => g.Title).Skip(start).Take(length).ToList();
 
-            int filteredCount = games.Count;
+            int filteredCount = _service.GetGamesCount();
 
             List<string[]> records = new List<string[]>();
 
@@ -94,7 +94,9 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
             {
                 records.Add(new string[]
                 {
-                    $"<a href=\"{Url.Action("Details", new { Id = game.Id })}\">{game.Title}</a>"
+                    game.Fingerprint,
+                    game.Title,
+                    $"<div class=\"text-right\"><a href=\"{Url.Action("Details", new { Id = game.Id })}\" class=\"btn btn-primary\">More Info</a></div>"
                 });
             }
 
