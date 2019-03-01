@@ -42,3 +42,43 @@
 .cover-dropzone img {
     max-width: 100%;
 }
+
+.alert {
+    padding: .5rem 1.5rem;
+    background: #000;
+    border-radius: .125rem;
+    font-size: 1rem;
+    border: none;
+}
+
+.alert-danger {
+    color: #fff;
+    background-color: #ff5722;
+}
+
+.alert-info {
+    color: #fff;
+    background-color: #038fce;
+}
+
+.alert-warning {
+    color: #333;
+    background-color: #ffc107;
+}
+
+.alert-success {
+    color: #fff;
+    background-color: #259b24;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
