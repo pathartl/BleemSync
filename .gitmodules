@@ -2,3 +2,6 @@
 	path = BleemSync.Payload.PlayStationClassic
 	url = https://github.com/pathartl/BleemSync.Payload.PlayStationClassic.git
 	branch = master
+[submodule "BleemSync.UI"]
+	path = BleemSync.UI
+	url = https://github.com/pathartl/BleemSync.UI.git
