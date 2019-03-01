@@ -207,49 +207,6 @@ namespace BleemSync.Central.Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GameRevisions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    SubmittedById = table.Column<string>(nullable: true),
-                    SubmittedOn = table.Column<DateTime>(nullable: true),
-                    ApprovedById = table.Column<string>(nullable: true),
-                    ApprovedOn = table.Column<DateTime>(nullable: true),
-                    RejectedById = table.Column<string>(nullable: true),
-                    RejectedOn = table.Column<DateTime>(nullable: true),
-                    GameId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GameRevisions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GameRevisions_AspNetUsers_ApprovedById",
-                        column: x => x.ApprovedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_GameRevisions_PlayStation_Games_GameId",
-                        column: x => x.GameId,
-                        principalTable: "PlayStation_Games",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_GameRevisions_AspNetUsers_RejectedById",
-                        column: x => x.RejectedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_GameRevisions_AspNetUsers_SubmittedById",
-                        column: x => x.SubmittedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Genres",
                 columns: table => new
                 {
@@ -307,6 +264,56 @@ namespace BleemSync.Central.Web.Migrations
                         name: "FK_PlayStation_Discs_PlayStation_Games_GameId",
                         column: x => x.GameId,
                         principalTable: "PlayStation_Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayStation_GameRevisions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    SubmittedById = table.Column<string>(nullable: true),
+                    SubmittedOn = table.Column<DateTime>(nullable: true),
+                    ApprovedById = table.Column<string>(nullable: true),
+                    ApprovedOn = table.Column<DateTime>(nullable: true),
+                    RejectedById = table.Column<string>(nullable: true),
+                    RejectedOn = table.Column<DateTime>(nullable: true),
+                    GameId = table.Column<int>(nullable: false),
+                    RevisedGameId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayStation_GameRevisions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayStation_GameRevisions_AspNetUsers_ApprovedById",
+                        column: x => x.ApprovedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PlayStation_GameRevisions_PlayStation_Games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "PlayStation_Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlayStation_GameRevisions_AspNetUsers_RejectedById",
+                        column: x => x.RejectedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PlayStation_GameRevisions_PlayStation_Games_RevisedGameId",
+                        column: x => x.RevisedGameId,
+                        principalTable: "PlayStation_Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlayStation_GameRevisions_AspNetUsers_SubmittedById",
+                        column: x => x.SubmittedById,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -384,26 +391,6 @@ namespace BleemSync.Central.Web.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GameRevisions_ApprovedById",
-                table: "GameRevisions",
-                column: "ApprovedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameRevisions_GameId",
-                table: "GameRevisions",
-                column: "GameId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameRevisions_RejectedById",
-                table: "GameRevisions",
-                column: "RejectedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GameRevisions_SubmittedById",
-                table: "GameRevisions",
-                column: "SubmittedById");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Genres_GameId",
                 table: "Genres",
                 column: "GameId");
@@ -427,6 +414,32 @@ namespace BleemSync.Central.Web.Migrations
                 name: "IX_PlayStation_Discs_GameId",
                 table: "PlayStation_Discs",
                 column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayStation_GameRevisions_ApprovedById",
+                table: "PlayStation_GameRevisions",
+                column: "ApprovedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayStation_GameRevisions_GameId",
+                table: "PlayStation_GameRevisions",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayStation_GameRevisions_RejectedById",
+                table: "PlayStation_GameRevisions",
+                column: "RejectedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayStation_GameRevisions_RevisedGameId",
+                table: "PlayStation_GameRevisions",
+                column: "RevisedGameId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayStation_GameRevisions_SubmittedById",
+                table: "PlayStation_GameRevisions",
+                column: "SubmittedById");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -450,9 +463,6 @@ namespace BleemSync.Central.Web.Migrations
                 name: "EsrbRatingDescriptors");
 
             migrationBuilder.DropTable(
-                name: "GameRevisions");
-
-            migrationBuilder.DropTable(
                 name: "Genres");
 
             migrationBuilder.DropTable(
@@ -462,13 +472,16 @@ namespace BleemSync.Central.Web.Migrations
                 name: "PlayStation_Art");
 
             migrationBuilder.DropTable(
+                name: "PlayStation_GameRevisions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "PlayStation_Discs");
 
             migrationBuilder.DropTable(
-                name: "PlayStation_Discs");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "PlayStation_Games");

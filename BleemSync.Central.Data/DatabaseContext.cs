@@ -28,16 +28,6 @@ namespace BleemSync.Central.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Models.PlayStation.GameRevision>()
-                .HasOne(gr => gr.Game)
-                .WithMany(g => g.Revisions)
-                .HasForeignKey(gr => gr.GameId);
-
-            modelBuilder.Entity<Models.PlayStation.GameRevision>()
-                .HasOne(gr => gr.RevisedGame)
-                .WithOne(g => g.Revision)
-                .HasForeignKey<Models.PlayStation.GameRevision>(g => g.RevisedGameId);
         }
     }
 }

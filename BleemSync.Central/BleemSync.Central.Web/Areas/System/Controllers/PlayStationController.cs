@@ -50,9 +50,33 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
 
         public IActionResult Moderation()
         {
-            var games = _service.GetGameRevisions(gr => gr.ApprovedBy == null).ToList();
+            var games = _service.GetGameRevisions(gr => gr.ApprovedBy == null && gr.SubmittedBy != null && gr.RejectedBy == null).ToList();
 
             return View(games);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult ReviewChanges(int id)
+        {
+            var gameRevision = _service.GetGameRevisions(gr => gr.Id == id).FirstOrDefault();
+
+            return View(gameRevision);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult RejectChanges(int id)
+        {
+            _service.RejectGameRevision(id);
+
+            return RedirectToAction("Moderation");
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult ApproveChanges(int id)
+        {
+            _service.ApproveGameRevision(id);
+
+            return RedirectToAction("Moderation");
         }
 
         public IActionResult DataTable()
@@ -60,7 +84,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
             int start = Convert.ToInt32(Request.Form["start"]);
             int length = Convert.ToInt32(Request.Form["length"]);
 
-            var games = _service.GetGames(start, length).ToList();
+            var games = _service.GetGames(g => g.IsActive).OrderBy(g => g.Title).Skip(start).Take(length).ToList();
 
             int filteredCount = games.Count;
 

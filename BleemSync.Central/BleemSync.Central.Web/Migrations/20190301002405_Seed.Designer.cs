@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BleemSync.Central.Web.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20190227043709_AddRevisionOnGame")]
-    partial class AddRevisionOnGame
+    [Migration("20190301002405_Seed")]
+    partial class Seed
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("BleemSync.Central.Data.Models.EsrbRatingDescriptor", b =>
@@ -153,8 +153,6 @@ namespace BleemSync.Central.Web.Migrations
                     b.Property<string>("Publisher");
 
                     b.Property<int>("Region");
-
-                    b.Property<int>("RevisionId");
 
                     b.Property<string>("Title");
 
@@ -426,7 +424,7 @@ namespace BleemSync.Central.Web.Migrations
                         .HasForeignKey("ApprovedById");
 
                     b.HasOne("BleemSync.Central.Data.Models.PlayStation.Game", "Game")
-                        .WithMany("Revisions")
+                        .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade);
 

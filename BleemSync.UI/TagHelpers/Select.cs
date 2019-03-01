@@ -4,6 +4,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.IO;
+using System;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace BleemSync.UI
 {
@@ -18,6 +21,42 @@ namespace BleemSync.UI
         [HtmlAttributeName("asp-items")]
         public IEnumerable<SelectListItem> Items { get; set; }
 
+        [HtmlAttributeName("disabled")]
+        public bool Disabled { get; set; }
+
+        [HtmlAttributeName("float")]
+        public bool IsFloating { get; set; }
+
+        [HtmlAttributeName("sm")]
+        public bool IsSm { get; set; }
+
+        [HtmlAttributeName("lg")]
+        public bool IsLg { get; set; }
+
+        [HtmlAttributeName("readonly")]
+        public bool ReadOnly { get; set; }
+
+        [HtmlAttributeName("required")]
+        public bool Required { get; set; }
+
+        [HtmlAttributeName("multiple")]
+        public bool Multiple { get; set; }
+
+        [HtmlAttributeName("has-warning")]
+        public bool HasWarning { get; set; }
+
+        [HtmlAttributeName("has-success")]
+        public bool HasSuccess { get; set; }
+
+        [HtmlAttributeName("has-error")]
+        public bool HasError { get; set; }
+
+        [HtmlAttributeName("icon")]
+        public string Icon { get; set; }
+
+        [HtmlAttributeName("placeholder")]
+        public string Placeholder { get; set; }
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -29,37 +68,9 @@ namespace BleemSync.UI
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            var isLg = output.Attributes.SingleOrDefault(a => a.Name == "lg") != null;
-            var isSm = output.Attributes.SingleOrDefault(a => a.Name == "sm") != null;
-            var isFloating = output.Attributes.SingleOrDefault(a => a.Name == "float") != null;
-            var isDisabled = output.Attributes.SingleOrDefault(a => a.Name == "disabled") != null;
-            var isReadOnly = output.Attributes.SingleOrDefault(a => a.Name == "readonly") != null;
-            var isRequired = output.Attributes.SingleOrDefault(a => a.Name == "required") != null;
-            var isMultiple = output.Attributes.SingleOrDefault(a => a.Name == "multiple") != null;
-            var hasWarning = output.Attributes.SingleOrDefault(a => a.Name == "has-warning") != null;
-            var hasSuccess = output.Attributes.SingleOrDefault(a => a.Name == "has-success") != null;
-            var hasError = output.Attributes.SingleOrDefault(a => a.Name == "has-error") != null;
+            var placeholder = output.HasAttribute("placeholder") ? output.GetAttribute("placeholder") : "";
 
-            var icon = output.Attributes.SingleOrDefault(a => a.Name == "icon");
-            var placeholder = output.Attributes.SingleOrDefault(a => a.Name == "placeholder");
-
-            var binding = output.Attributes.SingleOrDefault(a => a.Name == "for");
-
-            output.Attributes.RemoveAll("lg");
-            output.Attributes.RemoveAll("sm");
-            output.Attributes.RemoveAll("float");
-            output.Attributes.RemoveAll("disabled");
-            output.Attributes.RemoveAll("readonly");
-            output.Attributes.RemoveAll("required");
-            output.Attributes.RemoveAll("multiple");
-            output.Attributes.RemoveAll("has-warning");
-            output.Attributes.RemoveAll("has-success");
-            output.Attributes.RemoveAll("has-error");
-            output.Attributes.RemoveAll("icon");
-            output.Attributes.RemoveAll("placeholder");
-            output.Attributes.RemoveAll("for");
-
-            var formGroupClass = "form-group pmd-textfield";
+            output.AddClass("form-group pmd-textfield");
 
             var labelAttributes = new Dictionary<string, object>();
             var selectAttributes = new Dictionary<string, object>
@@ -67,25 +78,24 @@ namespace BleemSync.UI
                 { "class", "select-simple form-control pmd-select2" }
             };
 
-            if (isLg) formGroupClass = $"{formGroupClass} form-group-lg";
-            if (isSm) formGroupClass = $"{formGroupClass} form-group-sm";
-            if (isFloating) formGroupClass = $"{formGroupClass} pmd-textfield-floating-label";
-            if (hasWarning) formGroupClass = $"{formGroupClass} has-warning";
-            if (hasSuccess) formGroupClass = $"{formGroupClass} has-sucess";
-            if (hasError) formGroupClass = $"{formGroupClass} has-error";
+            if (IsLg) output.AddClass("form-group-lg");
+            if (IsSm) output.AddClass("form-group-sm");
+            if (IsFloating) output.AddClass("pmd-textfield-floating-label");
+            if (HasWarning) output.AddClass("has-warning");
+            if (HasSuccess) output.AddClass("has-success");
+            if (HasError) output.AddClass("has-error");
 
-            if (isDisabled) selectAttributes.Add("disabled", "disabled");
-            if (isReadOnly) selectAttributes.Add("readonly", "readonly");
-            if (isRequired) selectAttributes.Add("required", "required");
+            if (Disabled) selectAttributes.Add("disabled", "disabled");
+            if (ReadOnly) selectAttributes.Add("readonly", "readonly");
+            if (Required) selectAttributes.Add("required", "required");
 
             var inputPre = "";
             var inputPost = "";
             var labelClass = "control-label";
-            string placeholderString = placeholder != null ? placeholder.Value.ToString() : "";
 
-            if (icon != null)
+            if (Icon != null)
             {
-                inputPre = $"{inputPre}<div class=\"input-group\"><div class=\"input-group-addon\"><i class=\"material-icons md-dark pmd-sm\">{icon.Value}</i></div>";
+                inputPre = $"{inputPre}<div class=\"input-group\"><div class=\"input-group-addon\"><i class=\"material-icons md-dark pmd-sm\">{Icon}</i></div>";
                 inputPost = $"{inputPost}</div>";
                 labelClass = $"{labelClass} pmd-input-group-label";
             }
@@ -95,13 +105,42 @@ namespace BleemSync.UI
             var metadata = For.Metadata;
             var modelExplorer = For.ModelExplorer;
 
-            var select = _generator.GenerateSelect(ViewContext, modelExplorer, placeholderString, For.Name, Items, isMultiple, selectAttributes);
+            var modelType = For.ModelExplorer.ModelType;
+
+            if (Nullable.GetUnderlyingType(For.ModelExplorer.ModelType) != null)
+            {
+                modelType = Nullable.GetUnderlyingType(For.ModelExplorer.ModelType);
+            }
+
+            if (modelType.IsEnum)
+            {
+                var selectListItems = new List<SelectListItem>();
+                var enumNames = Enum.GetNames(modelType);
+                var enumValues = Enum.GetValues(modelType);
+                var attributes = modelType.GetCustomAttribute<DisplayAttribute>();
+
+                int i = 0;
+                foreach (var name in enumNames)
+                {
+                    var display = modelType.GetMember(name).First().GetCustomAttribute<DisplayAttribute>();
+                    selectListItems.Add(new SelectListItem()
+                    {
+                        Text = display == null ? name : display.Name,
+                        Value = enumValues.GetValue(i).ToString()
+                    });
+
+                    i++;
+                }
+
+                Items = selectListItems;
+            }
+
+            var select = _generator.GenerateSelect(ViewContext, modelExplorer, placeholder, For.Name, Items, Multiple, selectAttributes);
             var label = _generator.GenerateLabel(ViewContext, modelExplorer, For.Name, metadata.DisplayName, labelAttributes);
             var hidden = _generator.GenerateHidden(ViewContext, modelExplorer, For.Name, null, true, null);
 
             output.TagName = "div";
             output.TagMode = TagMode.StartTagAndEndTag;
-            output.Attributes.SetAttribute("class", formGroupClass);
 
             string selectOutput;
 

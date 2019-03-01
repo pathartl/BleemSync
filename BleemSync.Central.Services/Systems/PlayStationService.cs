@@ -3,6 +3,7 @@ using BleemSync.Central.Data.Models;
 using BleemSync.Central.Data.Models.PlayStation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +72,10 @@ namespace BleemSync.Central.Services.Systems
 
         public IQueryable<GameRevision> GetGameRevisions(Expression<Func<GameRevision, bool>> predicate)
         {
-            return _context.PlayStation_GameRevisions.Where(predicate);
+            return _context.PlayStation_GameRevisions.Where(predicate)
+                .Include(gr => gr.Game)
+                .Include(gr => gr.RevisedGame)
+                .Include(gr => gr.SubmittedBy);
         }
 
         public void AddGame(Game game)
@@ -105,6 +109,33 @@ namespace BleemSync.Central.Services.Systems
             };
 
             _context.Add(revision);
+            _context.SaveChanges();
+        }
+
+        public async void RejectGameRevision(int id)
+        {
+            var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+            var gameRevision = GetGameRevisions(gr => gr.Id == id).FirstOrDefault();
+
+            gameRevision.RejectedOn = DateTime.Now;
+            gameRevision.RejectedBy = user;
+            gameRevision.RevisedGame.IsActive = false;
+
+            _context.Update(gameRevision);
+            _context.SaveChanges();
+        }
+
+        public async void ApproveGameRevision(int id)
+        {
+            var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+            var gameRevision = GetGameRevisions(gr => gr.Id == id).FirstOrDefault();
+
+            gameRevision.ApprovedOn = DateTime.Now;
+            gameRevision.ApprovedBy = user;
+            gameRevision.Game.IsActive = false;
+            gameRevision.RevisedGame.IsActive = true;
+
+            _context.Update(gameRevision);
             _context.SaveChanges();
         }
     }

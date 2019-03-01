@@ -17,6 +17,9 @@
                         <td>@revision.Game.Fingerprint</td>
                         <td>@revision.Game.Title</td>
                         <td>@revision.SubmittedBy.UserName</td>
+                        <td style="text-align: right;">
+                            <button asp-action="ReviewChanges" asp-route-id="@revision.Id" text="Review Changes" />
+                        </td>
                     </tr>
                 }
             </tbody>

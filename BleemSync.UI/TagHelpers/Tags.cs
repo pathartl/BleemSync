@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.IO;
+using System.Collections;
 
 namespace BleemSync.UI
 {
@@ -95,7 +96,7 @@ namespace BleemSync.UI
 
             var items = new List<SelectListItem>();
 
-            if (modelExplorer.Model != null)
+            if (modelExplorer.Model != null && modelExplorer.ModelType is IEnumerable && ((IList)modelExplorer.Model).Count > 0)
             {
                 foreach (var item in (string[])modelExplorer.Model)
                 {

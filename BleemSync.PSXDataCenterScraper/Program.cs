@@ -28,9 +28,9 @@ namespace BleemSync.Scrapers.PSXDataCenterScraper
             var _context = serviceProvider.GetService<DatabaseContext>();
 
             var scraper = new PlayStationScraper(_context);
-            //scraper.ScrapeMainList("http://10.0.1.12/psxdatacenter/psxdatacenter.com/ulist.html");
+            scraper.ScrapeMainList("http://10.0.1.12/psxdatacenter/psxdatacenter.com/ulist.html");
             //scraper.ScrapeMainList("http://10.0.1.12/psxdatacenter/psxdatacenter.com/plist.html");
-            scraper.ScrapeMainList("http://10.0.1.12/psxdatacenter/psxdatacenter.com/jlist.html");
+            //scraper.ScrapeMainList("http://10.0.1.12/psxdatacenter/psxdatacenter.com/jlist.html");
         }
     }
 }
