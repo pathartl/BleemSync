@@ -1,0 +1,25 @@
+﻿@addTagHelper *, BleemSync.UI
+@model BleemSync.Central.Data.Models.PlayStation.Game
+
+<hidden asp-for="Id" />
+<textbox asp-for="Title" />
+<textbox asp-for="Fingerprint" />
+<textbox asp-for="Version" />
+<textbox asp-for="Developer" />
+<textbox asp-for="Publisher" />
+<textbox asp-for="DateReleased" />
+<dropdown asp-for="Region" />
+<textbox asp-for="Players" />
+<textarea asp-for="Description" />
+<textbox asp-for="MemoryCardBlockCount" />
+<checkbox asp-for="OfficiallyLicensed" />
+<checkbox asp-for="MultitapCompatible" />
+<checkbox asp-for="LinkCableCompatible" />
+<checkbox asp-for="VibrationCompatible" />
+<checkbox asp-for="AnalogCompatible" />
+<checkbox asp-for="DigitalCompatible" />
+<checkbox asp-for="LightGunCompatible" />
+<dropdown asp-for="EsrbRating" />
+<tags asp-for="EsrbRatingDescriptors" />
+<dropdown asp-for="PegiRating" />
+<tags asp-for="PegiDescriptors" />

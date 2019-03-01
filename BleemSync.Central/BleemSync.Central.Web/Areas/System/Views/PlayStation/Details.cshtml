@@ -3,29 +3,11 @@
 
 <card title="@Model.Title">
     <card-body>
+        <button asp-action="Edit" asp-route-id="@Model.Id" text="Edit" icon="mode_edit" />
         <form method="post">
-            <hidden asp-for="Id" />
-            <textbox disabled asp-for="Title" />
-            <textbox disabled asp-for="Fingerprint" />
-            <textbox disabled asp-for="Version" />
-            <textbox disabled asp-for="Developer" />
-            <textbox disabled asp-for="Publisher" />
-            <textbox disabled asp-for="DateReleased" />
-            <dropdown disabled asp-for="Region" />
-            <textbox disabled asp-for="Players" />
-            <textarea disabled asp-for="Description" />
-            <textbox disabled asp-for="MemoryCardBlockCount" />
-            <checkbox disabled asp-for="OfficiallyLicensed" />
-            <checkbox disabled asp-for="MultitapCompatible" />
-            <checkbox disabled asp-for="LinkCableCompatible" />
-            <checkbox disabled asp-for="VibrationCompatible" />
-            <checkbox disabled asp-for="AnalogCompatible" />
-            <checkbox disabled asp-for="DigitalCompatible" />
-            <checkbox disabled asp-for="LightGunCompatible" />
-            <dropdown disabled asp-for="EsrbRating" />
-            <tags disabled asp-for="EsrbRatingDescriptors" />
-            <dropdown disabled asp-for="PegiRating" />
-            <tags disabled asp-for="PegiDescriptors" />
+            <fieldset disabled>
+                <partial name="Partials/Fields.cshtml" model="Model" />
+            </fieldset>
         </form>
     </card-body>
 </card>

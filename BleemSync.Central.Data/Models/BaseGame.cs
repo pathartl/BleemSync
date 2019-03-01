@@ -18,15 +18,28 @@ namespace BleemSync.Central.Data.Models
         public virtual ICollection<GameGenre> Genres { get; set; }
         public string Developer { get; set; }
         public string Publisher { get; set; }
+
+        [Display(Name = "Date Released")]
         public DateTime DateReleased { get; set; }
+
         public GameRegion Region { get; set; }
+
+        [Display(Name = "Number of Players")]
         public string Players { get; set; }
 
+        [Display(Name = "ESRB Rating")]
         public EsrbRating EsrbRating { get; set; }
+
+        [Display(Name = "ESRB Rating Descriptors")]
         public virtual ICollection<EsrbRatingDescriptor> EsrbRatingDescriptors { get; set; }
 
+        [Display(Name = "PEGI Rating")]
         public PegiRating PegiRating { get; set; }
+
+        [Display(Name = "PEGI Rating Descriptors")]
         public virtual ICollection<PegiRatingDescriptor> PegiDescriptors { get; set; }
+
+        [Display(Name = "Officially Licensed")]
         public bool OfficiallyLicensed { get; set; }
         public bool IsActive { get; set; }
 
@@ -40,10 +53,15 @@ namespace BleemSync.Central.Data.Models
 
     public enum GameRegion
     {
+        [Display(Name = "Region Free")]
         RegionFree,
+        [Display(Name = "NTSC - Japan")]
         NTSC_J,
+        [Display(Name = "NTSC - North America")]
         NTSC_U,
+        [Display(Name = "PAL")]
         PAL,
+        [Display(Name = "NTSC - China")]
         NTSC_C
     }
 }
