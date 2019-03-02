@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using BleemSync.Central.Data.Models.PlayStation;
 using BleemSync.Central.Services.Systems;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BleemSync.Central.Web.Areas.System.Controllers
+namespace BleemSync.Central.Web.Areas.Systems.Controllers
 {
-    [Area("System")]
+    [Area("Systems")]
     [Route("[area]/[controller]/[action]")]
     public class PlayStationController : Controller
     {
@@ -33,6 +34,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public IActionResult Edit(int id)
         {
             var game = _service.GetGame(id);
@@ -41,6 +43,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
         }
 
         [HttpPost("{id}")]
+        [Authorize]
         public IActionResult Edit(Game game)
         {
             _service.ReviseGameAsync(game);
@@ -48,6 +51,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "Moderator")]
         public IActionResult Moderation()
         {
             var games = _service.GetGameRevisions(gr => gr.ApprovedBy == null && gr.SubmittedBy != null && gr.RejectedBy == null).ToList();
@@ -56,6 +60,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Moderator")]
         public IActionResult ReviewChanges(int id)
         {
             var gameRevision = _service.GetGameRevisions(gr => gr.Id == id).FirstOrDefault();
@@ -64,6 +69,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Moderator")]
         public IActionResult RejectChanges(int id)
         {
             _service.RejectGameRevision(id);
@@ -72,6 +78,7 @@ namespace BleemSync.Central.Web.Areas.System.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Moderator")]
         public IActionResult ApproveChanges(int id)
         {
             _service.ApproveGameRevision(id);

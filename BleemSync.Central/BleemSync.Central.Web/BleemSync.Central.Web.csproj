@@ -12,8 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\System\Data\" />
-    <Folder Include="Areas\System\Models\" />
+    <Folder Include="Areas\Identity\Pages\" />
+    <Folder Include="Areas\Identity\Services\" />
+    <Folder Include="Areas\Systems\Data\" />
+    <Folder Include="Areas\Systems\Models\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,6 +81,6 @@
     <Content Remove="wwwroot\lib\bleemsync\central-service.js" />
     <Content Remove="wwwroot\lib\bleemsync\game-manager.js" />
     <Content Remove="wwwroot\lib\bleemsync\scrape-games.js" />
-    <Content Remove="Areas\System\Views\_ViewStart.cshtml" />
+    <Content Remove="Areas\Systems\Views\_ViewStart.cshtml" />
   </ItemGroup>
 </Project>
