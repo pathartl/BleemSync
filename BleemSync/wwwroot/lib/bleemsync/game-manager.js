@@ -139,8 +139,18 @@
 
     EditGame(data) {
         var d = new Date();
+        
         // Reformat date so it would be set properly by browser
-        data.ReleaseDate = data.ReleaseDate.split('T')[0];
+        // Prevent error when loading a misconfigured (blank) game
+        if (data.ReleaseDate) {
+            data.ReleaseDate = data.ReleaseDate.split('T')[0];
+        }
+        
+        // If loading a misconfigured (blank) game, provide an indication of that in the name
+        if (!data.Name || data.Name === "") {
+            data.Name = "Empty game";
+        }
+        
         this._editGameForm.show().setViewModel(data);
         this._editGameForm.find('.cover-preview').attr('src', `/Games/GetLocalCoverByGameId/${data.Id}?v=${d.getTime()}`);
     }
