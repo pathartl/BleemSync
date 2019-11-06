@@ -1,0 +1,13 @@
+﻿@addTagHelper *, BleemSync.UI
+@model BleemSync.Central.Data.Models.MegaDrive.Game
+
+<card title="@Model.Title">
+    <card-body>
+        <button asp-action="Edit" asp-route-id="@Model.Id" text="Edit" icon="mode_edit" />
+        <form method="post">
+            <fieldset disabled>
+                <partial name="Partials/Fields.cshtml" model="Model" />
+            </fieldset>
+        </form>
+    </card-body>
+</card>

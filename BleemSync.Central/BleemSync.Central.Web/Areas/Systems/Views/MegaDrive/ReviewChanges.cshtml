@@ -1,0 +1,48 @@
+﻿@addTagHelper *, BleemSync.UI
+@model BleemSync.Central.Data.Models.MegaDrive.GameRevision
+
+<card>
+    <card-body>
+        <div class="row">
+            <column xs="6" class="game-revision--game">
+                <partial name="Partials/Fields.cshtml" model="Model.Game" />
+            </column>
+            <column xs="6" class="game-revision--revised-game">
+                <partial name="Partials/Fields.cshtml" model="Model.RevisedGame" />
+            </column>
+        </div>
+    </card-body>
+    <card-actions>
+        <button asp-action="RejectChanges" asp-route-id="@Model.Id" text="Reject Changes" danger />
+        <button asp-action="ApproveChanges" asp-route-id="@Model.Id" text="Approve Changes" class="pull-right" />
+    </card-actions>
+</card>
+
+<style>
+    .field-changed {
+        background: rgba(255, 0, 0, 0.1);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var gameFields = {};
+            var gameRevisionFields = {};
+
+            $('.game-revision--game [name]').each(function (index, element) {
+                gameFields[element.getAttribute('name')] = JSON.stringify($(element).val());
+            });
+
+            $('.game-revision--revised-game [name]').each(function (index, element) {
+                gameRevisionFields[element.getAttribute('name')] = JSON.stringify($(element).val());
+            });
+
+            Object.keys(gameFields).forEach(function (key, index) {
+                if (gameRevisionFields[key] != gameFields[key]) {
+                    $('.game-revision--revised-game [name="' + key + '"]').parents('.form-group').first().addClass('field-changed');
+                }
+            });
+        });
+    </script>
+}

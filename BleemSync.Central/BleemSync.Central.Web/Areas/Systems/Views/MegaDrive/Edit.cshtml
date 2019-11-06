@@ -1,0 +1,13 @@
+﻿@addTagHelper *, BleemSync.UI
+@model BleemSync.Central.Data.Models.MegaDrive.Game
+
+<alert warning text-center>You are editing a game. Any edits will be submitted to a moderator for approval.</alert>
+
+<card title="Edit PlayStation Game">
+    <card-body>
+        <form method="post">
+            <partial name="Partials/Fields.cshtml" model="Model" />
+            <button type="submit" text="Submit for Approval" />
+        </form>
+    </card-body>
+</card>
