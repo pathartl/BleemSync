@@ -11,7 +11,14 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  solution: 'BleemSync.sln'
 
 steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
