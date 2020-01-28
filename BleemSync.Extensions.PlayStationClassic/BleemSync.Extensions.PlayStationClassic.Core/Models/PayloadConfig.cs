@@ -166,5 +166,11 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Models
         [DefaultValue(true)]
         [Display(Name = "If TRUE then play boot menu music WAV loop")]
         public bool BootMenuMusic { get; set; }
+
+        [IniProperty(Name = "usb_only")]
+        [IniSection(Name = "not_recommended")]
+        [DefaultValue(false)]
+        [Display(Name = "If TRUE do not install bootloader payload")]
+        public bool UsbOnly { get; set; }
     }
 }
