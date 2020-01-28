@@ -140,7 +140,9 @@
     EditGame(data) {
         var d = new Date();
         // Reformat date so it would be set properly by browser
-        data.ReleaseDate = data.ReleaseDate.split('T')[0];
+        if (data.ReleaseDate) {
+            data.ReleaseDate = data.ReleaseDate.split('T')[0];
+        }
         this._editGameForm.show().setViewModel(data);
         this._editGameForm.find('.cover-preview').attr('src', `/Games/GetLocalCoverByGameId/${data.Id}?v=${d.getTime()}`);
     }
