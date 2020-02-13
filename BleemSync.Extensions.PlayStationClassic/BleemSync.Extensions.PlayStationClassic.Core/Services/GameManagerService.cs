@@ -1,9 +1,8 @@
 ﻿using BleemSync.Data;
-using BleemSync.Data.Abstractions;
 using BleemSync.Data.Entities;
 using BleemSync.Data.Models;
 using BleemSync.Services.Abstractions;
-using ExtCore.Data.Abstractions;
+using BleemSync.Services.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -17,124 +16,200 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
     public class GameManagerService : IGameManagerService
     {
         private MenuDatabaseContext _context { get; set; }
-        private IStorage _storage { get; set; }
-        private IGameManagerNodeRepository _gameManagerNodeRepository { get; set; }
-        private IGameManagerFileRepository _gameManagerFileRepository { get; set; }
+        private DatabaseContext _bleemsyncContext { get; set; }
         private IConfiguration _configuration { get; set; }
         private string _baseGamesDirectory { get; set; }
 
-        public GameManagerService(MenuDatabaseContext context, IStorage storage, IConfiguration configuration)
+        public GameManagerService(MenuDatabaseContext context, DatabaseContext bleemsyncContext, IConfiguration configuration)
         {
             _context = context;
-            _gameManagerNodeRepository = storage.GetRepository<IGameManagerNodeRepository>();
-            _gameManagerFileRepository = storage.GetRepository<IGameManagerFileRepository>();
-            _storage = storage;
+            _bleemsyncContext = bleemsyncContext;
             _configuration = configuration;
 
-            _baseGamesDirectory = configuration["PlayStationClassic:GamesDirectory"];
+            _baseGamesDirectory = Path.Combine(
+                configuration["BleemSync:Destination"],
+                configuration["BleemSync:PlayStationClassic:GamesDirectory"]
+            );
         }
 
-        public void AddGame(GameManagerNode node)
+        private void AddDiscs(GameManagerNode gameNode)
         {
-            var game = new Game()
+            AddDiscs(gameNode, _context);
+        }
+
+        private void AddDiscs(GameManagerNode gameNode, MenuDatabaseContext context)
+        {
+            #region Populate Disc Entries
+            // Playlist files / cue sheets should always be first in this list
+            var launchableGameFileExtensions = new string[]
             {
-                Id = node.Id,
-                Title = node.Name,
-                Publisher = node.Publisher,
-                Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0,
-                Players = node.Players.HasValue ? node.Players.Value : 0,
-                Position = node.Position
+                ".cue",
+                ".m3u",
+                ".bin",
+                ".iso",
+                ".pbp",
+                ".img",
+                ".mdf",
+                ".toc",
+                ".cbn"
             };
 
-            _context.Games.Add(game);
-            _context.SaveChanges();
+            IEnumerable<GameManagerFile> launchableGameFiles = new List<GameManagerFile>();
 
-            if (node.Files.Count > 0)
+            // Search uploaded files for the first launchable files out of our file extension list.
+            // We only want to grab the first here as people shouldn't be mixing and matching different
+            // game image file formats.
+            foreach (var launchableGameFileExtension in launchableGameFileExtensions)
             {
-                // Move the files to the correct location and update the BleemSync database to reflect where the files are moved to
-                var outputDirectory = Path.Combine(_baseGamesDirectory, game.Id.ToString());
+                launchableGameFiles = gameNode.Files.Where(f => Path.GetExtension(f.Path) == launchableGameFileExtension);
 
-                Directory.CreateDirectory(outputDirectory);
-
-                PostProcessGameFiles(node.Files, outputDirectory);
-            }
-
-            _storage.Save();
-        }
-
-        private void PostProcessGameFiles(List<GameManagerFile> files, string outputDirectory)
-        {
-            var additionalFiles = new List<GameManagerFile>();
-
-            foreach (var file in files)
-            {
-                var source = file.Path;
-                var destination = Path.Combine(outputDirectory, file.Name);
-                var extension = Path.GetExtension(file.Name);
-                // Lowercase extension for consistency, except for .bin, which may be
-                // case-sensitively referenced by .cue files
-                if (extension.ToLower() != ".bin") Path.ChangeExtension(destination, extension.ToLower());
-
-                SystemMove(source, destination);
-                file.Path = Path.GetFullPath(destination);
-
-                var fileInfo = new FileInfo(destination);
-
-                switch (fileInfo.Extension.ToLower())
+                if (launchableGameFiles.Count() > 0)
                 {
+                    break;
                 }
             }
 
-            files.AddRange(additionalFiles);
-
-            var cueFiles = files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue").ToList();
-            // If we don't have any .cues, assume all files (except cover.png) are discs
-            if (cueFiles.Count == 0) cueFiles = files.Where(f => f.Name != "cover.png").ToList();
-            var firstDiscFile = cueFiles.First().Name;
-            var baseName = Path.GetFileNameWithoutExtension(firstDiscFile);
-            var coverFile = files.Where(f => f.Name == "cover.png").FirstOrDefault();
-            if (coverFile != null)
-            {
-                var newCoverFileName = baseName + ".png";
-                var newCoverFilePath = Path.Combine(outputDirectory, newCoverFileName);
-
-                SystemMove(coverFile.Path, newCoverFilePath);
-                coverFile.Path = Path.GetFullPath(newCoverFilePath);
-                coverFile.Name = newCoverFileName;
-            }
-
             var discNum = 1;
-            foreach (var cueFile in cueFiles)
+
+            foreach (var launchableGameFile in launchableGameFiles)
             {
                 var disc = new Disc()
                 {
-                    DiscBasename = Path.ChangeExtension(cueFile.Name, null),
+                    DiscBasename = Path.GetFileNameWithoutExtension(launchableGameFile.Path),
                     DiscNumber = discNum,
-                    GameId = cueFile.NodeId,
+                    GameId = gameNode.Id,
                 };
 
-                _context.Discs.Add(disc);
+                context.Discs.Add(disc);
 
                 discNum++;
             }
 
-            _context.SaveChanges();
+            context.SaveChanges();
+            #endregion
         }
 
-        static void SystemMove(string from, string to)
+        private void MoveGame(GameManagerNode gameNode)
         {
-            SystemMove(from, to, false);
+            if (gameNode.Type != GameManagerNodeType.Game)
+            {
+                throw new InvalidDataException("The node provided was not a game.");
+            }
+
+            var gameDirectory = Path.Combine(_baseGamesDirectory, gameNode.Id.ToString());
+
+            // Ensure directory exists before we try to move the files
+            Directory.CreateDirectory(gameDirectory);
+
+            foreach (var file in gameNode.Files)
+            {
+                var source = file.Path;
+                var destination = Path.Combine(gameDirectory, file.Name);
+                var extension = Path.GetExtension(file.Name).ToLower();
+
+                // Lowercase/normalize extension
+                Path.ChangeExtension(destination, extension);
+
+                FileUtility.Move(source, destination);
+
+                // Update the path in the database
+                file.Path = Path.GetFullPath(destination);
+            }
+
+            #region Move Cover File
+            if (gameNode.Files.Count > 0)
+            {
+                // Rename the cover file to the basename of the game's image or cue sheet
+                string basename = "";
+                var firstCueSheet = gameNode.Files.Where(f => Path.GetExtension(f.Path) == ".cue").FirstOrDefault();
+
+                if (firstCueSheet != null)
+                {
+                    basename = Path.GetFileNameWithoutExtension(firstCueSheet.Path);
+                }
+                else
+                {
+                    basename = Path.GetFileNameWithoutExtension(gameNode.Files.First().Path);
+                }
+
+                var cover = gameNode.Files.Where(f => f.Name == "cover.png").FirstOrDefault();
+
+                if (cover != null)
+                {
+                    FileUtility.Move(cover.Path, Path.Combine(gameDirectory, $"{basename}.png"));
+                }
+            }
+            #endregion
+
+            _bleemsyncContext.SaveChanges();
         }
 
-        // HACK: File.Move() seems to cause a copy. Try to mv with shell and see if it's faster.
-        static void SystemMove(string from, string to, bool overwrite)
+        public void AddGame(GameManagerNode node)
         {
-            if (overwrite && File.Exists(to)) throw new IOException("Destination file exists.");
-            from = from.Replace("\"", "\\\"");
-            to = to.Replace("\"", "\\\"");
-            var proc = System.Diagnostics.Process.Start("mv", $"{(overwrite ? "-f " : string.Empty)}\"{from}\" \"{to}\"");
-            proc.WaitForExit();
-            if (proc.ExitCode != 0) throw new IOException($"mv returned {proc.ExitCode}");
+            AddGame(node, _context);
+        }
+
+        private void AddGame(GameManagerNode node, MenuDatabaseContext context)
+        {
+            UpdateGame(node, context);
+
+            if (node.Type == GameManagerNodeType.Game)
+            {
+                MoveGame(node);
+                AddDiscs(node, context);
+            }
+        }
+
+        public void UpdateGame(GameManagerNode node)
+        {
+            UpdateGame(node, _context);
+        }
+
+        private void UpdateGame(GameManagerNode node, MenuDatabaseContext context)
+        {
+            var exists = true;
+            var game = context.Games.Find(node.Id);
+
+            // If game doesn't exist in database, create it
+            if (game == null)
+            {
+                game = new Game()
+                {
+                    Id = node.Id
+                };
+
+                exists = false;
+            }
+
+            game.Title = node.Name;
+            game.Publisher = node.Publisher;
+            game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
+            game.Players = node.Players.HasValue ? node.Players.Value : 0;
+            game.Position = node.Position;
+
+            if (exists)
+            {
+                context.Games.Update(game);
+            }
+            else
+            {
+                context.Games.Add(game);
+            }
+
+            context.SaveChanges();
+        }
+
+        public void UpdateGames(IEnumerable<GameManagerNode> nodes)
+        {
+            UpdateGames(nodes, _context);
+        }
+
+        private void UpdateGames(IEnumerable<GameManagerNode> nodes, MenuDatabaseContext context)
+        {
+            foreach (var node in nodes)
+            {
+                UpdateGame(node, context);
+            }
         }
 
         private GameManagerFile CreateCueSheet(FileInfo sourceFileInfo, GameManagerFile sourceFile)
@@ -159,29 +234,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             managerFile.NodeId = sourceFile.NodeId;
 
             return managerFile;
-        }
-
-        public void UpdateGame(GameManagerNode node)
-        {
-            UpdateGames(new GameManagerNode[] { node });
-        }
-
-        public void UpdateGames(IEnumerable<GameManagerNode> nodes)
-        {
-            foreach (var node in nodes)
-            {
-                var game = _context.Games.Find(node.Id);
-
-                game.Title = node.Name;
-                game.Publisher = node.Publisher;
-                game.Year = node.ReleaseDate.HasValue ? node.ReleaseDate.Value.Year : 0;
-                game.Players = node.Players.HasValue ? node.Players.Value : 0;
-                game.Position = node.Position;
-
-                _context.Games.Update(game);
-            }
-
-            _context.SaveChanges();
         }
 
         public void DeleteGame(GameManagerNode node)
@@ -218,7 +270,6 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
                 if (node.Files.Count > 0)
                 {
                     var cueFiles = node.Files.Where(f => Path.GetExtension(f.Name).ToLower() == ".cue");
-                    if (cueFiles.Count() == 0) cueFiles = node.Files.Where(f => Path.GetExtension(f.Name) != ".png");
 
                     var discNum = 1;
 
@@ -279,11 +330,72 @@ namespace BleemSync.Extensions.PlayStationClassic.Core.Services
             return nodes;
         }
 
-        public void Sync()
+        private void AddParentNavigationItem(int parentId, MenuDatabaseContext context)
         {
-            // Assuming everything's going OK, we can tell power_manage to reboot,
-            // and any additional setup needed will be done on next boot
-            File.WriteAllText("/dev/shm/power/control", "reboot");
+            var parent = _bleemsyncContext.Nodes.Where(n => n.Id == parentId).FirstOrDefault();
+
+            AddParentNavigationItem(parent, context);
+        }
+
+        private void AddParentNavigationItem(GameManagerNode parent, MenuDatabaseContext context)
+        {
+            var parentNavItem = new Game()
+            {
+                Id = parent.Id,
+                Title = "Back",
+                Players = 1,
+                Publisher = parent.Name,
+                Position = -1,
+                Discs = new List<Disc>()
+                {
+                    new Disc()
+                    {
+                        DiscBasename = "folder",
+                        DiscNumber = 1,
+                        GameId = parent.Id
+                    }
+                }
+            };
+
+            context.Games.Add(parentNavItem);
+        }
+
+        public void GenerateFolders()
+        {
+            var folderIds = _bleemsyncContext.Nodes.Where(n => n.Type == GameManagerNodeType.Folder).Select(n => n.Id).ToList();
+
+            foreach (var folderId in folderIds)
+            {
+                var folderGameDir = Path.Combine(
+                    _configuration["BleemSync:Destination"],
+                    _configuration["BleemSync:PlayStationClassic:GamesDirectory"],
+                    folderId.ToString()
+                );
+
+                var folderDatabaseFilePath = Path.Combine(folderGameDir, "folder.db");
+
+                if (File.Exists(folderDatabaseFilePath))
+                {
+                    File.Delete(folderDatabaseFilePath);
+                }
+
+                var optionsBuilder = new DbContextOptionsBuilder<MenuDatabaseContext>();
+                optionsBuilder.UseSqlite($"Data Source={folderDatabaseFilePath}");
+
+                Directory.CreateDirectory(folderGameDir);
+
+                using (var folderContext = new MenuDatabaseContext(optionsBuilder.Options, _configuration))
+                {
+                    var nodesForFolder = _bleemsyncContext.Nodes.Where(n => n.ParentId == folderId).ToList();
+
+                    AddParentNavigationItem(folderId, folderContext);
+
+                    foreach (var node in nodesForFolder)
+                    {
+                        AddGame(node, folderContext);
+                    }
+                }
+            }
         }
     }
 }

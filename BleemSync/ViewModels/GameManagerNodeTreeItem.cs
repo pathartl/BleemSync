@@ -10,7 +10,7 @@ namespace BleemSync.ViewModels
         public string Id { get; set; }
 
         [JsonProperty(PropertyName = "text")]
-        public string Name { get; set; }
+        public string Text { get; set; }
 
         [JsonProperty(PropertyName = "icon")]
         public string Icon { get; set; }
@@ -26,9 +26,32 @@ namespace BleemSync.ViewModels
         public GameManagerNodeTreeItem(GameManagerNode node)
         {
             Id = node.Id.ToString();
-            Name = node.Name;
+            Text = node.Name;
             Type = Enum.GetName(typeof(GameManagerNodeType), node.Type);
             Parent = node.ParentId == null ? "#" : node.ParentId.ToString();
+        }
+
+        public GameManagerNode ToGameManagerNode()
+        {
+            var node = new GameManagerNode()
+            {
+                Id = 0,
+                Name = Text
+            };
+
+            switch (Type)
+            {
+                default:
+                case "Game":
+                    node.Type = GameManagerNodeType.Game;
+                    break;
+
+                case "Folder":
+                    node.Type = GameManagerNodeType.Folder;
+                    break;
+            }
+
+            return node;
         }
     }
 }

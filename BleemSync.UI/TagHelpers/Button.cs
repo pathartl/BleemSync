@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using BleemSync.UI.Extensions;
 
 namespace BleemSync.UI
 {
@@ -44,6 +45,60 @@ namespace BleemSync.UI
             }
         }
 
+        [HtmlAttributeName("raised")]
+        public bool Raised { get; set; }
+
+        [HtmlAttributeName("flat")]
+        public bool Flat { get; set; }
+
+        [HtmlAttributeName("outline")]
+        public bool Outline { get; set; }
+
+        [HtmlAttributeName("float")]
+        public bool Floating { get; set; }
+
+        [HtmlAttributeName("sm")]
+        public bool IsSm { get; set; }
+
+        [HtmlAttributeName("lg")]
+        public bool IsLg { get; set; }
+
+        [HtmlAttributeName("block")]
+        public bool Block { get; set; }
+
+        [HtmlAttributeName("default")]
+        public bool Default { get; set; }
+
+        [HtmlAttributeName("primary")]
+        public bool Primary { get; set; }
+
+        [HtmlAttributeName("success")]
+        public bool Success { get; set; }
+
+        [HtmlAttributeName("info")]
+        public bool Info { get; set; }
+
+        [HtmlAttributeName("warning")]
+        public bool Warning { get; set; }
+
+        [HtmlAttributeName("danger")]
+        public bool Danger { get; set; }
+
+        [HtmlAttributeName("link")]
+        public bool Link { get; set; }
+
+        [HtmlAttributeName("icon")]
+        public string Icon { get; set; }
+
+        [HtmlAttributeName("text")]
+        public string Text { get; set; }
+
+        [HtmlAttributeName("type")]
+        public string Type { get; set; }
+
+        [HtmlAttributeName("onclick")]
+        public string OnClick { get; set; }
+
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
@@ -58,109 +113,88 @@ namespace BleemSync.UI
         {
             _urlHelper = _urlHelperFactory.GetUrlHelper(ViewContext);
 
-            var isRaised = output.Attributes.SingleOrDefault(a => a.Name == "raised") != null;
-            var isFlat = output.Attributes.SingleOrDefault(a => a.Name == "flat") != null;
-            var isOutline = output.Attributes.SingleOrDefault(a => a.Name == "outline") != null;
-            var isFloating = output.Attributes.SingleOrDefault(a => a.Name == "floating") != null;
-            var isLg = output.Attributes.SingleOrDefault(a => a.Name == "lg") != null;
-            var isSm = output.Attributes.SingleOrDefault(a => a.Name == "sm") != null;
-            var isBlock = output.Attributes.SingleOrDefault(a => a.Name == "block") != null;
-            // Colors
-            var isDefault = output.Attributes.SingleOrDefault(a => a.Name == "default") != null;
-            var isPrimary = output.Attributes.SingleOrDefault(a => a.Name == "primary") != null;
-            var isSuccess = output.Attributes.SingleOrDefault(a => a.Name == "success") != null;
-            var isInfo = output.Attributes.SingleOrDefault(a => a.Name == "info") != null;
-            var isWarning = output.Attributes.SingleOrDefault(a => a.Name == "warning") != null;
-            var isDanger = output.Attributes.SingleOrDefault(a => a.Name == "danger") != null;
-            var isLink = output.Attributes.SingleOrDefault(a => a.Name == "link") != null;
+            output.AddClass("btn");
 
-            var icon = output.Attributes.SingleOrDefault(a => a.Name == "icon");
-            var text = output.Attributes.SingleOrDefault(a => a.Name == "text");
-            var action = output.Attributes.SingleOrDefault(a => a.Name == "asp-action");
-            var controller = output.Attributes.SingleOrDefault(a => a.Name == "asp-controller");
-            var buttonClassAttr = output.Attributes.SingleOrDefault(a => a.Name == "class");
+            if (Raised) output.AddClass("pmd-btn-raised");
+            if (Flat) output.AddClass("pmd-btn-flat");
+            if (Outline) output.AddClass("pmd-btn-outline");
+            if (Floating) output.AddClass("pmd-btn-fab");
+            if (IsLg) output.AddClass("btn-lg");
+            if (IsSm) output.AddClass("btn-sm");
+            if (Block) output.AddClass("btn-block");
+            if (Default) output.AddClass("btn-default");
+            if (Primary) output.AddClass("btn-primary");
+            if (Success) output.AddClass("btn-success");
+            if (Info) output.AddClass("btn-info");
+            if (Warning) output.AddClass("btn-warning");
+            if (Danger) output.AddClass("btn-danger");
+            if (Link) output.AddClass("btn-link");
 
-            output.Attributes.RemoveAll("raised");
-            output.Attributes.RemoveAll("flat");
-            output.Attributes.RemoveAll("outline");
-            output.Attributes.RemoveAll("floating");
-            output.Attributes.RemoveAll("lg");
-            output.Attributes.RemoveAll("sm");
-            output.Attributes.RemoveAll("block");
-            output.Attributes.RemoveAll("default");
-            output.Attributes.RemoveAll("primary");
-            output.Attributes.RemoveAll("success");
-            output.Attributes.RemoveAll("info");
-            output.Attributes.RemoveAll("warning");
-            output.Attributes.RemoveAll("danger");
-            output.Attributes.RemoveAll("link");
-            output.Attributes.RemoveAll("icon");
-            output.Attributes.RemoveAll("text");
-
-            var buttonClass = "btn";
-
-            if (buttonClassAttr != null)
+            if (!Default && !Primary && !Success && !Info && !Warning && !Danger && !Link)
             {
-                buttonClass += " " + buttonClassAttr.Value;
+                output.AddClass("btn-primary");
             }
 
-            var labelAttributes = new Dictionary<string, object>();
-
-            if (isRaised) buttonClass = $"{buttonClass} pmd-btn-raised";
-            if (isFlat) buttonClass = $"{buttonClass} pmd-btn-flat";
-            if (isOutline) buttonClass = $"{buttonClass} pmd-btn-outline";
-            if (isFloating) buttonClass = $"{buttonClass} pmd-btn-fab";
-            if (isLg) buttonClass = $"{buttonClass} btn-lg";
-            if (isSm) buttonClass = $"{buttonClass} btn-sm";
-            if (isBlock) buttonClass = $"{buttonClass} btn-block";
-            if (isDefault) buttonClass = $"{buttonClass} btn-default";
-            if (isPrimary) buttonClass = $"{buttonClass} btn-primary";
-            if (isSuccess) buttonClass = $"{buttonClass} btn-success";
-            if (isInfo) buttonClass = $"{buttonClass} btn-info";
-            if (isWarning) buttonClass = $"{buttonClass} btn-warning";
-            if (isDanger) buttonClass = $"{buttonClass} btn-danger";
-            if (isLink) buttonClass = $"{buttonClass} btn-link";
-
-            if (!isDefault && !isPrimary && !isSuccess && !isInfo && !isWarning && !isDanger && !isLink)
+            if (Icon != null)
             {
-                buttonClass = $"{buttonClass} btn-primary";
+                output.AddClass("btn-icon");
+                output.PreContent.AppendHtml($"<i class=\"material-icons pmd-sm\">{Icon}</i>");
             }
 
-            var inputPre = "";
-            var inputPost = "";
-            var labelClass = "control-label";
-
-            if (icon != null)
+            if (Text == null)
             {
-                inputPre = $"{inputPre}<div class=\"input-group\"><div class=\"input-group-addon\"><i class=\"material-icons md-dark pmd-sm\">{icon.Value}</i></div>";
-                inputPost = $"{inputPost}</div>";
-                labelClass = $"{labelClass} pmd-input-group-label";
+                output.AddClass("no-text");
             }
-
-            labelAttributes.Add("class", labelClass);
-
-
-            string buttonOutput = "";
 
             if (Action != null || Controller != null)
             {
-                var url = _urlHelper.Action(Action, Controller, _routeValues);
+                if (Type == null || (Type != null && Type == "submit"))
+                {
+                    var url = _urlHelper.Action(Action, Controller, _routeValues);
 
-                output.Attributes.SetAttribute("href", url);
+                    output.Attributes.SetAttribute("href", url);
+                    output.TagName = "a";
+                }
+            }
+            else if (Type != null && Type == "link")
+            {
                 output.TagName = "a";
+            }
+            else if (OnClick != null)
+            {
+                output.SetAttribute("onclick", OnClick);
+                output.TagName = "button";
             }
             else
             {
-                
+                Type = "submit";
                 output.Attributes.SetAttribute("type", "submit");
                 output.TagName = "button";
             }
 
-            buttonOutput = text.Value.ToString();
+            output.RemoveAttributes(
+                new string[] {
+                    "raised",
+                    "flat",
+                    "outline",
+                    "floating",
+                    "lg",
+                    "sm",
+                    "block",
+                    "default",
+                    "primary",
+                    "success",
+                    "info",
+                    "warning",
+                    "danger",
+                    "link",
+                    "icon",
+                    "text"
+                }
+            );
 
             output.TagMode = TagMode.StartTagAndEndTag;
-            output.Attributes.SetAttribute("class", buttonClass);
-            output.Content.SetHtmlContent(buttonOutput);
+            output.Content.SetHtmlContent(Text);
         }
     }
 }

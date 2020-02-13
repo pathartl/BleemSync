@@ -4,11 +4,10 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>BleemSync.Data</RootNamespace>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="ExtCore.Data.Abstractions" Version="3.3.0" />
-    <PackageReference Include="ExtCore.Data.Entities.Abstractions" Version="3.3.0" />
-    <PackageReference Include="ExtCore.Data.EntityFramework.Sqlite" Version="3.3.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>

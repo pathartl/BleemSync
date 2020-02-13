@@ -1,4 +1,48 @@
-﻿class GameManager {
+﻿class UploadQueue {
+    constructor() {
+        this.Requests = new Array();
+        this.IsUploading = false;
+
+        this._queuePane = $('#upload-queue');
+        this._displayName = $('#upload-queue--current-upload-name');
+        this._queueList = $('.upload-queue--list');
+    }
+
+    Start() {
+        this._queuePane.addClass('active');
+
+        if (!this.IsUploading) {
+            this.IsUploading = true;
+            this.Upload(this.Requests[0]);
+            this.Requests = this.Requests.slice(1);
+        }
+    }
+
+    Add(options) {
+        this.Requests.push(options);
+
+        var listItem = $('<div />').addClass('upload-queue--list--item list-group-item').text(options.data.get('Name'));
+
+        this._queueList.append(listItem);
+    }
+
+    Upload(options) {
+        this._displayName.text(options.data.get('Name'));
+        $.ajax(options);
+    }
+
+    Complete() {
+        this._queueList.find('.list-group-item').first().remove();
+
+        if (this.Requests.length == 0) {
+            this._queuePane.removeClass('active');
+            this._queuePane.find('.progress-bar').css('width', 0);
+            this._displayName.text('');
+        }
+    }
+}
+
+class GameManager {
     constructor() {
         this._tree = $('.game-manager-node-tree');
         this._forms = $('.game-manager-form');
@@ -6,11 +50,14 @@
         this._addGameForm = $('#add-game-form');
         this._addGameButton = $('.add-game-button');
         this._uploadInput = $('input[name="Files"]');
-        this._progressBar = $('#progress-bar-modal');
+        this._progressBar = $('#progress-bar');
         this._coverDropZone = $('.cover-dropzone');
         this._coverInput = $('input[name="Cover"]');
         this._coverPreview = $('.cover-preview');
         this._deleteGameButton = $('#edit-game-form button[value="Delete"]');
+        this._addFolderButton = $('#game-manager-add-folder');
+
+        this._uploadQueue = new UploadQueue();
 
         this.Init();
     }
@@ -35,6 +82,13 @@
                 AlertService.Error("You've selected .cue files but not .bin files. You should select both kinds of files.");
 
             this.ParseUploader();
+        });
+
+        this._addGameForm.on('Queued', (e, options) => {
+            e.preventDefault();
+            this._uploadQueue.Add(options);
+            this._uploadQueue.Start();
+            this._addGameForm.clearForm();
         });
 
         this._addGameForm.on('GameAdded', () => {
@@ -64,6 +118,11 @@
             this.LoadAddGameForm();
         });
 
+        this._addFolderButton.on('click', (e) => {
+            e.preventDefault();
+            this.AddFolder();
+        });
+
         this._deleteGameButton.on('click', (e) => {
             if (!confirm("Are you sure you want to delete the game? This will " +
                 "also remove the virtual memory card and save state associated with the game."))
@@ -87,26 +146,42 @@
         this._tree.jstree({
             'core': {
                 'data': data,
-                'check_callback': true
+                'check_callback': true,
+                'dblclick_toggle': false
             },
             'types': {
                 '#': {
-                    'valid_children': ['Folder', 'Game']
+                    'valid_children': ['Folder', 'Game'],
+                    'icon': 'material-icons storage'
                 },
                 'Folder': {
-                    'valid_children': ['Folder', 'Game']
+                    'valid_children': ['Folder', 'Game'],
+                    'icon': 'material-icons folder'
                 },
                 'Game': {
-                    'valid_children': []
+                    'valid_children': [],
+                    'icon': 'material-icons videogame_asset'
+                }
+            },
+            'contextmenu': {
+                'items': {
+                    'delete': {
+                        'label': 'Delete',
+                        'action': (data) => this.ContextOnDelete(data)
+                    }
                 }
             },
             'plugins': [
                 'dnd',
-                'types'
+                'types',
+                'state',
+                'contextmenu'
             ]
         })
             .on('move_node.jstree', (e, data) => this.TreeOnMoveNode(data))
-            .on('select_node.jstree', (e, data) => this.TreeOnSelectNode(data));
+            .on('select_node.jstree', (node, data, event) => this.TreeOnSelectNode(node, data, event))
+            .on('rename_node.jstree', (e, data) => this.TreeOnRenameNode(data))
+            .on('dblclick.jstree', (event) => this.TreeOnDoubleClickNode(event));
     }
 
     TreeOnMoveNode(data) {
@@ -120,14 +195,42 @@
         });
     }
 
-    TreeOnSelectNode(data) {
+    TreeOnRenameNode(data) {
+        var treeData = this._tree.jstree(true).get_json(null, { 'flat': true });
+
+        $.ajax({
+            type: 'POST',
+            url: '/Games/SaveTree',
+            data: { Nodes: treeData },
+            dataType: 'json',
+            success: () => this.TreeReload()
+        });
+    }
+
+    TreeOnSelectNode(node, data, event) {
+        console.log(event);
         this.LoadEditGameForm(data.node.id);
+    }
+
+    TreeOnDoubleClickNode(event) {
+        var node = this._tree.jstree(true).get_node(event.target);
+        this._tree.jstree(true).edit(node);
     }
 
     TreeReload() {
         $.getJSON('/Games/GetTree', (data) => {
             this._tree.jstree(true).settings.core.data = data;
             this._tree.jstree(true).refresh();
+        });
+    }
+
+    ContextOnDelete(data) {
+        var node = this._tree.jstree(true).get_node(data.reference);
+
+        $.ajax({
+            type: 'DELETE',
+            url: `/Games/DeleteGame/${node.id}`,
+            success: () => this.TreeReload()
         });
     }
 
@@ -148,6 +251,15 @@
     LoadAddGameForm(viewModel) {
         this._forms.hide();
         this._addGameForm.show().setViewModel(viewModel);
+    }
+
+    AddFolder() {
+        var node = this._tree.jstree(true).create_node(null, {
+            "text": "New Folder",
+            "type": "Folder"
+        });
+
+        this._tree.jstree(true).edit(node);
     }
 
     ReadFileAsText(file) {
@@ -205,18 +317,21 @@
     }
 
     OnGameUpdated() {
-        this._progressBar.modal('hide');
+        // this._progressBar.modal('hide');
         this.TreeReload();
         this._editGameForm.clearForm();
         this._forms.hide();
     }
 
     OnGameAdded() {
-        this._progressBar.modal('hide');
+        this._uploadQueue.IsUploading = false;
+        // this._progressBar.modal('hide');
         this._uploadInput.val(null);
         this.TreeReload();
         this._addGameForm.clearForm();
         this._forms.hide();
+        this._uploadQueue.Start();
+        this._uploadQueue.Complete();
     }
 
     OnXHRError(response) {

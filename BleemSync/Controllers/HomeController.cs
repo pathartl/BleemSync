@@ -1,20 +1,13 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BleemSync.Models;
-using BleemSync.Data.Abstractions;
-using ExtCore.Data.Abstractions;
 
 namespace BleemSync.Controllers
 {
     public class HomeController : Controller
     {
-        private IGameManagerNodeRepository _gameRepository { get; set; }
-        private IStorage _storage { get; set; }
-
-        public HomeController(IStorage storage)
+        public HomeController()
         {
-            _gameRepository = storage.GetRepository<IGameManagerNodeRepository>();
-            _storage = storage;
         }
 
         public IActionResult Index()

@@ -1,7 +1,7 @@
-﻿using ExtCore.Data.Entities.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BleemSync.Data.Entities
 {
@@ -11,7 +11,8 @@ namespace BleemSync.Data.Entities
         Folder
     }
 
-    public class GameManagerNode : IEntity
+    [Table("GameManagerNodes")]
+    public class GameManagerNode
     {
         [Key]
         public int Id { get; set; }

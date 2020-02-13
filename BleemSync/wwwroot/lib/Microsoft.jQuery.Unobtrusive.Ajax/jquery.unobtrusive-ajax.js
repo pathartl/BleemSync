@@ -162,7 +162,13 @@
         }
         // end change
 
-        $.ajax(options);
+        let queueTriggerName = element.getAttribute('data-ajax-queue');
+
+        if (queueTriggerName) {
+            $(element).trigger(queueTriggerName, options);
+        } else {
+            $.ajax(options);
+        }
     }
 
     function validate(form) {
@@ -177,8 +183,8 @@
         var Percentage = (current * 100) / max;
 
         // Change this later to use eventing
-        $('#progress-bar-modal').modal({ backdrop: 'static', keyboard: false });
-        $('#progress-bar-modal').find('.progress-bar').css('width', Percentage + '%');
+        //$('#progress-bar-modal').modal({ backdrop: 'static', keyboard: false });
+        $('#progress-bar').find('.progress-bar').css('width', Percentage + '%');
 
         if (Percentage >= 100) {
             //$('#progress-bar-modal').modal('hide');
