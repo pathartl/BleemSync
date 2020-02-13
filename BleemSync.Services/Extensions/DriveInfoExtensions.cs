@@ -70,7 +70,14 @@ namespace BleemSync.Services.Extensions
                 displayNames.Add(displayName);
             }
 
-            return displayNames.Contains(driveInfo.DriveFormat.ToUpper());
+            if (driveInfo.IsReady)
+            {
+                return displayNames.Contains(driveInfo.DriveFormat.ToUpper());
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private static decimal ConvertToDataUnit(long bytes, DataUnit unit)
