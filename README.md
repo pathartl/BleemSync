@@ -1,7 +1,7 @@
+# THIS VERSION IS DEPRECATED / ARCHIVED
+
 # BleemSync
 BleemSync is a relatively safe way to add games to your PlayStation Classic.
-
-There is now a dedicated page for BleemSync. You can find it [here](https://modmyclassic.com/bleemsync/)
 
 ----
 
@@ -27,14 +27,6 @@ There is now a dedicated page for BleemSync. You can find it [here](https://modm
 * A low powered USB drive. (Or any USB via a USB2.0 externally powered USB hub)
   * note 1 – As of 1.0 OTG support is not enabled. (YET) Because of this you are limited to 100ma on the front 2 USB ports.
   * note 2 – USB2.0 drives are recommended as they generally use less power than newer drives.
-
-## How to use BleemSync
-
-Please visit the dedicated HOW TO section [here](https://modmyclassic.com/bleemsync/#How_to_use_BleemSync)
-
-## Frequently Asked Questions
-
-Please visit the dedicated FAQ section [here](https://modmyclassic.com/bleemsync/#FAQ) to see the complete list of FAQs
 
 ## Credits (WIP)
 
