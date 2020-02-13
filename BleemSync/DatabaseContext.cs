@@ -1,7 +1,7 @@
 ﻿using BleemSync.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BleemSync.Data
+namespace BleemSync
 {
     public class DatabaseContext : DbContext
     {

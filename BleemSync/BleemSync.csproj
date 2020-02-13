@@ -1,34 +1,40 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <ServerGarbageCollection>false</ServerGarbageCollection>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="ExtCore.Mvc" Version="3.3.0" />
-    <PackageReference Include="ExtCore.WebApplication" Version="3.3.0" />
-    <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
-    <PackageReference Include="RestSharp" Version="106.6.1" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
+    <Folder Include="Models\" />
+    <Compile Update="**\*.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <AvaloniaResource Include="**\*.xaml">
+      <SubType>Designer</SubType>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
-
+  <ItemGroup>
+    <AvaloniaResource Remove="Views\GameManager.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Views\GameManager.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.9.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.9.0" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\GameManager.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
-    <ProjectReference Include="..\BleemSync.Extensions.Infrastructure\BleemSync.Extensions.Infrastructure.csproj" />
-    <ProjectReference Include="..\BleemSync.Extensions.PlayStationClassic\BleemSync.Extensions.PlayStationClassic.Core\BleemSync.Extensions.PlayStationClassic.Core.csproj" />
     <ProjectReference Include="..\BleemSync.Services\BleemSync.Services.csproj" />
-    <ProjectReference Include="..\BleemSync.UI\BleemSync.UI.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
-  </ItemGroup>
-
 </Project>

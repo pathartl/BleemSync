@@ -1,24 +1,25 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Logging.Serilog;
+using Avalonia.ReactiveUI;
 
-namespace BleemSync
+namespace AvaloniaApplication1
 {
-    public class Program
+    class Program
     {
-        public static void Main(string[] args)
-        {
-            CreateWebHostBuilder(args)
-                .UseUrls("http://0.0.0.0:5000")
-                .Build()
-                .Run();
-        }
+        // Initialization code. Don't use any Avalonia, third-party APIs or any
+        // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
+        // yet and stuff might break.
+        [STAThread]
+        public static void Main(string[] args) => BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-            .UseKestrel(options =>
-            {
-                options.Limits.MaxRequestBodySize = 1474560000;
-            });
+        // Avalonia configuration, don't remove; also used by visual designer.
+        public static AppBuilder BuildAvaloniaApp()
+            => AppBuilder.Configure<App>()
+                .UsePlatformDetect()
+                .LogToDebug()
+                .UseReactiveUI();
     }
 }

@@ -1,25 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>BleemSync.Services</RootNamespace>
-    <Version>0.4.0</Version>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
-    <ProjectReference Include="..\BleemSync.UI\BleemSync.UI.csproj" />
+    <ProjectReference Include="..\BleemSync.Fingerprinting\BleemSync.Fingerprinting.csproj" />
+    <ProjectReference Include="..\BleemSync.Utilities\BleemSync.Utilities.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\newtonsoft.json\9.0.1\lib\netstandard1.0\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
-  </ItemGroup>
-
 
 </Project>
