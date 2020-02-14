@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Data", "BleemSync
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Services", "BleemSync.Services\BleemSync.Services.csproj", "{4C787B66-A705-4BCF-AB75-FF651A15C592}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Fingerprinting", "BleemSync.Fingerprinting\BleemSync.Fingerprinting.csproj", "{01A969FD-8510-48B9-B960-3B324A27C403}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Fingerprinting", "BleemSync.Fingerprinting\BleemSync.Fingerprinting.csproj", "{01A969FD-8510-48B9-B960-3B324A27C403}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Utilities", "BleemSync.Utilities\BleemSync.Utilities.csproj", "{34515D06-EE0E-4BD0-A58F-CF464AA9328B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BleemSync.Utilities", "BleemSync.Utilities\BleemSync.Utilities.csproj", "{34515D06-EE0E-4BD0-A58F-CF464AA9328B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BleemSync.Scrapers", "BleemSync.Scrapers\BleemSync.Scrapers.csproj", "{5F543BD8-E9CE-4EA9-AB8C-754D6256E5DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{34515D06-EE0E-4BD0-A58F-CF464AA9328B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34515D06-EE0E-4BD0-A58F-CF464AA9328B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34515D06-EE0E-4BD0-A58F-CF464AA9328B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F543BD8-E9CE-4EA9-AB8C-754D6256E5DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F543BD8-E9CE-4EA9-AB8C-754D6256E5DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F543BD8-E9CE-4EA9-AB8C-754D6256E5DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F543BD8-E9CE-4EA9-AB8C-754D6256E5DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

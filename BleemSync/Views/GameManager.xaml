@@ -8,6 +8,8 @@
     <TextBlock Classes="h1">Drag+Drop</TextBlock>
     <TextBlock Classes="h2">Example of Drag+Drop capabilities</TextBlock>
 
+    <ListBox Items="{Binding Items}" SelectedItem="{Binding SelectedItem}" AutoScrollToSelectedItem="True"  SelectedItems="{Binding SelectedItems}" SelectionMode="{Binding SelectionMode}" Width="250" Height="350"></ListBox>
+
     <StackPanel Orientation="Horizontal"
             Margin="0,16,0,0"
             HorizontalAlignment="Center"

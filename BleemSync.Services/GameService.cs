@@ -3,6 +3,7 @@ using BleemSync.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BleemSync.Services
@@ -16,6 +17,16 @@ namespace BleemSync.Services
             DatabaseContext = new DatabaseContext();
             DatabaseContext.Database.EnsureCreated();
             DatabaseContext.Database.Migrate();
+        }
+
+        public Game Get(Guid id)
+        {
+            return DatabaseContext.Games.FirstOrDefault(g => g.Id == id);
+        }
+
+        public IQueryable<Game> Get()
+        {
+            return DatabaseContext.Games.AsQueryable();
         }
 
         public Game Add(Game game)
