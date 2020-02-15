@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using AvaloniaApplication1.ViewModels;
+using BleemSync.ViewModels;
 
-namespace AvaloniaApplication1
+namespace BleemSync
 {
     public class ViewLocator : IDataTemplate
     {

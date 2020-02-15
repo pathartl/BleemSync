@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace AvaloniaApplication1.Views
+namespace BleemSync.Views
 {
     public class MainWindow : Window
     {

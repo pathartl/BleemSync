@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AvaloniaApplication1.ViewModels
+namespace BleemSync.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {

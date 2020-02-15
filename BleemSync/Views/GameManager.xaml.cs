@@ -9,22 +9,22 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace AvaloniaApplication1.Views
+namespace BleemSync.Views
 {
     public class GameManager : UserControl
     {
         private class PageViewModel : ReactiveObject
         {
-            private ObservableCollection<string> items;
+            private ObservableCollection<Game> _games;
 
-            public ObservableCollection<string> Items {
-                get => items;
-                set => this.RaiseAndSetIfChanged(ref items, value);
+            public ObservableCollection<Game> Games {
+                get => _games;
+                set => this.RaiseAndSetIfChanged(ref _games, value);
             }
 
             public PageViewModel(ICollection<Game> games)
             {
-                Items = new ObservableCollection<string>(games.Select(g => g.Title));
+                Games = new ObservableCollection<Game>(games);
             }
         }
 
@@ -71,7 +71,7 @@ namespace AvaloniaApplication1.Views
 
                     GameService.Add(game);
 
-                    ViewModel.Items.Add(game.Title);
+                    ViewModel.Games.Add(game);
                 }
             }
         }

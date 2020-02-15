@@ -1,26 +1,33 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.DataGrid"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="AvaloniaApplication1.Views.GameManager">
-  <StackPanel Orientation="Vertical" Spacing="4">
-    <TextBlock Classes="h1">Drag+Drop</TextBlock>
-    <TextBlock Classes="h2">Example of Drag+Drop capabilities</TextBlock>
+             x:Class="BleemSync.Views.GameManager">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition MinWidth="50" MaxWidth="500" Width="150" />
+        <ColumnDefinition Width="2" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <StackPanel Grid.Column="0">
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+        <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
+      </StackPanel>
 
-    <ListBox Items="{Binding Items}" SelectedItem="{Binding SelectedItem}" AutoScrollToSelectedItem="True"  SelectedItems="{Binding SelectedItems}" SelectionMode="{Binding SelectionMode}" Width="250" Height="350"></ListBox>
+      <StackPanel Grid.Column="2" DragDrop.AllowDrop="True">
+        <DataGrid AutoGenerateColumns="True" Items="{Binding Games}"></DataGrid>
+      </StackPanel>
 
-    <StackPanel Orientation="Horizontal"
-            Margin="0,16,0,0"
-            HorizontalAlignment="Center"
-            Spacing="16">
-      <Border BorderBrush="{DynamicResource ThemeAccentBrush}" BorderThickness="2" Padding="16" Name="DragMe">
-        <TextBlock Name="DragState">Drag Me</TextBlock>
-      </Border>
-      <Border Background="{DynamicResource ThemeAccentBrush2}" Padding="16"
-              DragDrop.AllowDrop="True">
-        <TextBlock Name="DropState">Drop some text or files here</TextBlock>
-      </Border>
-    </StackPanel>
-  </StackPanel>
+      
+
+      <GridSplitter Grid.Column="1" Background="Gray" HorizontalAlignment="Stretch" Width="2" />
+    </Grid>
 </UserControl>
