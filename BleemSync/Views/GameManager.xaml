@@ -22,9 +22,17 @@
         <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
       </StackPanel>
 
-      <StackPanel Grid.Column="2" DragDrop.AllowDrop="True">
-        <DataGrid AutoGenerateColumns="True" Items="{Binding Games}"></DataGrid>
-      </StackPanel>
+      <DataGrid Grid.Column="2" DragDrop.AllowDrop="True" Items="{Binding Games}">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Title" Binding="{Binding Title}" />
+          <DataGridTextColumn Header="Version" Binding="{Binding Version}" />
+          <DataGridTextColumn Header="Developer" Binding="{Binding Developer}" />
+          <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" />
+          <DataGridTextColumn Header="Region" Binding="{Binding Region}" />
+          <DataGridTextColumn Header="Players" Binding="{Binding Players}" />
+        </DataGrid.Columns>
+        
+      </DataGrid>
 
       
 
