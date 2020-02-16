@@ -1,6 +1,7 @@
 ﻿using BleemSync.Data.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
@@ -8,6 +9,7 @@ namespace BleemSync.Data.Models
 {
     public class Game
     {
+        [Browsable(false)]
         public Guid Id { get; set; }
         public string Fingerprint { get; set; }
         public string Title { get; set; }
@@ -41,7 +43,9 @@ namespace BleemSync.Data.Models
 
         public string Path { get; set; }
 
-        // public Guid? GameConsoleId { get; set; }
-        // public GameConsole GameConsole { get; set; }
+        public Guid PlatformId { get; set; }
+        public Platform Platform { get; set; }
+
+        public ICollection<CollectionGame> CollectionGames { get; set; }
     }
 }

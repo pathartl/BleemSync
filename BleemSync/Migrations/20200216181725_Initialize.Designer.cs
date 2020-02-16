@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BleemSync.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200213053119_Initialize")]
+    [Migration("20200216181725_Initialize")]
     partial class Initialize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,6 +17,40 @@ namespace BleemSync.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.1");
+
+            modelBuilder.Entity("BleemSync.Data.Models.Collection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("Collection");
+                });
+
+            modelBuilder.Entity("BleemSync.Data.Models.CollectionGame", b =>
+                {
+                    b.Property<Guid>("CollectionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CollectionId", "GameId");
+
+                    b.HasIndex("GameId");
+
+                    b.ToTable("CollectionGame");
+                });
 
             modelBuilder.Entity("BleemSync.Data.Models.Game", b =>
                 {
@@ -48,7 +82,7 @@ namespace BleemSync.Migrations
                     b.Property<int>("PegiRating")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("PlatformId")
+                    b.Property<Guid>("PlatformId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Players")
@@ -85,19 +119,62 @@ namespace BleemSync.Migrations
                     b.Property<int>("Region")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ShortTitle")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Consoles");
+                    b.ToTable("Platforms");
+                });
+
+            modelBuilder.Entity("BleemSync.Data.Models.Profile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("BleemSync.Data.Models.Collection", b =>
+                {
+                    b.HasOne("BleemSync.Data.Models.Profile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BleemSync.Data.Models.CollectionGame", b =>
+                {
+                    b.HasOne("BleemSync.Data.Models.Collection", "Collection")
+                        .WithMany("CollectionGames")
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BleemSync.Data.Models.Game", "Game")
+                        .WithMany("CollectionGames")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BleemSync.Data.Models.Game", b =>
                 {
-                    b.HasOne("BleemSync.Data.Models.Platform", null)
+                    b.HasOne("BleemSync.Data.Models.Platform", "Platform")
                         .WithMany("Games")
-                        .HasForeignKey("PlatformId");
+                        .HasForeignKey("PlatformId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

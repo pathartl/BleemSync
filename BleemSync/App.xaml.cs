@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using BleemSync.ViewModels;
 using BleemSync.Views;
 using BleemSync.Data;
+using BleemSync.Services;
 
 namespace BleemSync
 {
@@ -13,6 +14,11 @@ namespace BleemSync
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+
+            using (var platformService = new PlatformService())
+            {
+                platformService.Initialize();
+            }
         }
 
         public override void OnFrameworkInitializationCompleted()

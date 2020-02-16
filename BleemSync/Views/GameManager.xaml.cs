@@ -29,6 +29,7 @@ namespace BleemSync.Views
         }
 
         private GameService GameService { get; set; }
+        private PlatformService PlatformService { get; set; }
         private PageViewModel ViewModel { get; set; }
 
         public GameManager()
@@ -36,6 +37,7 @@ namespace BleemSync.Views
             InitializeComponent();
 
             GameService = new GameService();
+            PlatformService = new PlatformService();
 
             ViewModel = new PageViewModel(GameService.Get().ToList());
             DataContext = ViewModel;
@@ -67,6 +69,7 @@ namespace BleemSync.Views
 
                     var game = scraperService.ScrapeGame(fingerprint);
 
+                    game.PlatformId = PlatformService.Get("PlayStation").Id;
                     game.Path = file;
 
                     GameService.Add(game);

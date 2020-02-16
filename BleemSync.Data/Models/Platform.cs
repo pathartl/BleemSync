@@ -9,6 +9,7 @@ namespace BleemSync.Data.Models
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
+        public string ShortTitle { get; set; }
         public string Manufacturer { get; set; }
         public Region Region { get; set; }
 

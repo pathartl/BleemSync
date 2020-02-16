@@ -1,14 +1,10 @@
-﻿using BleemSync.Data.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace BleemSync
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : Data.DatabaseContext
     {
-        public DbSet<Game> Games { get; set; }
-        public DbSet<Platform> Consoles { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite("Data Source=BleemSync Library.db");
     }
 }

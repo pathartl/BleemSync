@@ -8,17 +8,8 @@ using System.Text;
 
 namespace BleemSync.Services
 {
-    public class GameService : IDisposable
+    public class GameService : DataService
     {
-        private DatabaseContext DatabaseContext { get; set; }
-
-        public GameService()
-        {
-            DatabaseContext = new DatabaseContext();
-            DatabaseContext.Database.EnsureCreated();
-            DatabaseContext.Database.Migrate();
-        }
-
         public Game Get(Guid id)
         {
             return DatabaseContext.Games.FirstOrDefault(g => g.Id == id);
@@ -33,6 +24,9 @@ namespace BleemSync.Services
         {
             game = DatabaseContext.Add(game).Entity;
 
+
+            
+
             DatabaseContext.SaveChanges();
 
             return game;
@@ -42,11 +36,6 @@ namespace BleemSync.Services
         {
             DatabaseContext.AddRange(games);
             DatabaseContext.SaveChanges();
-        }
-
-        public void Dispose()
-        {
-            DatabaseContext.Dispose();
         }
     }
 }
