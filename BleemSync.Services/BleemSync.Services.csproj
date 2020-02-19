@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BleemSync.Data\BleemSync.Data.csproj" />
     <ProjectReference Include="..\BleemSync.Fingerprinting\BleemSync.Fingerprinting.csproj" />
     <ProjectReference Include="..\BleemSync.Scrapers\BleemSync.Scrapers.csproj" />
