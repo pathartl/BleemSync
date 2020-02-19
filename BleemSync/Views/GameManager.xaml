@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="BleemSync.Views.GameManager">
-    <Grid>
+    <Grid VerticalAlignment="Stretch">
       <Grid.ColumnDefinitions>
         <ColumnDefinition MinWidth="50" MaxWidth="500" Width="150" />
         <ColumnDefinition Width="2" />
@@ -22,7 +22,7 @@
         <TextBlock Margin="10" HorizontalAlignment="Center">Menu Item 1</TextBlock>
       </StackPanel>
 
-      <DataGrid Grid.Column="2" DragDrop.AllowDrop="True" Items="{Binding Games}">
+      <DataGrid Grid.Column="2" DragDrop.AllowDrop="True" Items="{Binding Games}" CanUserResizeColumns="True">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Title" Binding="{Binding Title}" />
           <DataGridTextColumn Header="Version" Binding="{Binding Version}" />

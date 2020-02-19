@@ -9,5 +9,13 @@
         x:Class="BleemSync.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="BleemSync">
-  <views:GameManager/>
+  <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <ComboBox Margin="4" Width="100" HorizontalAlignment="Left" >
+      <ComboBoxItem>Profile #1</ComboBoxItem>
+      <ComboBoxItem>Profile #2</ComboBoxItem>
+      <ComboBoxItem>Profile #3</ComboBoxItem>
+      <ComboBoxItem>Add New Profile...</ComboBoxItem>
+    </ComboBox>
+    <views:GameManager VerticalAlignment="Stretch" />
+  </StackPanel>
 </Window>

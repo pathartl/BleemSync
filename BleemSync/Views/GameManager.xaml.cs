@@ -15,6 +15,14 @@ namespace BleemSync.Views
     {
         private class PageViewModel : ReactiveObject
         {
+            public ObservableCollection<string> _profiles;
+
+            public ObservableCollection<string> Profiles
+            {
+                get => _profiles;
+                set => this.RaiseAndSetIfChanged(ref _profiles, value);
+            }
+
             private ObservableCollection<Game> _games;
 
             public ObservableCollection<Game> Games {
@@ -25,6 +33,12 @@ namespace BleemSync.Views
             public PageViewModel(ICollection<Game> games)
             {
                 Games = new ObservableCollection<Game>(games);
+                Profiles = new ObservableCollection<string>()
+                {
+                    "Profile 1",
+                    "Profile 2",
+                    "Profile 3"
+                };
             }
         }
 
