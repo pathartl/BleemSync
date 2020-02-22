@@ -22,7 +22,7 @@ $(PKG_TARGET).mod:
 	mkdir -p $(PKG_TARGET)/DEBIAN
 	# The below 3 lines need replace once a build is automated via CI/CD
 	wget https://classicmodscloud.com/project_eris/.build_files/bleemsyncUI1.2.tar
-	tar -C psc_eris/ -xcvf bleemsyncUI1.2.tar
+	tar -C psc_eris/ -xzvf bleemsyncUI1.2.tar
 	rm -f bleemsyncUI1.2.tar
 	cp -rf psc_eris/* $(PKG_TARGET)/
 	chmod +x $(PKG_TARGET)/media/project_eris/opt/bleemsync_ui/BleemSync
