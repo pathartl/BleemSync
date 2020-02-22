@@ -1,0 +1,52 @@
+DEPENDANT=0
+
+BUILDTARGET := psc_eris
+
+PKG_PRETTY_NAME := BleemSync on console app
+PKG_NAME := bleemsync
+VERSION := 1.0.0
+GIT_COMMIT := $(shell echo "`git rev-parse --short HEAD``git diff-index --quiet HEAD --`")
+PKG_CREATOR := Pat Hartl
+MAINTAINER := ModMyClassic <contact@modmyclassic.com>
+PLATFORM := SONYPSC
+ARCHITECTURE := armhf
+ifeq ($(DEPENDANT), 1)
+	DEPENDS :=
+endif
+
+PKG_TARGET := $(PKG_NAME)_$(VERSION)_$(PLATFORM)-$(GIT_COMMIT)
+
+all : $(PKG_TARGET).mod
+
+$(PKG_TARGET).mod:
+	mkdir -p $(PKG_TARGET)/DEBIAN
+    # The below 3 lines need replace once a build is automated via CI/CD
+    wget https://classicmodscloud.com/project_eris/.build_files/bleemsyncUI1.2.tar
+    tar -C psc_eris/ -xcvf bleemsyncUI1.2.tar
+    rm -f bleemsyncUI1.2.tar
+	cp -rf psc_eris/* $(PKG_TARGET)/
+	chmod +x $(PKG_TARGET)/media/project_eris/opt/bleemsync_ui/BleemSync
+	printf "%s\n" \
+		"Package: $(PKG_NAME)" \
+		"Version: $(VERSION)" \
+		"Architecture: $(ARCHITECTURE)" \
+		"Depends: $(DEPENDS)" \
+		"Maintainer: $(MAINTAINER)" \
+		"Description: $(PKG_PRETTY_NAME)" > $(PKG_TARGET)/DEBIAN/control
+	echo " Type: USB_MOD" >> $(PKG_TARGET)/DEBIAN/control
+	cat mod_description_$(BUILDTARGET).txt >> $(PKG_TARGET)/DEBIAN/control
+	echo " Author: $(PKG_CREATOR)" >> $(PKG_TARGET)/DEBIAN/control
+	echo " Platform: $(PLATFORM) $(ARCHITECTURE)" >> $(PKG_TARGET)/DEBIAN/control
+	echo " Git Commit: $(GIT_COMMIT)" >> $(PKG_TARGET)/DEBIAN/control
+	echo " Built: $(shell date)" >> $(PKG_TARGET)/DEBIAN/control
+
+	dpkg-deb -v --build $(PKG_TARGET)
+	mv $(PKG_TARGET).deb $(PKG_TARGET).mod
+
+	rm -r $(PKG_TARGET)/
+	touch $(PKG_TARGET).mod
+
+clean:
+	-rm -rf $(PKG_TARGET)/ $(PKG_TARGET).mod
+
+.PHONY: clean

@@ -3,6 +3,9 @@ $version = "0.7.0d"
 # Must run the following as admin if you want to build and compress
 # Install-Module 7Zip4PowerShell -Force -Verbose
 
+# This kinda sucks and needs to be refactored
+# into a makefile which can be ran from CI/CD pipeline
+
 rm -Recurse -Force .\BleemSync.Payload\System\BleemSync
 mkdir .\BleemSync.Payload\System\BleemSync
 

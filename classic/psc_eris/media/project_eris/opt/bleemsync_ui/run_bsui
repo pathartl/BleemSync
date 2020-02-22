@@ -1,0 +1,22 @@
+#!/bin/sh
+
+source "/var/volatile/project_eris.cfg"
+
+BSUIPATH="${PROJECT_ERIS_PATH}/opt/bleemsync_ui"
+
+display_message(){	
+  TEXT_X=640	
+  TEXT_Y=120	
+  TEXT_SIZE=16	
+  TEXT_FONT="/usr/share/fonts/ttf/LiberationMono-Regular.ttf"	
+  TEXT_BG="0x7E000000"	
+  IMAGE="${BSUIPATH}/splashscreen.png"
+  "${PROJECT_ERIS_PATH}/bin/sdl_text_display" "${1}" "${TEXT_X}" "${TEXT_Y}" "${TEXT_SIZE}" "${TEXT_FONT}" 255 255 255 "${IMAGE}" "${TEXT_BG}"	
+}
+
+display_message "Loading BleemSync UI..."
+chmod +x "${BSUIPATH}/BleemSync"
+${BSUIPATH}/BleemSync &
+sleep 10
+killall sdl_display
+display_message "BleemSync UI loaded, now accessible by your PC"

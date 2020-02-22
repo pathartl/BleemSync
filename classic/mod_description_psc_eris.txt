@@ -1,0 +1,4 @@
+ BleemSync UI is a on console modification tool which runs
+ a small webserver on your console which you can connect to 
+ via RNDIS or Wi-Fi to modify your game content via your web
+ browser

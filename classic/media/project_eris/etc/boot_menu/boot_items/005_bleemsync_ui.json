@@ -1,0 +1,6 @@
+{
+    "texture":"BS.png",
+    "hoverTexture":"BS_Hover.png",
+    "launchCommand":"sh /media/project_eris/opt/bleemsync_ui/run_bsui"
+  }
+  
