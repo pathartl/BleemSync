@@ -16,7 +16,7 @@ display_message(){
 
 display_message "Loading BleemSync UI..."
 chmod +x "${BSUIPATH}/BleemSync"
-${BSUIPATH}/BleemSync &
+${BSUIPATH}/BleemSync > "${RUNTIME_LOG_PATH}/bleemsync_ui.log" 2>&1 &
 sleep 10
 killall sdl_display
 display_message "BleemSync UI loaded, now accessible by your PC"
