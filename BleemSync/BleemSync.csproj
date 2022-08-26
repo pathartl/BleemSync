@@ -13,7 +13,7 @@
     <PackageReference Include="ExtCore.WebApplication" Version="3.3.0" />
     <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
     <PackageReference Include="RestSharp" Version="106.6.1" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.22" />
   </ItemGroup>
 
   <ItemGroup>
